@@ -88,3 +88,54 @@ export function navForRole(role: Role): NavGroup[] {
 
 export const itemLabel = (item: NavItem, role: Role) =>
   role === 'collaborateur' && item.selfLabel ? item.selfLabel : item.label;
+
+// ─── Sections de la barre latérale ──────────────────────────────────────
+// Le menu principal reste court : chaque section regroupe des pages voisines,
+// accessibles par des onglets en haut de page. Les adresses des pages ne changent pas.
+
+export interface NavSection {
+  label: string;
+  selfLabel?: string;
+  icon: LucideIcon;
+  /** Chemins des pages (voir NAV), dans l'ordre des onglets ; libellé d'onglet facultatif. */
+  tabs: { to: string; tabLabel?: string }[];
+}
+
+export const SECTIONS: NavSection[] = [
+  { label: 'Tableau de bord', selfLabel: 'Accueil', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }, { to: '/rapports' }] },
+  { label: 'Équipe', selfLabel: 'Mon suivi', icon: Users, tabs: [{ to: '/equipe' }, { to: '/competences' }, { to: '/meteo' }] },
+  { label: 'Entretiens', selfLabel: 'Mes entretiens', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }] },
+  { label: 'Objectifs', selfLabel: 'Mes objectifs', icon: Target, tabs: [{ to: '/objectifs' }] },
+  { label: 'Planning', icon: KanbanSquare, tabs: [{ to: '/taches' }, { to: '/plan-de-charge' }, { to: '/absences' }] },
+  { label: 'Réunions', selfLabel: 'Délégation', icon: CalendarDays, tabs: [{ to: '/reunions' }, { to: '/delegation' }] },
+];
+
+export interface ResolvedSection {
+  label: string;
+  icon: LucideIcon;
+  /** Première page accessible : cible du lien de la section. */
+  to: string;
+  tabs: { to: string; label: string }[];
+}
+
+const ALL_ITEMS = [...NAV.flatMap((g) => g.items), SETTINGS_ITEM];
+
+/** Sections visibles pour un rôle (onglets filtrés selon les droits, sections vides retirées). */
+export function sectionsForRole(role: Role): ResolvedSection[] {
+  return SECTIONS.flatMap((s) => {
+    const tabs = s.tabs.flatMap((t) => {
+      const item = ALL_ITEMS.find((i) => i.to === t.to);
+      if (!item || !item.roles.includes(role)) return [];
+      return [{ to: t.to, label: t.tabLabel ?? itemLabel(item, role) }];
+    });
+    if (tabs.length === 0) return [];
+    return [{ label: role === 'collaborateur' && s.selfLabel ? s.selfLabel : s.label, icon: s.icon, to: tabs[0].to, tabs }];
+  });
+}
+
+/** Vrai si `pathname` est la page `to` ou l'une de ses sous-pages. */
+export const matchesPath = (to: string, pathname: string) =>
+  to === '/' ? pathname === '/' : pathname === to || pathname.startsWith(`${to}/`);
+
+export const sectionForPath = (sections: ResolvedSection[], pathname: string) =>
+  sections.find((s) => s.tabs.some((t) => matchesPath(t.to, pathname)));

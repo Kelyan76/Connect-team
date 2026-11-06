@@ -38,6 +38,7 @@ function PublicOnly({ children }: { children: ReactNode }) {
 
 const routes: RouteObject[] = [
   { path: '/connexion', element: <PublicOnly>{page(() => import('@/features/auth/pages/LoginPage'))}</PublicOnly> },
+  { path: '/inscription', element: <PublicOnly>{page(() => import('@/features/auth/pages/SignupPage'))}</PublicOnly> },
   { path: '/mot-de-passe-oublie', element: page(() => import('@/features/auth/pages/ForgotPasswordPage')) },
   { path: '/nouveau-mot-de-passe', element: <PublicOnly>{page(() => import('@/features/auth/pages/NewPasswordPage'))}</PublicOnly> },
   ...(isLocalBackend

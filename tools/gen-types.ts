@@ -54,7 +54,8 @@ const fns = (
       array(select t.typname::text from unnest(p.proargtypes::oid[]) with ordinality a(oid, i) join pg_type t on t.oid = a.oid order by a.i) as types, p.pronargdefaults::int as ndefaults,
       rt.typname::text as ret, p.proretset as retset
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace join pg_type rt on rt.oid = p.prorettype
-    where n.nspname = 'public' and rt.typname <> 'trigger' order by p.proname`)
+    where n.nspname = 'public' and rt.typname <> 'trigger'
+      and has_function_privilege('authenticated', p.oid, 'execute') order by p.proname`)
 ).rows;
 
 const out: string[] = [];
@@ -88,7 +89,8 @@ for (const kind of ['table', 'view'] as const) {
 }
 out.push('    Functions: {');
 for (const f of fns) {
-  const names = f.args ?? [];
+  // proargnames inclut aussi les colonnes de sortie (returns table) : on garde les arguments d'entrée.
+  const names = (f.args ?? []).slice(0, f.types.length);
   const args = names.map((a, i) => `${a}${i >= names.length - f.ndefaults ? '?' : ''}: ${tsType(f.types[i])}`).join('; ');
   const ret = f.ret === 'void' ? 'undefined' : tsType(f.ret);
   out.push(`      ${f.name}: { Args: ${args ? `{ ${args} }` : 'Record<PropertyKey, never>'}; Returns: ${f.retset ? `${ret}[]` : ret} };`);

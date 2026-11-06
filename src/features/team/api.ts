@@ -9,6 +9,11 @@ export async function listPeople(): Promise<Person[]> {
   return unwrap(await supabase.from('profiles').select('*').order('last_name'), 'Équipe');
 }
 
+/** Identifiants des collaborateurs fictifs créés à l'inscription (visibles par le manager seul). */
+export async function listDemoAccounts(): Promise<Tables<'demo_accounts'>[]> {
+  return unwrap(await supabase.from('demo_accounts').select('*'), 'Comptes de démonstration');
+}
+
 export async function updatePerson(id: string, patch: TablesUpdate<'profiles'>): Promise<void> {
   check(await supabase.from('profiles').update(patch).eq('id', id), 'Mise à jour fiche');
 }

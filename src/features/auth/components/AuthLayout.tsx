@@ -18,7 +18,7 @@ export function AuthLayout({ title, description, children, aside }: { title: str
           {children}
           {aside && <div className="border-t border-line pt-6 lg:hidden">{aside}</div>}
         </div>
-        <p className="text-xs text-fg-subtle">Valmont Équipements · Pilotage des opérations et services</p>
+        <p className="text-xs text-fg-subtle">Connect Team · Pilotage et management d’équipe</p>
       </main>
       {aside && <aside className="hidden border-l border-line bg-surface lg:flex lg:flex-col lg:justify-center lg:px-16">{aside}</aside>}
     </div>

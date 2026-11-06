@@ -30,6 +30,8 @@ interface HeaderProps {
   onSignOut: () => void;
   /** Emplacement des notifications (rappels), fourni par la feature alertes. */
   notifications?: ReactNode;
+  /** Menu de navigation affiché sur petit écran. */
+  mobileNav?: ReactNode;
 }
 
 const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform);
@@ -40,12 +42,13 @@ const THEMES: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
   { value: 'systeme', label: 'Système', icon: Monitor },
 ];
 
-export function Header({ user, onOpenPalette, onSignOut, notifications }: HeaderProps) {
+export function Header({ user, onOpenPalette, onSignOut, notifications, mobileNav }: HeaderProps) {
   const { period, setPreset } = usePeriod();
   const { preference, setPreference } = useTheme();
 
   return (
     <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-3 border-b border-line bg-surface px-4 lg:px-6">
+      {mobileNav}
       <button
         type="button"
         onClick={onOpenPalette}

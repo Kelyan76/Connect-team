@@ -25,7 +25,8 @@ enabled = true
 site_url = "http://127.0.0.1:5173"
 additional_redirect_urls = ["http://127.0.0.1:5173/nouveau-mot-de-passe", "http://localhost:5173/nouveau-mot-de-passe"]
 jwt_expiry = 3600
-# Les comptes sont créés uniquement par invitation du manager.
+# Pas d'inscription publique : les managers passent par la fonction signup-manager (code d'accès),
+# les collaborateurs par invitation de leur manager.
 enable_signup = false
 minimum_password_length = 10
 password_requirements = "lower_upper_letters_digits_symbols"
@@ -39,4 +40,8 @@ double_confirm_changes = true
 verify_jwt = false
 
 [functions.manage-member]
+verify_jwt = false
+
+# Inscription des managers (protégée par le secret SIGNUP_CODE, appelée sans session).
+[functions.signup-manager]
 verify_jwt = false

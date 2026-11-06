@@ -37,6 +37,12 @@ Mot de passe commun : `Cadence-Demo26!`
 
 Autres collaborateurs : Élodie Fontaine (assistante ADV), Thomas Girard (responsable atelier), Mathilde Roux (technicienne méthodes), Bastien Le Gall (technicien de maintenance itinérant), mêmes conventions d'adresse.
 
+### Inscription des managers
+
+Page **Créer un compte manager** (`/inscription`, lien sous le formulaire de connexion). Il faut le code d'accès du groupe : `CADENCE` en démonstration locale, le secret `SIGNUP_CODE` en production.
+
+Chaque manager obtient sa propre équipe, copiée depuis l'équipe modèle (Valmont Équipements) : collaborateurs fictifs, objectifs, tâches, entretiens… Chaque collaborateur fictif a un vrai compte (adresse en `@cadence-demo.example`, mot de passe commun généré) : les identifiants sont affichés au manager en bas de la page **Équipe**. Les collaborateurs réels continuent d'arriver par invitation.
+
 Les e-mails (invitations, réinitialisation du mot de passe) arrivent dans la **boîte mail de démonstration** (`/boite-mail`), comme Inbucket/Mailpit avec la CLI Supabase.
 
 ### Version partageable
@@ -70,7 +76,9 @@ Playwright utilise le navigateur Edge installé (`channel: 'msedge'`).
 
 ### 2. Créer le schéma et le jeu de données
 
-Dans **SQL Editor**, coller et exécuter `supabase/hosted/setup.sql` : il enchaîne les cinq migrations de `supabase/migrations` puis le jeu de démonstration (mêmes comptes et mot de passe). Sans données de démonstration, exécuter seulement les migrations, dans l'ordre.
+Dans **SQL Editor**, coller et exécuter `supabase/hosted/setup.sql` : il enchaîne les migrations de `supabase/migrations` puis le jeu de démonstration (mêmes comptes et mot de passe). Sans données de démonstration, exécuter seulement les migrations, dans l'ordre. Le jeu de démonstration sert aussi d'**équipe modèle** copiée à chaque inscription de manager : le conserver.
+
+**Projet déjà installé** : exécuter seulement les nouvelles migrations dans SQL Editor (par exemple `20261107090000_signup.sql` pour l'inscription des managers).
 
 Avec la CLI (et un jeton d'accès) : `npx supabase link --project-ref <id>` puis `npx supabase db push --include-seed`.
 
@@ -78,7 +86,7 @@ Avec la CLI (et un jeton d'accès) : `npx supabase link --project-ref <id>` puis
 
 **Authentication › Sign In / Providers** :
 
-- désactiver « Allow new users to sign up » (les comptes se créent uniquement par invitation du manager) ;
+- désactiver « Allow new users to sign up » (les managers s'inscrivent via la fonction `signup-manager`, les collaborateurs par invitation) ;
 - **Password** : longueur minimale 10, exigences « lowercase, uppercase, digits and symbols ».
 
 **Authentication › URL Configuration** :
@@ -90,12 +98,12 @@ Avec la CLI (et un jeton d'accès) : `npx supabase link --project-ref <id>` puis
 
 ### 4. Déployer les Edge Functions
 
-Les fonctions `invite-member` (invitation) et `manage-member` (désactivation / réactivation) sont dans `supabase/functions/`.
+Les fonctions `invite-member` (invitation), `manage-member` (désactivation / réactivation) et `signup-manager` (inscription d'un manager) sont dans `supabase/functions/`.
 
-- Depuis le tableau de bord : **Edge Functions › Deploy a new function › Via Editor**, créer `invite-member` puis `manage-member` et coller le contenu de chaque `index.ts`.
-- Ou avec la CLI : `npx supabase functions deploy invite-member` et `npx supabase functions deploy manage-member`.
-- Désactiver « Verify JWT » pour les deux fonctions : elles vérifient elles-mêmes la session de l'appelant (compatible avec les nouvelles clés de signature).
-- Ajouter le secret `SITE_URL` (adresse du site) dans **Edge Functions › Secrets**. `SUPABASE_URL`, `SUPABASE_ANON_KEY` et `SUPABASE_SERVICE_ROLE_KEY` sont fournis automatiquement.
+- Depuis le tableau de bord : **Edge Functions › Deploy a new function › Via Editor**, créer chaque fonction sous le même nom et coller le contenu de son `index.ts`.
+- Ou avec la CLI : `npx supabase functions deploy invite-member`, `… manage-member` et `… signup-manager`.
+- Désactiver « Verify JWT » pour les trois fonctions : elles vérifient elles-mêmes l'appelant (session, ou code d'accès pour l'inscription).
+- Secrets dans **Edge Functions › Secrets** : `SITE_URL` (adresse du site) et `SIGNUP_CODE` (code d'accès à donner au groupe ; sans lui, les inscriptions sont fermées). `SUPABASE_URL`, `SUPABASE_ANON_KEY` et `SUPABASE_SERVICE_ROLE_KEY` sont fournis automatiquement.
 
 ### 5. Brancher l'application
 

@@ -1,6 +1,7 @@
 import { AppError, check, toUserMessage, unwrap } from '@/shared/lib/errors';
 import { isLocalBackend, supabase } from '@/shared/lib/supabase';
 import type { Tables } from '@/shared/types/database';
+import type { SignupValues } from './lib/signup';
 
 export type Profile = Tables<'profiles'>;
 export type Team = Tables<'teams'>;
@@ -11,6 +12,18 @@ export async function signIn(email: string, password: string): Promise<void> {
   // Journal des connexions : un échec ici ne doit pas bloquer l'accès.
   const { error: logError } = await supabase.rpc('record_login', { p_user_agent: navigator.userAgent.slice(0, 400) });
   if (logError) console.error('Journal des connexions', logError);
+}
+
+/** Edge Function signup-manager : compte manager + équipe pré-remplie, puis connexion. */
+export async function signUpManager(values: SignupValues): Promise<void> {
+  const { data, error } = await supabase.functions.invoke<{ ok?: boolean; error?: string }>('signup-manager', { body: values });
+  if (error) {
+    const context = (error as { context?: Response }).context;
+    const payload = context ? ((await context.json().catch(() => null)) as { error?: string } | null) : null;
+    throw new AppError(payload?.error ?? toUserMessage(error));
+  }
+  if (data?.error) throw new AppError(data.error);
+  await signIn(values.email, values.password);
 }
 
 export async function signOut(): Promise<void> {

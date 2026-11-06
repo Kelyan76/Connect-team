@@ -79,6 +79,10 @@ export function useUpdatePerson() {
   });
 }
 
+export function useDemoAccounts() {
+  return useQuery({ queryKey: qk.demoAccounts, queryFn: api.listDemoAccounts });
+}
+
 export function useLogins(enabled = true) {
   return useQuery({ queryKey: qk.logins, queryFn: api.listLogins, enabled });
 }

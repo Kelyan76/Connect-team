@@ -118,6 +118,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      demo_accounts: {
+        Row: {
+          user_id: string;
+          team_id: string;
+          password: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          team_id: string;
+          password: string;
+          created_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          team_id?: string;
+          password?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       feedbacks: {
         Row: {
           id: string;

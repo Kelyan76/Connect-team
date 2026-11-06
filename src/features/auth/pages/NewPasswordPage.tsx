@@ -1,9 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, Circle } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { cn } from '@/shared/lib/cn';
 import { toUserMessage } from '@/shared/lib/errors';
 import { Button } from '@/shared/ui/button';
 import { Field } from '@/shared/ui/field';
@@ -12,7 +10,8 @@ import { toast } from '@/shared/ui/toaster';
 import { updatePassword } from '../api';
 import { useAuth } from '../AuthProvider';
 import { AuthLayout } from '../components/AuthLayout';
-import { newPasswordSchema, PASSWORD_RULES, type NewPasswordValues } from '../lib/password';
+import { PasswordRules } from '../components/PasswordRules';
+import { newPasswordSchema, type NewPasswordValues } from '../lib/password';
 
 /** Définition du mot de passe : après une invitation ou une demande de réinitialisation. */
 export default function NewPasswordPage() {
@@ -54,19 +53,7 @@ export default function NewPasswordPage() {
         <Field label="Nouveau mot de passe" error={form.formState.errors.password?.message}>
           <Input type="password" autoComplete="new-password" autoFocus {...form.register('password')} />
         </Field>
-        <ul className="grid grid-cols-2 gap-1 text-xs" aria-label="Règles du mot de passe">
-          {PASSWORD_RULES.map((rule) => {
-            const ok = rule.test(value);
-            const Icon = ok ? Check : Circle;
-            return (
-              <li key={rule.id} className={cn('flex items-center gap-2', ok ? 'text-success' : 'text-fg-subtle')}>
-                <Icon className="size-3" aria-hidden />
-                {rule.label}
-                <span className="sr-only">{ok ? 'respectée' : 'non respectée'}</span>
-              </li>
-            );
-          })}
-        </ul>
+        <PasswordRules value={value} />
         <Field label="Confirmation" error={form.formState.errors.confirm?.message}>
           <Input type="password" autoComplete="new-password" {...form.register('confirm')} />
         </Field>

@@ -70,9 +70,15 @@ export default function LoginPage() {
         <Button type="submit" variant="primary" size="lg" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Connexion…' : 'Se connecter'}
         </Button>
-        <p className="text-xs text-fg-subtle">
-          Pas encore de compte ? Votre responsable vous envoie une invitation par e-mail.
-        </p>
+        <div className="flex flex-col gap-1 border-t border-line pt-4">
+          <p className="text-sm text-fg-muted">
+            Manager, pas encore de compte ?{' '}
+            <Link to="/inscription" className="font-medium text-accent hover:underline">
+              Créer un compte
+            </Link>
+          </p>
+          <p className="text-xs text-fg-subtle">Collaborateur : votre manager vous envoie une invitation par e-mail.</p>
+        </div>
       </form>
     </AuthLayout>
   );

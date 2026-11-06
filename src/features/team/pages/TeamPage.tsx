@@ -15,6 +15,7 @@ import { NativeSelect } from '@/shared/ui/input';
 import { Page, PageHeader, Toolbar } from '@/shared/ui/layout';
 import { SortableTh, Table, TBody, Td, Th, THead, Tr } from '@/shared/ui/table';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
+import { DemoAccountsPanel } from '../components/DemoAccountsPanel';
 import { InviteDialog } from '../components/InviteDialog';
 import { useTeamMembers } from '../queries';
 
@@ -169,6 +170,7 @@ export default function TeamPage() {
           </Table>
         </div>
       )}
+      <DemoAccountsPanel />
       <InviteDialog open={inviting} onOpenChange={setInviting} />
     </Page>
   );

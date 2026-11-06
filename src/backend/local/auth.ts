@@ -124,6 +124,24 @@ export async function inviteUser(db: PGlite, email: string, data: Record<string,
   return id;
 }
 
+type Queryable = Pick<PGlite, 'query'>;
+
+/** Équivalent local de auth.admin.createUser({ email_confirm: true }) : compte actif immédiatement. */
+export async function createConfirmedUser(db: Queryable, email: string, password: string, data: Record<string, unknown>): Promise<string> {
+  const res = await db.query<{ id: string }>(
+    `insert into auth.users (email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data)
+     values (lower($1), extensions.crypt($2, extensions.gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', $3::jsonb)
+     returning id`,
+    [email, password, JSON.stringify(data)],
+  );
+  const id = res.rows[0].id;
+  await db.query(`insert into auth.identities (provider_id, user_id, identity_data, provider) values ($1::text, $1::uuid, $2::jsonb, 'email')`, [
+    id,
+    JSON.stringify({ sub: id, email }),
+  ]);
+  return id;
+}
+
 export async function setBan(db: PGlite, userId: string, banned: boolean): Promise<void> {
   await db.query("update auth.users set banned_until = case when $2 then now() + interval '100 years' else null end where id = $1", [
     userId,

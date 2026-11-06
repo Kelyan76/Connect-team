@@ -6,6 +6,7 @@ export const qk = {
   managerNotes: (personId: string) => ['manager-notes', personId] as const,
   settings: ['settings'] as const,
   logins: ['logins'] as const,
+  demoAccounts: ['demo-accounts'] as const,
   objectives: ['objectives'] as const,
   keyResults: ['key-results'] as const,
   krHistory: ['kr-history'] as const,
