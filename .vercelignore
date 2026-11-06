@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-demo
+screenshots
+test-results
+playwright-report
+.supalite
+.env.local
+public/pglite-fs.wasm

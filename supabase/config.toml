@@ -1,0 +1,42 @@
+# Configuration Supabase (CLI locale et référence pour le projet hébergé).
+project_id = "cadence"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[inbucket]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:5173"
+additional_redirect_urls = ["http://127.0.0.1:5173/nouveau-mot-de-passe", "http://localhost:5173/nouveau-mot-de-passe"]
+jwt_expiry = 3600
+# Les comptes sont créés uniquement par invitation du manager.
+enable_signup = false
+minimum_password_length = 10
+password_requirements = "lower_upper_letters_digits_symbols"
+
+[auth.email]
+enable_signup = false
+enable_confirmations = false
+double_confirm_changes = true
+
+[functions.invite-member]
+verify_jwt = false
+
+[functions.manage-member]
+verify_jwt = false

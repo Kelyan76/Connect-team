@@ -1,0 +1,8 @@
+dist
+node_modules
+src/shared/types/database.ts
+supabase/.temp
+.supalite
+test-results
+playwright-report
+screenshots

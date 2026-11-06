@@ -1,0 +1,47 @@
+@import '@fontsource-variable/inter';
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-canvas font-sans text-base text-fg;
+  }
+  *,
+  ::before,
+  ::after {
+    @apply border-line;
+  }
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-focus;
+  }
+  ::selection {
+    @apply bg-accent-subtle text-fg;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

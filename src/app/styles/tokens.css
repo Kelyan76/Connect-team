@@ -1,0 +1,85 @@
+/*
+ * Valeurs des design tokens (triplets HSL).
+ * Neutres : 10 nuances de gris ardoise. Accent : un seul bleu profond.
+ * Statuts : vert, orange, rouge désaturés. Contrastes vérifiés WCAG AA sur canvas et surface.
+ */
+:root {
+  --slate-50: 210 20% 98%;
+  --slate-100: 213 20% 95.5%;
+  --slate-200: 214 17% 90%;
+  --slate-300: 213 15% 82%;
+  --slate-400: 214 11% 62%;
+  --slate-500: 215 11% 45%;
+  --slate-600: 216 14% 34%;
+  --slate-700: 217 19% 25%;
+  --slate-800: 219 24% 16%;
+  --slate-900: 221 30% 10%;
+
+  --canvas: var(--slate-50);
+  --surface: 0 0% 100%;
+  --surface-muted: var(--slate-100);
+  --surface-sunken: var(--slate-100);
+  --line: var(--slate-200);
+  --line-strong: var(--slate-300);
+  --fg: var(--slate-900);
+  --fg-muted: var(--slate-600);
+  --fg-subtle: var(--slate-500);
+  --fg-inverse: 0 0% 100%;
+
+  --accent: 218 63% 30%;
+  --accent-hover: 218 66% 24%;
+  --accent-subtle: 214 60% 95%;
+  --accent-fg: 0 0% 100%;
+
+  --success: 152 40% 28%;
+  --success-subtle: 145 32% 93%;
+  --warning: 30 75% 33%;
+  --warning-subtle: 38 70% 92%;
+  --danger: 3 58% 42%;
+  --danger-hover: 3 60% 36%;
+  --danger-subtle: 4 70% 95%;
+
+  --level-0: var(--slate-100);
+  --level-1: 214 45% 90%;
+  --level-2: 215 48% 76%;
+  --level-3: 216 50% 52%;
+  --level-4: 218 63% 30%;
+
+  --focus: 216 80% 45%;
+  --shadow: 221 30% 10%;
+}
+
+.dark {
+  --canvas: 221 30% 8%;
+  --surface: var(--slate-900);
+  --surface-muted: var(--slate-800);
+  --surface-sunken: 221 30% 7%;
+  --line: 219 22% 18%;
+  --line-strong: var(--slate-700);
+  --fg: var(--slate-100);
+  --fg-muted: var(--slate-400);
+  --fg-subtle: 214 10% 56%;
+  --fg-inverse: var(--slate-900);
+
+  --accent: 214 75% 64%;
+  --accent-hover: 214 80% 70%;
+  --accent-subtle: 216 40% 18%;
+  --accent-fg: var(--slate-900);
+
+  --success: 148 35% 58%;
+  --success-subtle: 150 25% 15%;
+  --warning: 34 65% 60%;
+  --warning-subtle: 32 35% 15%;
+  --danger: 3 65% 66%;
+  --danger-hover: 3 70% 72%;
+  --danger-subtle: 4 35% 16%;
+
+  --level-0: var(--slate-800);
+  --level-1: 216 30% 24%;
+  --level-2: 216 38% 36%;
+  --level-3: 215 50% 50%;
+  --level-4: 214 75% 64%;
+
+  --focus: 214 80% 66%;
+  --shadow: 0 0% 0%;
+}

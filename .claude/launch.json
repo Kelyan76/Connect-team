@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cadence",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--host", "127.0.0.1"],
+      "port": 5173
+    },
+    {
+      "name": "cadence-demo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "preview", "--outDir", "dist-demo", "--host", "127.0.0.1", "--port", "4173", "--strictPort"],
+      "port": 4173
+    }
+  ]
+}

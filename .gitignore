@@ -1,0 +1,32 @@
+# Dépendances
+node_modules/
+
+# Variables d'environnement (secrets) — on garde seulement les fichiers sans secret
+.env
+.env*
+!.env.example
+!.env.demo
+!.env.e2e
+
+# Vercel
+.vercel
+
+# Builds et artefacts
+dist/
+dist-demo/
+public/pglite-fs.wasm
+*.tsbuildinfo
+
+# Tests
+test-results/
+playwright-report/
+screenshots/
+
+# Base locale de démo
+.supalite/
+
+# Divers
+.claude-launch.tmp
+*.log
+.DS_Store
+Thumbs.db
