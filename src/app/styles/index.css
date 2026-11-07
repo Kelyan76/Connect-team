@@ -11,12 +11,23 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color-scheme: light;
-  }
-  html.dark {
-    color-scheme: dark;
+    /* Pas de zoom au double tap ; pas d'ajustement automatique du texte en paysage. */
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply bg-canvas font-sans text-base text-fg;
+    overscroll-behavior-y: none;
+  }
+  /* Sur téléphone, les champs en 16 px évitent le zoom automatique d'iOS à la saisie. */
+  @media (max-width: 767px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
   *,
   ::before,
@@ -34,6 +45,17 @@
 @layer utilities {
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+  /* Défilement horizontal sans barre visible (onglets sur mobile). */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Marge du bas pour la barre de navigation mobile (et l'encoche des iPhone). */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 

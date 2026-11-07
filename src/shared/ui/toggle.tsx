@@ -60,7 +60,7 @@ export const Segmented = forwardRef<
     ref={ref}
     type="single"
     onValueChange={(v) => v && onValueChange(v)}
-    className={cn('inline-flex h-8 items-center rounded border border-line-strong bg-surface p-px', className)}
+    className={cn('inline-flex h-9 items-center gap-px rounded-full bg-surface-muted p-1', className)}
     {...props}
   />
 ));
@@ -73,7 +73,7 @@ export const SegmentedItem = forwardRef<
   <ToggleGroupPrimitive.Item
     ref={ref}
     className={cn(
-      'inline-flex h-full items-center gap-2 rounded-sm px-2 text-sm font-medium text-fg-muted transition-colors hover:text-fg data-[state=on]:bg-surface-muted data-[state=on]:text-fg [&_svg]:size-4',
+      'inline-flex h-full shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 text-sm font-medium text-fg-muted transition-all hover:text-fg data-[state=on]:bg-surface data-[state=on]:text-fg data-[state=on]:shadow-sm [&_svg]:size-4',
       className,
     )}
     {...props}

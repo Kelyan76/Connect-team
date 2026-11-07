@@ -96,22 +96,26 @@ export const itemLabel = (item: NavItem, role: Role) =>
 export interface NavSection {
   label: string;
   selfLabel?: string;
+  /** Libellé court de la barre de navigation mobile. */
+  shortLabel: string;
+  selfShortLabel?: string;
   icon: LucideIcon;
   /** Chemins des pages (voir NAV), dans l'ordre des onglets ; libellé d'onglet facultatif. */
   tabs: { to: string; tabLabel?: string }[];
 }
 
 export const SECTIONS: NavSection[] = [
-  { label: 'Tableau de bord', selfLabel: 'Accueil', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }, { to: '/rapports' }] },
-  { label: 'Équipe', selfLabel: 'Mon suivi', icon: Users, tabs: [{ to: '/equipe' }, { to: '/competences' }, { to: '/meteo' }] },
-  { label: 'Entretiens', selfLabel: 'Mes entretiens', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }] },
-  { label: 'Objectifs', selfLabel: 'Mes objectifs', icon: Target, tabs: [{ to: '/objectifs' }] },
-  { label: 'Planning', icon: KanbanSquare, tabs: [{ to: '/taches' }, { to: '/plan-de-charge' }, { to: '/absences' }] },
-  { label: 'Réunions', selfLabel: 'Délégation', icon: CalendarDays, tabs: [{ to: '/reunions' }, { to: '/delegation' }] },
+  { label: 'Tableau de bord', selfLabel: 'Accueil', shortLabel: 'Accueil', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }, { to: '/rapports' }] },
+  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', icon: Users, tabs: [{ to: '/equipe' }, { to: '/competences' }, { to: '/meteo' }] },
+  { label: 'Entretiens', selfLabel: 'Mes entretiens', shortLabel: 'Entretiens', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }] },
+  { label: 'Objectifs', selfLabel: 'Mes objectifs', shortLabel: 'Objectifs', icon: Target, tabs: [{ to: '/objectifs' }] },
+  { label: 'Planning', shortLabel: 'Planning', icon: KanbanSquare, tabs: [{ to: '/taches' }, { to: '/plan-de-charge' }, { to: '/absences' }] },
+  { label: 'Réunions', selfLabel: 'Délégation', shortLabel: 'Réunions', selfShortLabel: 'Délégation', icon: CalendarDays, tabs: [{ to: '/reunions' }, { to: '/delegation' }] },
 ];
 
 export interface ResolvedSection {
   label: string;
+  shortLabel: string;
   icon: LucideIcon;
   /** Première page accessible : cible du lien de la section. */
   to: string;
@@ -129,7 +133,16 @@ export function sectionsForRole(role: Role): ResolvedSection[] {
       return [{ to: t.to, label: t.tabLabel ?? itemLabel(item, role) }];
     });
     if (tabs.length === 0) return [];
-    return [{ label: role === 'collaborateur' && s.selfLabel ? s.selfLabel : s.label, icon: s.icon, to: tabs[0].to, tabs }];
+    const self = role === 'collaborateur';
+    return [
+      {
+        label: self && s.selfLabel ? s.selfLabel : s.label,
+        shortLabel: self && s.selfShortLabel ? s.selfShortLabel : s.shortLabel,
+        icon: s.icon,
+        to: tabs[0].to,
+        tabs,
+      },
+    ];
   });
 }
 

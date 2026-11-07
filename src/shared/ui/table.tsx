@@ -13,7 +13,7 @@ export const Table = forwardRef<HTMLTableElement, HTMLAttributes<HTMLTableElemen
 Table.displayName = 'Table';
 
 export const THead = (props: HTMLAttributes<HTMLTableSectionElement>) => (
-  <thead {...props} className={cn('border-b border-line bg-surface-muted/50', props.className)} />
+  <thead {...props} className={cn('border-b border-line bg-surface-muted/60', props.className)} />
 );
 
 export const TBody = (props: HTMLAttributes<HTMLTableSectionElement>) => (
@@ -39,7 +39,7 @@ export function Th({
     <th
       scope="col"
       className={cn(
-        'h-8 whitespace-nowrap px-3 text-xs font-medium text-fg-subtle first:pl-4 last:pr-4',
+        'h-10 whitespace-nowrap px-3 text-xs font-medium text-fg-subtle first:pl-5 last:pr-5',
         alignClass[align],
         className,
       )}
@@ -70,7 +70,7 @@ export function SortableTh<K extends string>({
     <th
       scope="col"
       aria-sort={active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
-      className={cn('h-8 whitespace-nowrap px-3 first:pl-4 last:pr-4', alignClass[align], className)}
+      className={cn('h-10 whitespace-nowrap px-3 first:pl-5 last:pr-5', alignClass[align], className)}
     >
       <button
         type="button"
@@ -97,7 +97,7 @@ export function Td({
   return (
     <td
       className={cn(
-        'h-10 px-3 align-middle first:pl-4 last:pr-4',
+        'h-12 px-3 align-middle first:pl-5 last:pr-5',
         alignClass[numeric ? 'right' : align],
         numeric && 'tabular whitespace-nowrap',
         className,

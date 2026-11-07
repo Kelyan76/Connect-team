@@ -1,6 +1,7 @@
 import { PanelLeftClose, PanelLeftOpen, type LucideIcon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
+import { BrandMark } from '@/shared/ui/brand';
 import { Tooltip } from '@/shared/ui/menu';
 import { itemLabel, matchesPath, sectionsForRole, SETTINGS_ITEM, type Role } from './nav';
 
@@ -27,10 +28,10 @@ function Entry({ to, label, icon: Icon, active, collapsed, badge }: EntryProps) 
       to={to}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group flex h-9 items-center gap-3 rounded px-2 text-base transition-colors',
+        'group flex h-10 items-center gap-3 rounded px-3 text-base transition-colors',
         active
-          ? 'bg-surface-muted font-medium text-fg'
-          : 'text-fg-muted hover:bg-surface-muted/70 hover:text-fg',
+          ? 'bg-accent font-medium text-sidebar-fg shadow-sm'
+          : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-fg',
         collapsed && 'justify-center px-0',
       )}
     >
@@ -41,7 +42,7 @@ function Entry({ to, label, icon: Icon, active, collapsed, badge }: EntryProps) 
         <>
           <span className="truncate">{label}</span>
           {badge ? (
-            <span className="tabular ml-auto text-xs font-medium text-fg-subtle">{badge}</span>
+            <span className="tabular ml-auto text-xs font-medium opacity-80">{badge}</span>
           ) : null}
         </>
       )}
@@ -62,34 +63,28 @@ export function Sidebar({ role, collapsed, onToggle, teamName, badges = {} }: Si
   return (
     <aside
       className={cn(
-        'sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-surface md:flex',
-        collapsed ? 'w-14' : 'w-56',
+        'sticky top-0 hidden h-screen shrink-0 flex-col bg-sidebar text-sidebar-fg md:flex',
+        collapsed ? 'w-16' : 'w-60',
       )}
       aria-label="Navigation principale"
     >
       <div
         className={cn(
-          'flex h-12 items-center gap-2 border-b border-line px-4',
+          'flex h-16 items-center gap-3 px-5',
           collapsed && 'justify-center px-0',
         )}
       >
-        <svg viewBox="0 0 32 32" className="size-5 shrink-0" aria-hidden>
-          <rect width="32" height="32" rx="6" className="fill-accent" />
-          <path
-            d="M9 21.5V10.5h3v11zM14.5 21.5V14h3v7.5zM20 21.5V17h3v4.5z"
-            className="fill-accent-fg"
-          />
-        </svg>
+        <BrandMark className="size-7" />
         {!collapsed && (
           <div className="flex min-w-0 flex-col leading-tight">
             <span className="text-base font-semibold">Connect Team</span>
-            <span className="truncate text-xs text-fg-subtle">{teamName}</span>
+            <span className="truncate text-xs text-sidebar-muted">{teamName}</span>
           </div>
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-2 py-3">
-        <ul className="flex flex-col gap-px">
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <ul className="flex flex-col gap-1">
           {sections.map((s) => {
             const badge = s.tabs.reduce((sum, t) => sum + (badges[t.to] ?? 0), 0);
             return (
@@ -108,7 +103,7 @@ export function Sidebar({ role, collapsed, onToggle, teamName, badges = {} }: Si
         </ul>
       </nav>
 
-      <div className="flex flex-col gap-px border-t border-line px-2 py-2">
+      <div className="flex flex-col gap-1 border-t border-sidebar-hover px-3 py-3">
         {role === 'manager' && (
           <Entry
             to={SETTINGS_ITEM.to}
@@ -122,7 +117,7 @@ export function Sidebar({ role, collapsed, onToggle, teamName, badges = {} }: Si
           type="button"
           onClick={onToggle}
           className={cn(
-            'flex h-9 items-center gap-3 rounded px-2 text-base text-fg-muted hover:bg-surface-muted/70 hover:text-fg',
+            'flex h-10 items-center gap-3 rounded px-3 text-base text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-fg',
             collapsed && 'justify-center px-0',
           )}
           aria-label={collapsed ? 'Déplier la navigation' : 'Replier la navigation'}

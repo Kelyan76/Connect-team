@@ -4,22 +4,22 @@ import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/shared/lib/cn';
 
 export const buttonVariants = cva(
-  'inline-flex shrink-0 select-none items-center justify-center gap-2 whitespace-nowrap rounded font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex shrink-0 select-none items-center justify-center gap-2 whitespace-nowrap rounded font-medium transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        primary: 'bg-accent text-accent-fg hover:bg-accent-hover',
-        secondary: 'border border-line-strong bg-surface text-fg hover:bg-surface-muted',
+        primary: 'bg-accent text-accent-fg shadow-sm hover:bg-accent-hover',
+        secondary: 'border border-line-strong bg-surface text-fg shadow-sm hover:bg-surface-muted',
         ghost: 'text-fg-muted hover:bg-surface-muted hover:text-fg',
         danger: 'bg-danger text-fg-inverse hover:bg-danger-hover',
         link: 'h-auto px-0 text-accent underline-offset-4 hover:underline',
       },
       size: {
-        sm: 'h-7 px-2 text-sm',
-        md: 'h-8 px-3 text-sm',
-        lg: 'h-10 px-4 text-base',
-        icon: 'size-8',
-        'icon-sm': 'size-7',
+        sm: 'h-8 px-3 text-sm',
+        md: 'h-9 px-4 text-sm',
+        lg: 'h-11 px-5 text-base',
+        icon: 'size-9',
+        'icon-sm': 'size-8',
       },
     },
     defaultVariants: { variant: 'secondary', size: 'md' },

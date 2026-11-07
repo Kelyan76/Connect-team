@@ -94,8 +94,8 @@ export function ObjectiveCard({ objective: o, owner }: { objective: ObjectiveVie
   const canUpdate = isManager || (o.scope === 'individuel' && o.owner_id === profile.id);
 
   return (
-    <article className="rounded-lg border border-line bg-surface">
-      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-line px-4 py-3">
+    <article className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm">
+      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-line px-5 py-4">
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-md font-semibold">{o.title}</h2>
@@ -107,9 +107,9 @@ export function ObjectiveCard({ objective: o, owner }: { objective: ObjectiveVie
             {o.scope === 'equipe' ? 'Objectif d’équipe' : 'Objectif individuel'} · du {formatDate(o.start_date)} au {formatDate(o.due_date)}
           </span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex w-full flex-wrap items-center gap-4 sm:w-auto">
           {owner && <PersonLabel person={owner} detail={owner.job_title} />}
-          <div className="flex w-36 items-center gap-2">
+          <div className="flex min-w-36 flex-1 items-center gap-2 sm:w-36 sm:flex-none">
             <ProgressBar value={o.progress} tone={meta.tone} label="Avancement global" />
             <span className="tabular w-10 text-right text-base font-semibold">{formatPercent(o.progress)}</span>
           </div>

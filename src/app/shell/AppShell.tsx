@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { useHotkey } from '@/shared/hooks/use-hotkeys';
+import { BottomNav } from './BottomNav';
 import { CommandPalette, type PaletteEntry } from './CommandPalette';
 import { Header, type ShellUser } from './Header';
-import { MobileNav } from './MobileNav';
 import type { Role } from './nav';
 import { SectionTabs } from './SectionTabs';
 import { Sidebar } from './Sidebar';
@@ -58,16 +58,18 @@ export function AppShell({ role, user, teamName, onSignOut, searchEntries = [], 
       <div className="flex min-w-0 flex-1 flex-col">
         <Header
           user={user}
+          teamName={teamName}
           onOpenPalette={() => setPaletteOpen(true)}
           onSignOut={onSignOut}
           notifications={notifications}
-          mobileNav={<MobileNav role={role} />}
+          showSettings={role === 'manager'}
         />
         <SectionTabs role={role} />
         <main id="contenu" className="flex-1" tabIndex={-1}>
           {children}
         </main>
       </div>
+      <BottomNav role={role} />
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} role={role} entries={searchEntries} />
     </div>
   );

@@ -4,7 +4,7 @@ import type { Config } from 'tailwindcss';
  * Design tokens de Connect Team.
  * La palette, l'échelle typographique, les espacements, les rayons et les ombres
  * REMPLACENT ceux de Tailwind : aucune valeur hors système n'est disponible.
- * Les couleurs sont des variables CSS (src/app/styles/tokens.css) pour le mode sombre.
+ * Les couleurs sont des variables CSS (src/app/styles/tokens.css). Thème clair uniquement.
  */
 const token = (name: string) => `hsl(var(--${name}) / <alpha-value>)`;
 
@@ -16,6 +16,7 @@ for (let n = 1; n <= 160; n += 1) spacing[String(n)] = `${(n * 4) / 16}rem`;
 
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  // La classe `dark` n'est jamais posée : les variantes dark: restent inactives (thème clair uniquement).
   darkMode: 'class',
   theme: {
     colors: {
@@ -35,6 +36,8 @@ export default {
       danger: { DEFAULT: token('danger'), subtle: token('danger-subtle'), hover: token('danger-hover') },
       level: { 0: token('level-0'), 1: token('level-1'), 2: token('level-2'), 3: token('level-3'), 4: token('level-4') },
       focus: token('focus'),
+      sidebar: { DEFAULT: token('sidebar'), hover: token('sidebar-hover'), fg: token('sidebar-fg'), muted: token('sidebar-muted') },
+      hero: { from: token('hero-from'), to: token('hero-to') },
     },
     fontFamily: {
       sans: ['"Inter Variable"', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
@@ -51,12 +54,14 @@ export default {
     },
     fontWeight: { normal: '400', medium: '500', semibold: '600' },
     spacing,
-    borderRadius: { none: '0', sm: '4px', DEFAULT: '6px', md: '6px', lg: '8px', full: '9999px' },
+    // Formes arrondies : contrôles 10 px, cartes 16 px, pastilles pleines.
+    borderRadius: { none: '0', sm: '6px', DEFAULT: '10px', md: '10px', lg: '16px', xl: '20px', full: '9999px' },
     borderWidth: { 0: '0', DEFAULT: '1px', 2: '2px' },
     boxShadow: {
       none: 'none',
-      sm: '0 1px 2px 0 hsl(var(--shadow) / 0.06)',
-      md: '0 4px 12px -2px hsl(var(--shadow) / 0.12), 0 0 0 1px hsl(var(--shadow) / 0.04)',
+      sm: '0 1px 2px 0 hsl(var(--shadow) / 0.04), 0 1px 3px 0 hsl(var(--shadow) / 0.04)',
+      md: '0 8px 24px -6px hsl(var(--shadow) / 0.14), 0 0 0 1px hsl(var(--shadow) / 0.04)',
+      up: '0 -4px 16px -6px hsl(var(--shadow) / 0.10)',
     },
     extend: {
       maxWidth: { prose: '68ch' },

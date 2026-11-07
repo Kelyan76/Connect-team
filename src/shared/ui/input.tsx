@@ -8,11 +8,11 @@ import {
 import { cn } from '@/shared/lib/cn';
 
 const fieldBase =
-  'w-full rounded border border-line-strong bg-surface text-base text-fg placeholder:text-fg-subtle transition-colors hover:border-slate-400 focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/25 disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-fg-subtle aria-[invalid=true]:border-danger';
+  'w-full rounded border border-line-strong bg-surface text-base text-fg placeholder:text-fg-subtle transition-colors hover:border-slate-400 focus-visible:border-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus/15 disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-fg-subtle aria-[invalid=true]:border-danger';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   ({ className, type = 'text', ...props }, ref) => (
-    <input ref={ref} type={type} className={cn(fieldBase, 'h-8 px-3', className)} {...props} />
+    <input ref={ref} type={type} className={cn(fieldBase, 'h-10 px-3', className)} {...props} />
   ),
 );
 Input.displayName = 'Input';
@@ -35,11 +35,11 @@ export const NativeSelect = forwardRef<
   SelectHTMLAttributes<HTMLSelectElement>
 >(({ className, children, ...props }, ref) => (
   <div className={cn('relative', className)}>
-    <select ref={ref} className={cn(fieldBase, 'h-8 appearance-none pl-3 pr-8')} {...props}>
+    <select ref={ref} className={cn(fieldBase, 'h-10 appearance-none pl-3 pr-9')} {...props}>
       {children}
     </select>
     <ChevronDown
-      className="pointer-events-none absolute right-2 top-2 size-4 text-fg-subtle"
+      className="pointer-events-none absolute right-3 top-3 size-4 text-fg-subtle"
       aria-hidden
     />
   </div>

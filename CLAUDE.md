@@ -38,9 +38,13 @@ Comptes de démo : voir README (mot de passe commun dans `supabase/seed.sql`).
 
 ## Règles de design (section 2 du SPEC)
 
-- Uniquement les tokens : couleurs sémantiques (`bg-surface`, `text-fg-muted`, `border-line`, `bg-accent`…), tailles `text-xs|sm|base|md|lg|xl` (12/13/14/16/20/24), espacements multiples de 4, rayons ≤ 8px.
-- Interdits : dégradés, glassmorphism, halos, emojis, icônes dans des pastilles colorées, ombres marquées, hero marketing, textes d'accroche, animations décoratives.
-- Séparer par des bordures 1px (`Panel`), pas par des ombres. Hiérarchie par taille / graisse / gris.
+- Thème clair uniquement (pas de mode sombre). Seule zone foncée : la barre latérale bleu nuit (`bg-sidebar`).
+- Uniquement les tokens : couleurs sémantiques (`bg-surface`, `text-fg-muted`, `border-line`, `bg-accent`…), tailles `text-xs|sm|base|md|lg|xl` (12/13/14/16/20/24), espacements multiples de 4.
+- Formes arrondies : contrôles `rounded` (10 px), cartes `rounded-lg` (16 px), bandeaux `rounded-xl`, onglets et segments en pastilles `rounded-full`.
+- Cartes blanches avec bordure fine + ombre très légère (`Panel`, `shadow-sm`). KPI : `Stat` avec icône dans une pastille de couleur douce.
+- Dégradé réservé au bandeau d'accueil (`HeroBanner`, `from-hero-from to-hero-to`). Interdits : emojis, glassmorphism, ombres marquées, animations décoratives.
+- Pages légères : un seul bloc détaillé à la fois via `Segmented` ou menu déroulant plutôt que tout empiler.
+- Mobile d'abord : barre de navigation en bas (`BottomNav`), aucune page ne déborde à 375 px, champs en 16 px. Zoom de page désactivé (`app/no-zoom.ts`).
 - Tableaux denses : `Table`, `SortableTh`, nombres alignés à droite en `tabular`.
 - Formats : `formatDate` (« 4 nov. 2026 »), `formatNumber`, `formatEuros`, `isoWeekLabel` (S45).
 - États : `Skeleton`/`TableSkeleton` au chargement, `EmptyState` avec action, `ErrorState` avec réessai.

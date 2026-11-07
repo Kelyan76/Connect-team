@@ -5,13 +5,8 @@ import { queryClient } from '@/shared/lib/query-client';
 import { TooltipProvider } from '@/shared/ui/menu';
 import { Toaster } from '@/shared/ui/toaster';
 import { PeriodProvider } from './providers/period';
-import { ThemeProvider, useTheme } from './providers/theme';
+import { ThemeProvider } from './providers/theme';
 import { router } from './router';
-
-function ThemedToaster() {
-  const { resolved } = useTheme();
-  return <Toaster dark={resolved === 'sombre'} />;
-}
 
 export function App() {
   return (
@@ -22,7 +17,7 @@ export function App() {
             <AuthProvider>
               <RouterProvider router={router} />
             </AuthProvider>
-            <ThemedToaster />
+            <Toaster dark={false} />
           </PeriodProvider>
         </TooltipProvider>
       </QueryClientProvider>

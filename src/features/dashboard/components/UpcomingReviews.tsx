@@ -1,57 +1,47 @@
-import { useNavigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { Person } from '@/features/team/api';
 import type { Review } from '@/features/reviews/api';
 import { KIND_LABEL, PREP_META, prepStatus } from '@/features/reviews/lib/review-rules';
 import { daysFromToday } from '@/shared/lib/dates';
-import { formatDate, formatTime, relativeDays } from '@/shared/lib/format';
-import { PersonLabel } from '@/shared/ui/avatar';
+import { formatDate, formatTime, fullName, relativeDays } from '@/shared/lib/format';
+import { Avatar } from '@/shared/ui/avatar';
 import { StatusDot } from '@/shared/ui/badge';
 import { EmptyState } from '@/shared/ui/feedback';
 import { Panel } from '@/shared/ui/layout';
-import { Table, TBody, Td, Th, THead, Tr } from '@/shared/ui/table';
 
-/** Prochains entretiens avec leur statut de préparation. */
+/** Prochains entretiens avec leur statut de préparation, en liste lisible sur téléphone. */
 export function UpcomingReviews({ reviews, byId }: { reviews: Review[]; byId: Map<string, Person> }) {
-  const navigate = useNavigate();
   return (
     <Panel title="Prochains entretiens" flush>
       {reviews.length === 0 ? (
         <EmptyState title="Aucun entretien planifié" description="Planifiez les one-to-one de l’équipe depuis la page Entretiens." />
       ) : (
-        <Table>
-          <THead>
-            <tr>
-              <Th>Collaborateur</Th>
-              <Th>Type</Th>
-              <Th align="right">Date</Th>
-              <Th>Préparation</Th>
-            </tr>
-          </THead>
-          <TBody>
-            {reviews.map((r) => {
-              const person = byId.get(r.collaborator_id);
-              const prep = PREP_META[prepStatus(r)];
-              const days = daysFromToday(r.scheduled_at.slice(0, 10));
-              return (
-                <Tr key={r.id} className="cursor-pointer" onClick={() => navigate(`/entretiens/${r.id}`)}>
-                  <Td>{person && <PersonLabel person={person} detail={person.job_title} />}</Td>
-                  <Td className="whitespace-nowrap text-fg-muted">{KIND_LABEL[r.kind]}</Td>
-                  <Td numeric>
-                    <span className="flex flex-col items-end">
-                      <span>
-                        {formatDate(r.scheduled_at)} · {formatTime(r.scheduled_at)}
-                      </span>
-                      <span className="text-xs text-fg-subtle">{relativeDays(days)}</span>
+        <ul className="divide-y divide-line">
+          {reviews.map((r) => {
+            const person = byId.get(r.collaborator_id);
+            const prep = PREP_META[prepStatus(r)];
+            const days = daysFromToday(r.scheduled_at.slice(0, 10));
+            return (
+              <li key={r.id}>
+                <Link to={`/entretiens/${r.id}`} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-surface-muted/60">
+                  {person && <Avatar person={person} />}
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-base font-medium">{person ? fullName(person) : '—'}</span>
+                    <span className="truncate text-sm text-fg-subtle">
+                      {KIND_LABEL[r.kind]} · {formatDate(r.scheduled_at)} à {formatTime(r.scheduled_at)}
                     </span>
-                  </Td>
-                  <Td>
+                  </span>
+                  <span className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
+                    <span className="text-sm text-fg-muted">{relativeDays(days)}</span>
                     <StatusDot tone={prep.tone}>{prep.label}</StatusDot>
-                  </Td>
-                </Tr>
-              );
-            })}
-          </TBody>
-        </Table>
+                  </span>
+                  <ChevronRight className="size-4 shrink-0 text-fg-subtle" aria-hidden />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </Panel>
   );

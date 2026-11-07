@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Minus, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 import type { BadgeTone } from './badge';
@@ -32,16 +32,29 @@ export function ProgressBar({
       aria-valuemax={100}
       aria-valuenow={Math.round(value * 100)}
       aria-label={label}
-      className={cn('h-1 w-full overflow-hidden rounded-full bg-surface-muted', className)}
+      className={cn('h-2 w-full overflow-hidden rounded-full bg-surface-muted', className)}
     >
       <div className={cn('h-full rounded-full', barTone[tone])} style={{ width: `${pct}%` }} />
     </div>
   );
 }
 
+export type StatTone = 'accent' | 'success' | 'warning' | 'danger' | 'violet';
+
+const tileTone: Record<StatTone, string> = {
+  accent: 'bg-accent-subtle text-accent',
+  success: 'bg-success-subtle text-success',
+  warning: 'bg-warning-subtle text-warning',
+  danger: 'bg-danger-subtle text-danger',
+  violet: 'bg-level-1 text-accent-hover',
+};
+
 interface StatProps {
   label: string;
   value: ReactNode;
+  /** Icône dans une pastille colorée, à gauche de la valeur. */
+  icon?: LucideIcon;
+  tone?: StatTone;
   /** Écart vs période précédente, déjà formaté ; le signe est donné par `trend`. */
   delta?: string;
   trend?: 'up' | 'down' | 'flat';
@@ -52,14 +65,19 @@ interface StatProps {
 }
 
 /** Indicateur clé : libellé gris, valeur en tabular-nums, variation discrète. */
-export function Stat({ label, value, delta, trend = 'flat', upIsGood = true, hint, className }: StatProps) {
+export function Stat({ label, value, icon: TileIcon, tone = 'accent', delta, trend = 'flat', upIsGood = true, hint, className }: StatProps) {
   const good = trend === 'flat' ? null : (trend === 'up') === upIsGood;
   const Icon = trend === 'up' ? ArrowUpRight : trend === 'down' ? ArrowDownRight : Minus;
   return (
-    <div className={cn('flex min-w-0 flex-col gap-1 px-4 py-3', className)}>
-      <span className="truncate text-sm text-fg-muted">{label}</span>
+    <div className={cn('flex min-w-0 flex-col gap-1 rounded-lg border border-line bg-surface p-4 shadow-sm sm:p-5', className)}>
+      {TileIcon && (
+        <span className={cn('mb-2 flex size-10 items-center justify-center rounded', tileTone[tone])}>
+          <TileIcon className="size-5" aria-hidden />
+        </span>
+      )}
       <span className="tabular text-xl font-semibold text-fg">{value}</span>
-      <span className="flex items-center gap-1 text-xs text-fg-subtle">
+      <span className="line-clamp-2 text-sm text-fg-muted">{label}</span>
+      <span className="flex min-w-0 flex-wrap items-center gap-x-1 text-xs text-fg-subtle">
         {delta && (
           <span
             className={cn(
@@ -72,22 +90,13 @@ export function Stat({ label, value, delta, trend = 'flat', upIsGood = true, hin
             {delta}
           </span>
         )}
-        {hint && <span className="truncate">{hint}</span>}
+        {hint && <span>{hint}</span>}
       </span>
     </div>
   );
 }
 
-/** Rangée de KPI séparés par des filets verticaux, dans un seul cadre. */
+/** Grille de KPI en cartes : 2 colonnes sur téléphone, 4 sur grand écran. */
 export function StatGroup({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div
-      className={cn(
-        'grid grid-cols-2 divide-line rounded-lg border border-line bg-surface lg:grid-cols-4 lg:divide-x [&>*:nth-child(-n+2)]:border-b [&>*:nth-child(-n+2)]:border-line lg:[&>*:nth-child(-n+2)]:border-b-0 [&>*:nth-child(odd)]:border-r [&>*:nth-child(odd)]:border-line lg:[&>*:nth-child(odd)]:border-r-0',
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
+  return <div className={cn('grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4', className)}>{children}</div>;
 }

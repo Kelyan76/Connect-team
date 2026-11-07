@@ -1,18 +1,16 @@
-import { LogOut, Monitor, Moon, Search, Sun, UserRound } from 'lucide-react';
+import { LogOut, Search, Settings, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { usePeriod } from '@/app/providers/period';
-import { useTheme, type ThemePreference } from '@/app/providers/theme';
-import { cn } from '@/shared/lib/cn';
 import { fullName, type NamedPerson } from '@/shared/lib/format';
 import { PERIOD_LABELS, type PeriodPreset } from '@/shared/lib/period';
 import { Avatar } from '@/shared/ui/avatar';
+import { BrandMark } from '@/shared/ui/brand';
 import { Kbd } from '@/shared/ui/feedback';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/ui/menu';
@@ -26,45 +24,56 @@ export interface ShellUser extends NamedPerson {
 
 interface HeaderProps {
   user: ShellUser;
+  teamName: string;
   onOpenPalette: () => void;
   onSignOut: () => void;
   /** Emplacement des notifications (rappels), fourni par la feature alertes. */
   notifications?: ReactNode;
-  /** Menu de navigation affiché sur petit écran. */
-  mobileNav?: ReactNode;
+  /** Lien vers les paramètres dans le menu du profil (manager). */
+  showSettings?: boolean;
 }
 
 const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform);
 
-const THEMES: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
-  { value: 'clair', label: 'Clair', icon: Sun },
-  { value: 'sombre', label: 'Sombre', icon: Moon },
-  { value: 'systeme', label: 'Système', icon: Monitor },
-];
-
-export function Header({ user, onOpenPalette, onSignOut, notifications, mobileNav }: HeaderProps) {
+export function Header({ user, teamName, onOpenPalette, onSignOut, notifications, showSettings }: HeaderProps) {
   const { period, setPreset } = usePeriod();
-  const { preference, setPreference } = useTheme();
 
   return (
-    <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-3 border-b border-line bg-surface px-4 lg:px-6">
-      {mobileNav}
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface/90 px-4 backdrop-blur lg:px-6">
+      {/* Sur téléphone, la barre latérale est masquée : on rappelle l'application et l'équipe ici. */}
+      <Link to="/" className="flex min-w-0 items-center gap-2 md:hidden">
+        <BrandMark className="size-7 shrink-0" />
+        <span className="flex min-w-0 flex-col leading-tight">
+          <span className="text-base font-semibold">Connect Team</span>
+          <span className="truncate text-xs text-fg-subtle">{teamName}</span>
+        </span>
+      </Link>
+
       <button
         type="button"
         onClick={onOpenPalette}
-        className="flex h-8 min-w-0 max-w-90 flex-1 items-center gap-2 rounded border border-line bg-canvas px-3 text-sm text-fg-subtle transition-colors hover:border-line-strong hover:text-fg-muted"
+        className="hidden h-9 min-w-0 max-w-90 flex-1 items-center gap-2 rounded-full bg-surface-muted px-4 text-sm text-fg-subtle transition-colors hover:text-fg-muted md:flex"
       >
         <Search className="size-4 shrink-0" aria-hidden />
         <span className="truncate">Rechercher…</span>
-        <span className="ml-auto hidden items-center gap-1 sm:flex">
+        <span className="ml-auto hidden items-center gap-1 lg:flex">
           <Kbd>{isMac ? '⌘' : 'Ctrl'}</Kbd>
           <Kbd>K</Kbd>
         </span>
       </button>
 
-      <div className="ml-auto flex shrink-0 items-center gap-2">
+      <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+        <button
+          type="button"
+          onClick={onOpenPalette}
+          className="flex size-9 items-center justify-center rounded-full text-fg-muted hover:bg-surface-muted md:hidden"
+          aria-label="Rechercher"
+        >
+          <Search className="size-5" aria-hidden />
+        </button>
+
         <Select value={period.preset} onValueChange={(v) => setPreset(v as PeriodPreset)}>
-          <SelectTrigger className="h-8 w-auto gap-2" aria-label="Période d'analyse">
+          <SelectTrigger className="hidden h-9 w-auto gap-2 rounded-full sm:flex" aria-label="Période d'analyse">
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="end">
@@ -80,13 +89,13 @@ export function Header({ user, onOpenPalette, onSignOut, notifications, mobileNa
 
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="flex h-8 items-center gap-2 rounded pl-1 pr-2 hover:bg-surface-muted"
+            className="flex h-9 items-center gap-2 rounded-full pl-1 pr-1 hover:bg-surface-muted lg:pr-3"
             aria-label="Menu du profil"
           >
             <Avatar person={user} size="sm" />
             <span className="hidden max-w-36 truncate text-sm font-medium lg:inline">{fullName(user)}</span>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64">
+          <DropdownMenuContent className="w-64" align="end">
             <div className="flex flex-col px-2 py-2">
               <span className="text-base font-medium">{fullName(user)}</span>
               <span className="truncate text-xs text-fg-subtle">{user.email}</span>
@@ -101,26 +110,14 @@ export function Header({ user, onOpenPalette, onSignOut, notifications, mobileNa
                 Mon profil
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel>Thème</DropdownMenuLabel>
-            <div className="grid grid-cols-3 gap-1 px-1 pb-1" role="radiogroup" aria-label="Thème">
-              {THEMES.map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={preference === t.value}
-                  onClick={() => setPreference(t.value)}
-                  className={cn(
-                    'flex h-7 items-center justify-center gap-1 rounded-sm text-xs text-fg-muted hover:bg-surface-muted',
-                    preference === t.value && 'bg-surface-muted font-medium text-fg',
-                  )}
-                >
-                  <t.icon className="size-3" aria-hidden />
-                  {t.label}
-                </button>
-              ))}
-            </div>
+            {showSettings && (
+              <DropdownMenuItem asChild>
+                <Link to="/parametres">
+                  <Settings aria-hidden />
+                  Paramètres
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={onSignOut}>
               <LogOut aria-hidden />
