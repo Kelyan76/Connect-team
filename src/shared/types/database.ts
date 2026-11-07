@@ -60,6 +60,7 @@ export type Database = {
           note: string;
           created_at: string;
           updated_at: string;
+          workload: number | null;
         };
         Insert: {
           id?: string;
@@ -71,6 +72,7 @@ export type Database = {
           note?: string;
           created_at?: string;
           updated_at?: string;
+          workload?: number | null;
         };
         Update: {
           id?: string;
@@ -82,6 +84,7 @@ export type Database = {
           note?: string;
           created_at?: string;
           updated_at?: string;
+          workload?: number | null;
         };
         Relationships: [];
       };
@@ -974,6 +977,7 @@ export type Database = {
       auth_team_id: { Args: Record<PropertyKey, never>; Returns: string };
       can_read_answer: { Args: { p_review_id: string; p_author: Database['public']['Enums']['answer_author'] }; Returns: boolean };
       can_write_answer: { Args: { p_review_id: string; p_author: Database['public']['Enums']['answer_author'] }; Returns: boolean };
+      paris_today: { Args: Record<PropertyKey, never>; Returns: string };
       propose_key_result_value: { Args: { p_key_result_id: string; p_value: number }; Returns: undefined };
       record_login: { Args: { p_user_agent?: string }; Returns: undefined };
       review_key_result_value: { Args: { p_key_result_id: string; p_accept: boolean }; Returns: undefined };

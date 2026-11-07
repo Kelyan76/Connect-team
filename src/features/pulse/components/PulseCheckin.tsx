@@ -5,13 +5,13 @@ import { cn } from '@/shared/lib/cn';
 import { todayIso } from '@/shared/lib/dates';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/feedback';
-import { ENERGY, ENERGY_COLOR, lastWorkdays, MOOD, MOOD_COLOR, streak, type ScaleStep } from '../lib/pulse';
+import { displayDays, ENERGY, ENERGY_COLOR, MOOD, MOOD_COLOR, streak, WORKLOAD, WORKLOAD_COLOR, type ScaleStep } from '../lib/pulse';
 import { usePulses, useSavePulse } from '../queries';
 
 type Colors = typeof MOOD_COLOR;
 
 /** Échelle de 5 boutons-icônes : chaque niveau a sa couleur, le choix se remplit et grossit. */
-function Scale({ label, steps, colors, value, onChange }: { label: string; steps: Record<number, ScaleStep>; colors: Colors | typeof ENERGY_COLOR; value: number | null; onChange: (n: number) => void }) {
+function Scale({ label, steps, colors, value, onChange }: { label: string; steps: Record<number, ScaleStep>; colors: Colors | typeof ENERGY_COLOR | typeof WORKLOAD_COLOR; value: number | null; onChange: (n: number) => void }) {
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="pb-2 text-sm font-medium text-fg-muted">{label}</legend>
@@ -45,7 +45,7 @@ function Scale({ label, steps, colors, value, onChange }: { label: string; steps
 
 /** 10 derniers jours ouvrés en pastilles colorées (humeur), aujourd'hui à droite. */
 function History({ byDay }: { byDay: Map<string, number> }) {
-  const days = lastWorkdays(todayIso(), 10);
+  const days = displayDays(todayIso(), 10);
   return (
     <div className="flex items-center gap-1" aria-label="Humeur des 10 derniers jours ouvrés">
       {days.map((d) => {
@@ -67,7 +67,7 @@ function StreakPill({ days, compact }: { days: number; compact?: boolean }) {
 }
 
 /**
- * Pouls du jour du collaborateur : humeur et motivation en deux touchers, un mot facultatif.
+ * Pouls du jour du collaborateur : humeur, motivation et charge de travail en trois touchers, un mot facultatif.
  * Une fois saisi, la carte se replie et affiche la série de jours consécutifs.
  */
 export function PulseCheckin() {
@@ -80,6 +80,7 @@ export function PulseCheckin() {
   const [editing, setEditing] = useState(false);
   const [mood, setMood] = useState<number | null>(null);
   const [energy, setEnergy] = useState<number | null>(null);
+  const [workload, setWorkload] = useState<number | null>(null);
   const [note, setNote] = useState('');
   const series = streak(
     mine.map((p) => p.day),
@@ -93,6 +94,7 @@ export function PulseCheckin() {
   const start = () => {
     setMood(current?.mood ?? null);
     setEnergy(current?.energy ?? null);
+    setWorkload(current?.workload ?? null);
     setNote(current?.note ?? '');
     setEditing(true);
   };
@@ -100,6 +102,7 @@ export function PulseCheckin() {
   if (!open && current) {
     const M = MOOD[current.mood].icon;
     const E = ENERGY[current.energy].icon;
+    const W = current.workload !== null ? WORKLOAD[current.workload].icon : null;
     return (
       <section
         className={cn(
@@ -114,14 +117,20 @@ export function PulseCheckin() {
           <span className={cn('flex size-11 items-center justify-center rounded shadow-sm', ENERGY_COLOR[current.energy].solid)} title={ENERGY[current.energy].label}>
             <E className="size-6" aria-hidden />
           </span>
+          {W && current.workload !== null && (
+            <span className={cn('flex size-11 items-center justify-center rounded shadow-sm', WORKLOAD_COLOR[current.workload].solid)} title={WORKLOAD[current.workload].label}>
+              <W className="size-6" aria-hidden />
+            </span>
+          )}
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="order-last flex min-w-0 basis-full flex-col gap-1 sm:order-none sm:basis-0 sm:flex-1">
           <span className="text-base font-medium">
             {MOOD[current.mood].label} · motivation {ENERGY[current.energy].label.toLowerCase()}
+            {current.workload !== null && ` · charge ${WORKLOAD[current.workload].label.toLowerCase()}`}
           </span>
           <History byDay={byDay} />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 sm:ml-0">
           {series > 1 && <StreakPill days={series} />}
           <Button variant="ghost" size="icon-sm" aria-label="Modifier mon pouls du jour" onClick={start}>
             <Pencil aria-hidden />
@@ -132,8 +141,8 @@ export function PulseCheckin() {
   }
 
   const submit = () => {
-    if (!mood || !energy) return;
-    save.mutate({ collaboratorId: profile.id, mood, energy, note: note.trim() }, { onSuccess: () => setEditing(false) });
+    if (!mood || !energy || !workload) return;
+    save.mutate({ collaboratorId: profile.id, mood, energy, workload, note: note.trim() }, { onSuccess: () => setEditing(false) });
   };
 
   return (
@@ -155,7 +164,8 @@ export function PulseCheckin() {
         </div>
         <Scale label="Mon humeur" steps={MOOD} colors={MOOD_COLOR} value={mood} onChange={setMood} />
         <Scale label="Ma motivation" steps={ENERGY} colors={ENERGY_COLOR} value={energy} onChange={setEnergy} />
-        {mood && energy && (
+        <Scale label="Ma charge de travail" steps={WORKLOAD} colors={WORKLOAD_COLOR} value={workload} onChange={setWorkload} />
+        {mood && energy && workload && (
           <input
             className="h-10 w-full animate-page-in rounded border border-line-strong bg-surface px-3 text-base placeholder:text-fg-subtle focus-visible:border-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus/15"
             placeholder="Un mot pour votre manager ? (facultatif)"
@@ -169,7 +179,7 @@ export function PulseCheckin() {
           <Button
             size="lg"
             className="flex-1 border-transparent bg-gradient-to-r from-hero-from to-hero-to text-white shadow-md hover:opacity-95 sm:flex-none"
-            disabled={!mood || !energy || save.isPending}
+            disabled={!mood || !energy || !workload || save.isPending}
             onClick={submit}
           >
             {save.isPending && <Loader2 className="animate-spin" aria-hidden />}

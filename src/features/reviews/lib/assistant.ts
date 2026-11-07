@@ -27,7 +27,7 @@ export function suggestTopics(input: AssistantInput): Suggestion[] {
     }
   }
   if (hasMoodDrop(input.weather, 3)) {
-    out.push({ id: 'meteo', title: 'Comprendre la baisse de moral des dernières semaines', reason: 'Météo en baisse sur 3 semaines' });
+    out.push({ id: 'meteo', title: 'Comprendre la baisse de moral des dernières semaines', reason: 'Humeur en baisse sur 3 semaines (pouls)' });
   }
   const recent = input.loads.slice(-3);
   if (recent.filter((l) => l.percent > input.overloadPct).length >= 2) {

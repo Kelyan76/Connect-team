@@ -90,7 +90,7 @@ export function PrepAssistant({ review }: { review: Review }) {
           </section>
           <section className="flex items-center justify-between gap-3">
             <div className="flex flex-col">
-              <h3 className="text-xs font-medium text-fg-subtle">Météo, 8 dernières semaines</h3>
+              <h3 className="text-xs font-medium text-fg-subtle">Humeur (pouls), 8 dernières semaines</h3>
               <span className="tabular text-sm">{moods.filter((m) => m !== null).slice(-1)[0] ?? '—'} / 5 cette semaine</span>
             </div>
             <Sparkline values={moods} />

@@ -28,7 +28,7 @@ const FIELDS: { key: keyof Values; label: string; unit: string; hint: string }[]
   { key: 'overload_pct', label: 'Seuil de surcharge', unit: '%', hint: 'Charge hebdomadaire au-delà de laquelle on parle de surcharge.' },
   { key: 'overload_weeks', label: 'Durée de surcharge', unit: 'semaines', hint: 'Nombre de semaines consécutives avant alerte.' },
   { key: 'underload_pct', label: 'Seuil de sous-charge', unit: '%', hint: 'Signalé dans le plan de charge.' },
-  { key: 'weather_drop_weeks', label: 'Baisse de la météo', unit: 'semaines', hint: 'Humeur en recul chaque semaine pendant N semaines.' },
+  { key: 'weather_drop_weeks', label: 'Baisse de l’humeur (pouls)', unit: 'semaines', hint: 'Humeur en recul chaque semaine pendant N semaines.' },
   { key: 'review_due_days', label: 'Échéance réglementaire', unit: 'jours', hint: 'Entretien annuel ou professionnel à planifier sous N jours.' },
   { key: 'prep_reminder_days', label: 'Rappel de préparation', unit: 'jours', hint: 'Rappel si l’entretien a lieu sous N jours et n’est pas prêt.' },
   { key: 'max_absent', label: 'Absences simultanées', unit: 'personnes', hint: 'Au-delà, le jour est signalé dans le calendrier.' },

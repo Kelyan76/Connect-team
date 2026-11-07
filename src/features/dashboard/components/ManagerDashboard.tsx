@@ -22,12 +22,12 @@ import { UpcomingReviews } from './UpcomingReviews';
 const pts = (delta: number) => `${formatDecimal(Math.abs(delta * 100)).replace(',0', '')} pt${Math.abs(delta * 100) >= 2 ? 's' : ''}`;
 const trend = (d: number, eps = 0.005) => (d > eps ? 'up' : d < -eps ? 'down' : 'flat') as 'up' | 'down' | 'flat';
 
-type View = 'pouls' | 'alertes' | 'entretiens' | 'evolution' | 'meteo';
-const VIEWS: View[] = ['pouls', 'alertes', 'entretiens', 'evolution', 'meteo'];
+type View = 'pouls' | 'alertes' | 'entretiens' | 'evolution';
+const VIEWS: View[] = ['pouls', 'alertes', 'entretiens', 'evolution'];
 
 /**
  * Accueil du manager : quatre chiffres clés, puis un seul bloc à la fois
- * (alertes, entretiens, évolution, météo) choisi dans un menu, pour garder la page légère.
+ * (pouls, alertes, entretiens, évolution) choisi dans un menu, pour garder la page légère.
  */
 export function ManagerDashboard() {
   const { profile } = useCurrentUser();
@@ -125,7 +125,6 @@ export function ManagerDashboard() {
                 </SegmentedItem>
                 <SegmentedItem value="entretiens">Entretiens</SegmentedItem>
                 <SegmentedItem value="evolution">Évolution</SegmentedItem>
-                <SegmentedItem value="meteo">Météo</SegmentedItem>
               </Segmented>
             </div>
 
@@ -148,7 +147,7 @@ export function ManagerDashboard() {
             {view === 'entretiens' && <UpcomingReviews reviews={data.upcoming.slice(0, 6)} byId={byId} />}
 
             {view === 'evolution' && (
-              <Panel title="Évolution sur 6 mois" description="Fin de mois · météo ramenée sur 100">
+              <Panel title="Évolution sur 6 mois" description="Fin de mois · humeur (pouls) ramenée sur 100">
                 <TrendChart
                   data={data.trend}
                   xKey="mois"
@@ -158,29 +157,9 @@ export function ManagerDashboard() {
                   series={[
                     { key: 'atteinte', label: 'Objectifs (%)', color: SERIES.accent },
                     { key: 'charge', label: 'Charge (%)', color: SERIES.muted },
-                    { key: 'meteo', label: 'Météo', color: SERIES.warning, dashed: true },
+                    { key: 'meteo', label: 'Humeur', color: SERIES.warning, dashed: true },
                   ]}
                 />
-              </Panel>
-            )}
-
-            {view === 'meteo' && (
-              <Panel title="Météo d’équipe" description="Semaine en cours">
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="tabular text-xl font-semibold">{data.mood === null ? '—' : formatDecimal(data.mood)}</span>
-                    <span className="text-sm text-fg-muted">/ 5</span>
-                    {data.mood !== null && data.moodPrev !== null && (
-                      <span className="tabular text-sm text-fg-subtle">· semaine précédente {formatDecimal(data.moodPrev)}</span>
-                    )}
-                  </div>
-                  <p className="text-sm text-fg-muted">
-                    {data.answered} réponse{data.answered > 1 ? 's' : ''} sur {data.teamSize} cette semaine.
-                  </p>
-                  <Link to="/meteo" className="text-sm font-medium text-accent hover:underline">
-                    Voir le détail par collaborateur
-                  </Link>
-                </div>
               </Panel>
             )}
           </div>

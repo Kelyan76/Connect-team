@@ -56,7 +56,9 @@ const routes: RouteObject[] = [
       { path: '/objectifs', element: page(() => import('@/features/objectives/pages/ObjectivesPage')) },
       { path: '/competences', element: page(() => import('@/features/skills/pages/SkillsPage')) },
       { path: '/feedbacks', element: page(() => import('@/features/feedback/pages/FeedbackPage')) },
-      { path: '/meteo', element: page(() => import('@/features/weather/pages/WeatherPage')) },
+      { path: '/pouls', element: page(() => import('@/features/pulse/pages/PulsePage')) },
+      // Ancienne page Météo : remplacée par le pouls.
+      { path: '/meteo', element: <Navigate to="/pouls" replace /> },
       { path: '/taches', element: page(() => import('@/features/tasks/pages/TasksPage')) },
       { path: '/plan-de-charge', element: page(() => import('@/features/workload/pages/WorkloadPage')) },
       { path: '/absences', element: page(() => import('@/features/absences/pages/AbsencesPage')) },

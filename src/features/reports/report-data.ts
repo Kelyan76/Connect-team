@@ -1,4 +1,6 @@
 import * as objectivesApi from '@/features/objectives/api';
+import { weeklyFromPulses } from '@/features/pulse/lib/pulse';
+import { listPulses } from '@/features/pulse/queries';
 import { objectiveProgress, objectiveStatus } from '@/features/objectives/lib/status';
 import * as reviewsApi from '@/features/reviews/api';
 import * as teamApi from '@/features/team/api';
@@ -17,7 +19,7 @@ export async function loadReportData() {
     get(qk.reviews, reviewsApi.listReviews),
     get(qk.reviewActions, reviewsApi.listActions),
     get(qk.feedbacks, () => listTable('feedbacks', 'created_at', false)),
-    get(qk.weather, () => listTable('weather_entries', 'week_start')),
+    get(qk.pulses, listPulses).then(weeklyFromPulses),
     get(qk.workload, () => listTable('workload_allocations', 'week_start')),
     get(qk.tasks, () => listTable('tasks', 'position')),
     get(qk.absences, () => listTable('absences', 'start_date')),

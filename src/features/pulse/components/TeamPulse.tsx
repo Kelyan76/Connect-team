@@ -9,7 +9,7 @@ import { Avatar } from '@/shared/ui/avatar';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/feedback';
 import { Panel } from '@/shared/ui/layout';
-import { average, ENERGY, ENERGY_COLOR, lastWorkdays, MOOD, MOOD_COLOR, pulseSignals } from '../lib/pulse';
+import { average, displayDays, ENERGY, ENERGY_COLOR, MOOD, MOOD_COLOR, pulseSignals, WORKLOAD, WORKLOAD_COLOR } from '../lib/pulse';
 import { usePulses } from '../queries';
 
 const DAY_LETTER = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
@@ -36,7 +36,7 @@ export function TeamPulse({ people }: { people: Person[] }) {
   if (!pulses.data) return <Skeleton className="h-80 rounded-lg" />;
 
   const data = pulses.data;
-  const days = lastWorkdays(today, 10);
+  const days = displayDays(today, 10);
   const week = data.filter((p) => p.day > isoAddDays(today, -7));
   const prevWeek = data.filter((p) => p.day <= isoAddDays(today, -7) && p.day > isoAddDays(today, -14));
   const answeredToday = new Set(data.filter((p) => p.day === today).map((p) => p.collaborator_id));
@@ -46,10 +46,53 @@ export function TeamPulse({ people }: { people: Person[] }) {
   const byId = new Map(people.map((p) => [p.id, p]));
   const mood = average(week, 'mood');
   const energy = average(week, 'energy');
+  const load = average(week, 'workload');
+  const todayEntries = new Map(data.filter((p) => p.day === today).map((p) => [p.collaborator_id, p]));
+  const ordered = [...people].sort((a, b) => Number(todayEntries.has(b.id)) - Number(todayEntries.has(a.id)));
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="stagger grid grid-cols-3 gap-3">
+      <Panel title="Aujourd’hui" description={`${answeredToday.size} sur ${people.length} ont donné leur pouls`} flush>
+        <ul className="stagger divide-y divide-line">
+          {ordered.map((p) => {
+            const e = todayEntries.get(p.id);
+            return (
+              <li key={p.id}>
+                <Link to={`/equipe/${p.id}`} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-surface-muted/60">
+                  <Avatar person={p} />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-base font-medium">{fullName(p)}</span>
+                    {e?.note ? (
+                      <span className="truncate text-sm text-fg-muted">« {e.note} »</span>
+                    ) : !e ? (
+                      <span className="text-sm text-fg-subtle">Pas encore répondu</span>
+                    ) : null}
+                  </span>
+                  {e && (
+                    <span className="flex shrink-0 gap-1">
+                      {[
+                        { steps: MOOD, colors: MOOD_COLOR, v: e.mood, name: 'Humeur' },
+                        { steps: ENERGY, colors: ENERGY_COLOR, v: e.energy, name: 'Motivation' },
+                        ...(e.workload !== null ? [{ steps: WORKLOAD, colors: WORKLOAD_COLOR, v: e.workload, name: 'Charge' }] : []),
+                      ].map(({ steps, colors, v, name }) => {
+                        const Icon = steps[v].icon;
+                        return (
+                          <span key={name} title={`${name} : ${steps[v].label}`} className={cn('flex size-8 items-center justify-center rounded', colors[v].solid)}>
+                            <Icon className="size-4" aria-hidden />
+                            <span className="sr-only">{`${name} : ${steps[v].label}`}</span>
+                          </span>
+                        );
+                      })}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </Panel>
+
+      <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="flex flex-col gap-2 rounded-lg border border-line bg-gradient-to-br from-hero-from/10 to-surface p-4 shadow-sm">
           <span className="flex size-9 items-center justify-center rounded bg-gradient-to-br from-hero-from to-hero-to text-white shadow-sm">
             <Users className="size-5" aria-hidden />
@@ -66,11 +109,12 @@ export function TeamPulse({ people }: { people: Person[] }) {
         {[
           { key: 'mood' as const, value: mood, label: 'Humeur · 7 jours', steps: MOOD, colors: MOOD_COLOR },
           { key: 'energy' as const, value: energy, label: 'Motivation · 7 jours', steps: ENERGY, colors: ENERGY_COLOR },
+          { key: 'workload' as const, value: load, label: 'Charge · 7 jours', steps: WORKLOAD, colors: WORKLOAD_COLOR },
         ].map(({ key, value, label, steps, colors }) => {
           const level = value === null ? 3 : Math.min(5, Math.max(1, Math.round(value)));
           const Icon = steps[level].icon;
           return (
-            <div key={key} className={cn('flex flex-col gap-2 rounded-lg border border-line bg-gradient-to-br to-surface p-4 shadow-sm', key === 'mood' ? MOOD_COLOR[level].wash : 'from-energy-4/10')}>
+            <div key={key} className={cn('flex flex-col gap-2 rounded-lg border border-line bg-gradient-to-br to-surface p-4 shadow-sm', key === 'mood' ? MOOD_COLOR[level].wash : key === 'energy' ? 'from-energy-4/10' : 'from-mood-2/10')}>
               <span className={cn('flex size-9 items-center justify-center rounded shadow-sm', colors[level].solid)}>
                 <Icon className="size-5" aria-hidden />
               </span>

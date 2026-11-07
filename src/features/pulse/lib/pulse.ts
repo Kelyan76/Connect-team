@@ -1,5 +1,22 @@
-import { Annoyed, Battery, BatteryFull, BatteryLow, BatteryMedium, Frown, Laugh, Meh, Smile, Zap, type LucideIcon } from 'lucide-react';
-import { isoAddDays } from '@/shared/lib/dates';
+import {
+  Annoyed,
+  Battery,
+  BatteryFull,
+  BatteryLow,
+  BatteryMedium,
+  Feather,
+  Frown,
+  Laugh,
+  Leaf,
+  Meh,
+  Scale,
+  Siren,
+  Smile,
+  Weight,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
+import { isoAddDays, weekStartIso } from '@/shared/lib/dates';
 import type { Tables } from '@/shared/types/database';
 
 export type Pulse = Tables<'daily_pulses'>;
@@ -23,6 +40,23 @@ export const ENERGY: Record<number, ScaleStep> = {
   3: { label: 'Moyenne', icon: BatteryMedium },
   4: { label: 'Motivé', icon: BatteryFull },
   5: { label: 'À fond', icon: Zap },
+};
+
+/** Charge de travail ressentie : 3 = équilibrée ; 4-5 = surcharge (couleurs chaudes). */
+export const WORKLOAD: Record<number, ScaleStep> = {
+  1: { label: 'Très légère', icon: Feather },
+  2: { label: 'Légère', icon: Leaf },
+  3: { label: 'Équilibrée', icon: Scale },
+  4: { label: 'Chargée', icon: Weight },
+  5: { label: 'Surchargé', icon: Siren },
+};
+
+export const WORKLOAD_COLOR: Record<number, { solid: string; soft: string; dot: string; text: string }> = {
+  1: { solid: 'bg-energy-2 text-white border-energy-2', soft: 'bg-energy-2/10 text-energy-2 border-energy-2/20', dot: 'bg-energy-2', text: 'text-energy-2' },
+  2: { solid: 'bg-sec-team text-white border-sec-team', soft: 'bg-sec-team/10 text-sec-team border-sec-team/20', dot: 'bg-sec-team', text: 'text-sec-team' },
+  3: { solid: 'bg-mood-4 text-white border-mood-4', soft: 'bg-mood-4/10 text-mood-4 border-mood-4/20', dot: 'bg-mood-4', text: 'text-mood-4' },
+  4: { solid: 'bg-mood-2 text-white border-mood-2', soft: 'bg-mood-2/10 text-mood-2 border-mood-2/20', dot: 'bg-mood-2', text: 'text-mood-2' },
+  5: { solid: 'bg-mood-1 text-white border-mood-1', soft: 'bg-mood-1/10 text-mood-1 border-mood-1/20', dot: 'bg-mood-1', text: 'text-mood-1' },
 };
 
 /**
@@ -71,6 +105,45 @@ export function lastWorkdays(today: string, count: number): string[] {
   return out;
 }
 
+/** Jours affichés dans les historiques : les derniers jours ouvrés, plus aujourd'hui même un week-end. */
+export function displayDays(today: string, count: number): string[] {
+  return isWeekend(today) ? [...lastWorkdays(today, count - 1), today] : lastWorkdays(today, count);
+}
+
+/**
+ * Agrégat hebdomadaire des pouls (moyennes par collaborateur et par semaine), au format de l'ancienne
+ * « météo » : alertes, rapports, préparation d'entretien et courbes continuent de fonctionner.
+ */
+export interface WeeklyPulse {
+  id: string;
+  collaborator_id: string;
+  week_start: string;
+  mood: number;
+  workload: number;
+  comment: string;
+}
+
+export function weeklyFromPulses(pulses: Pulse[]): WeeklyPulse[] {
+  const groups = new Map<string, Pulse[]>();
+  for (const p of pulses) {
+    const key = `${p.collaborator_id}|${weekStartIso(p.day)}`;
+    groups.set(key, [...(groups.get(key) ?? []), p]);
+  }
+  return [...groups.entries()].map(([key, list]) => {
+    const [collaborator_id, week_start] = key.split('|');
+    const loads = list.map((p) => p.workload).filter((w): w is number => w !== null);
+    const notes = [...list].sort((a, b) => b.day.localeCompare(a.day)).find((p) => p.note)?.note ?? '';
+    return {
+      id: key,
+      collaborator_id,
+      week_start,
+      mood: Math.round((list.reduce((s, p) => s + p.mood, 0) / list.length) * 10) / 10,
+      workload: loads.length ? Math.round((loads.reduce((s, w) => s + w, 0) / loads.length) * 10) / 10 : 3,
+      comment: notes,
+    };
+  });
+}
+
 /**
  * Série : nombre de jours ouvrés consécutifs avec un pouls, en remontant depuis aujourd'hui
  * (ou depuis le dernier jour ouvré si aujourd'hui n'est pas encore saisi : la série n'est pas perdue avant le soir).
@@ -88,7 +161,7 @@ export function streak(days: Iterable<string>, today: string): number {
 
 const mean = (xs: number[]) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
 
-export type SignalKind = 'moral_bas' | 'en_baisse' | 'motivation_basse' | 'silence';
+export type SignalKind = 'moral_bas' | 'en_baisse' | 'motivation_basse' | 'surcharge' | 'silence';
 
 export interface Signal {
   personId: string;
@@ -122,6 +195,10 @@ export function pulseSignals(pulses: Pulse[], people: { id: string; first_name: 
     } else if (mood3 !== null && moodBefore !== null && moodBefore - mood3 >= 1) {
       out.push({ personId: p.id, kind: 'en_baisse', severity: 'warning', title: `Humeur en baisse : ${p.first_name}`, detail: `${moodBefore.toFixed(1).replace('.', ',')} → ${mood3.toFixed(1).replace('.', ',')} / 5` });
     }
+    const load3 = mean(last3.map((x) => x.workload).filter((w): w is number => w !== null));
+    if (last3.length >= 2 && load3 !== null && load3 >= 4.3) {
+      out.push({ personId: p.id, kind: 'surcharge', severity: 'danger', title: `Surcharge : ${p.first_name}`, detail: `Charge ressentie ${load3.toFixed(1).replace('.', ',')} / 5 sur les derniers jours` });
+    }
     if (last3.length >= 2 && energy3 !== null && energy3 <= 2) {
       out.push({ personId: p.id, kind: 'motivation_basse', severity: 'warning', title: `Motivation basse : ${p.first_name}`, detail: `Motivation moyenne ${energy3.toFixed(1).replace('.', ',')} / 5` });
     }
@@ -129,6 +206,6 @@ export function pulseSignals(pulses: Pulse[], people: { id: string; first_name: 
   return out.sort((a, b) => (a.severity === b.severity ? 0 : a.severity === 'danger' ? -1 : 1));
 }
 
-export function average(pulses: Pulse[], key: 'mood' | 'energy'): number | null {
-  return mean(pulses.map((p) => p[key]));
+export function average(pulses: Pulse[], key: 'mood' | 'energy' | 'workload'): number | null {
+  return mean(pulses.map((p) => p[key]).filter((v): v is number => v !== null));
 }

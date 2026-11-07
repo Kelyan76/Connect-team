@@ -38,7 +38,7 @@ function Previews() {
           </span>
           <div>
             <p className="tabular text-lg font-semibold">4,2 / 5</p>
-            <p className="text-xs text-fg-subtle">Météo d’équipe</p>
+            <p className="text-xs text-fg-subtle">Pouls d’équipe</p>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@ export function AuthLayout({ title, description, children, aside }: { title: str
         <span aria-hidden className="pointer-events-none absolute -bottom-32 -left-16 size-96 animate-float-slow rounded-full bg-white/10 blur-2xl" />
         <div className="stagger relative flex max-w-110 flex-col">
           <h2 className="text-xl font-semibold leading-tight">Pilotez votre équipe, simplement.</h2>
-          <p className="mt-2 text-base text-white/80">Objectifs, entretiens, charge et météo d’équipe réunis au même endroit.</p>
+          <p className="mt-2 text-base text-white/80">Objectifs, entretiens, charge et pouls d’équipe réunis au même endroit.</p>
           {aside ? <div className="mt-8 rounded-lg bg-white p-6 text-fg shadow-md">{aside}</div> : <Previews />}
         </div>
       </aside>

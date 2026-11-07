@@ -43,7 +43,7 @@ Page **Créer un compte manager** (`/inscription`, lien sous le formulaire de co
 
 Chaque manager obtient sa propre équipe, copiée depuis l'équipe modèle (Valmont Équipements) : collaborateurs fictifs, objectifs, tâches, entretiens… Chaque collaborateur fictif a un vrai compte (adresse en `@cadence-demo.example`, mot de passe commun généré) : les identifiants sont affichés au manager en bas de la page **Équipe**. Les collaborateurs réels continuent d'arriver par invitation.
 
-**Pouls du jour** : chaque collaborateur indique son humeur et sa motivation en haut de son accueil (série de jours consécutifs). Le manager suit l'équipe dans l'onglet *Pouls* de son accueil : participation, tendances, signaux (moral bas, baisse, silence) avec « Proposer un 1:1 » en un clic. Les demandes de one-to-one arrivent dans la cloche du manager (notification à l'écran, vérification toutes les 30 s).
+**Pouls du jour** (remplace l'ancienne météo hebdomadaire) : chaque collaborateur indique son humeur, sa motivation et sa charge de travail en haut de son accueil (série de jours consécutifs). Alertes, rapports et préparation d'entretien utilisent les moyennes hebdomadaires du pouls. Le manager suit l'équipe dans l'onglet *Pouls* de son accueil : participation, tendances, signaux (moral bas, baisse, silence) avec « Proposer un 1:1 » en un clic. Les demandes de one-to-one arrivent dans la cloche du manager (notification à l'écran, vérification toutes les 30 s).
 
 Pour tester l'application côté collaborateur : **Équipe › Tester en tant que collaborateur › Se connecter** (ou menu du profil › *Tester en collaborateur*). Un bandeau en haut permet ensuite de revenir au compte manager sans retaper son mot de passe.
 

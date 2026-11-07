@@ -24,7 +24,7 @@ export function TeamDocument({ report, company }: { report: MonthlyReport; compa
           items={[
             { label: 'Atteinte des objectifs', value: pct(k.attainment) },
             { label: 'Charge moyenne', value: pct(k.load, false) },
-            { label: 'Météo moyenne', value: k.mood === null ? '—' : `${formatDecimal(k.mood)} / 5` },
+            { label: 'Humeur moyenne', value: k.mood === null ? '—' : `${formatDecimal(k.mood)} / 5` },
             { label: 'Tâches terminées', value: String(k.done) },
           ]}
         />
@@ -44,7 +44,7 @@ export function TeamDocument({ report, company }: { report: MonthlyReport; compa
             { label: 'Collaborateur', width: 30, render: (r) => fullName(r.person) },
             { label: 'Objectifs', width: 14, right: true, render: (r) => pct(r.progress) },
             { label: 'Charge moy.', width: 14, right: true, render: (r) => pct(r.load, false) },
-            { label: 'Météo', width: 14, right: true, render: (r) => (r.mood === null ? '—' : formatDecimal(r.mood)) },
+            { label: 'Humeur', width: 14, right: true, render: (r) => (r.mood === null ? '—' : formatDecimal(r.mood)) },
             { label: 'Tâches faites', width: 14, right: true, render: (r) => String(r.done) },
             { label: 'Absence (j)', width: 14, right: true, render: (r) => String(r.absent) },
           ]}

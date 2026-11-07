@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, CloudSun, FileDown, Gauge, Target } from 'lucide-react';
+import { CheckCircle2, FileDown, HeartPulse, Gauge, Target } from 'lucide-react';
 import { useState } from 'react';
 import { OBJECTIVE_STATUS } from '@/features/objectives/lib/status';
 import { useTeamMembers } from '@/features/team/queries';
@@ -127,7 +127,7 @@ export default function ReportsPage() {
               value={<span className={row.load !== null && row.load > 100 ? 'text-danger' : undefined}>{row.load === null ? '—' : formatPercent(row.load, false)}</span>}
               hint="sur le mois"
             />
-            <Stat icon={CloudSun} tone="warning" label="Météo" value={row.mood === null ? '—' : `${formatDecimal(row.mood)} / 5`} hint="moyenne du mois" />
+            <Stat icon={HeartPulse} tone="warning" label="Humeur" value={row.mood === null ? '—' : `${formatDecimal(row.mood)} / 5`} hint="moyenne du mois" />
             <Stat icon={CheckCircle2} tone="violet" label="Tâches terminées" value={row.done} hint={`${row.absent} j d’absence`} />
           </StatGroup>
           <Panel title="Ses objectifs" flush>
@@ -142,7 +142,7 @@ export default function ReportsPage() {
           <StatGroup>
             <Stat icon={Target} label="Objectifs atteints" value={formatPercent(report.kpis.attainment)} hint={`${report.objectives.length} objectifs suivis`} />
             <Stat icon={Gauge} tone="success" label="Charge moyenne" value={report.kpis.load === null ? '—' : formatPercent(report.kpis.load, false)} hint="sur le mois" />
-            <Stat icon={CloudSun} tone="warning" label="Météo moyenne" value={report.kpis.mood === null ? '—' : `${formatDecimal(report.kpis.mood)} / 5`} hint={`${report.kpis.absentDays} j d’absence`} />
+            <Stat icon={HeartPulse} tone="warning" label="Humeur moyenne" value={report.kpis.mood === null ? '—' : `${formatDecimal(report.kpis.mood)} / 5`} hint={`${report.kpis.absentDays} j d’absence`} />
             <Stat icon={CheckCircle2} tone="violet" label="Tâches terminées" value={report.kpis.done} hint={`${report.kpis.late} en retard`} />
           </StatGroup>
           <Panel title="Objectifs de l’équipe" flush>

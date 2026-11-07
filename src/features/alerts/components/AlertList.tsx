@@ -17,7 +17,7 @@ export function AlertList({ alerts, limit, compact = false }: { alerts: Alert[] 
     );
   }
   if (alerts.length === 0) {
-    return <EmptyState title="Aucune alerte" description="Objectifs, charge, météo et entretiens sont dans les seuils fixés." />;
+    return <EmptyState title="Aucune alerte" description="Objectifs, charge, pouls et entretiens sont dans les seuils fixés." />;
   }
   return (
     <ul className="divide-y divide-line">

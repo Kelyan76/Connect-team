@@ -22,7 +22,7 @@ export const ALERT_KIND_LABEL: Record<AlertKind, string> = {
   objectif: 'Objectif',
   one_to_one: 'One-to-one',
   surcharge: 'Charge',
-  meteo: 'Météo',
+  meteo: 'Humeur',
   echeance: 'Échéance réglementaire',
   preparation: 'Préparation',
 };
@@ -109,9 +109,9 @@ export function computeAlerts(input: AlertInput): Alert[] {
           kind: 'meteo',
           severity: 'warning',
           personId: p.id,
-          title: `Météo de ${name(p)} en baisse depuis ${s.weather_drop_weeks} semaines`,
+          title: `Humeur de ${name(p)} en baisse depuis ${s.weather_drop_weeks} semaines`,
           detail: 'Humeur déclarée en recul chaque semaine',
-          to: '/meteo',
+          to: '/pouls',
         });
       }
 

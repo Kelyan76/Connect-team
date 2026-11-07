@@ -2,7 +2,7 @@ import {
   BarChart3,
   Bell,
   CalendarDays,
-  CloudSun,
+  HeartPulse,
   FileText,
   Gauge,
   GitFork,
@@ -55,7 +55,7 @@ export const NAV: NavGroup[] = [
       { to: '/objectifs', label: 'Objectifs', icon: Target, selfLabel: 'Mes objectifs', roles: both },
       { to: '/competences', label: 'Compétences', icon: Grid3x3, selfLabel: 'Mes compétences', roles: both },
       { to: '/feedbacks', label: 'Feedbacks', icon: NotebookPen, roles: both },
-      { to: '/meteo', label: 'Météo', icon: CloudSun, selfLabel: 'Ma météo', roles: both },
+      { to: '/pouls', label: 'Pouls', icon: HeartPulse, selfLabel: 'Mon pouls', roles: both },
     ],
   },
   {
@@ -109,7 +109,7 @@ export interface NavSection {
 
 export const SECTIONS: NavSection[] = [
   { label: 'Tableau de bord', selfLabel: 'Accueil', shortLabel: 'Accueil', tone: 'home', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }, { to: '/rapports' }] },
-  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', tone: 'team', icon: Users, tabs: [{ to: '/equipe' }, { to: '/competences' }, { to: '/meteo' }] },
+  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', tone: 'team', icon: Users, tabs: [{ to: '/equipe' }, { to: '/pouls' }, { to: '/competences' }] },
   { label: 'Entretiens', selfLabel: 'Mes entretiens', shortLabel: 'Entretiens', tone: 'reviews', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }] },
   { label: 'Objectifs', selfLabel: 'Mes objectifs', shortLabel: 'Objectifs', tone: 'goals', icon: Target, tabs: [{ to: '/objectifs' }] },
   { label: 'Planning', shortLabel: 'Planning', tone: 'planning', icon: KanbanSquare, tabs: [{ to: '/taches' }, { to: '/plan-de-charge' }, { to: '/absences' }] },

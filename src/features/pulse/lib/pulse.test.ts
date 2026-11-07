@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { lastWorkdays, previousWorkday, pulseSignals, streak, type Pulse } from './pulse';
+import { lastWorkdays, previousWorkday, pulseSignals, streak, weeklyFromPulses, type Pulse } from './pulse';
 
-const pulse = (collaborator_id: string, day: string, mood: number, energy = 4): Pulse => ({
+const pulse = (collaborator_id: string, day: string, mood: number, energy = 4, workload: number | null = 3): Pulse => ({
   id: `${collaborator_id}-${day}`,
   team_id: 't',
   collaborator_id,
   day,
   mood,
   energy,
+  workload,
   note: '',
   created_at: '',
   updated_at: '',
@@ -47,5 +48,20 @@ describe('signaux', () => {
     expect(kinds).toContain('a:moral_bas');
     expect(kinds).toContain('b:en_baisse');
     expect(kinds).toContain('c:silence');
+  });
+
+  it('détecte une surcharge ressentie', () => {
+    const data = days.map((d, i) => pulse('a', d, 4, 4, i >= 6 ? 5 : 3));
+    expect(pulseSignals(data, people.slice(0, 1), '2026-11-09').map((s) => s.kind)).toContain('surcharge');
+  });
+});
+
+describe('agrégat hebdomadaire (ancienne météo)', () => {
+  it('moyenne humeur et charge par collaborateur et par semaine', () => {
+    const weeks = weeklyFromPulses([pulse('a', '2026-11-02', 2, 4, 5), pulse('a', '2026-11-03', 4, 4, 3), pulse('a', '2026-11-09', 5, 4, null)]);
+    const first = weeks.find((w) => w.week_start === '2026-11-02');
+    expect(first?.mood).toBe(3);
+    expect(first?.workload).toBe(4);
+    expect(weeks.find((w) => w.week_start === '2026-11-09')?.workload).toBe(3);
   });
 });

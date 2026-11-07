@@ -20,7 +20,7 @@ export default function AlertsPage() {
       <PageHeader
         breadcrumbs={[{ label: 'Pilotage' }, { label: 'Alertes' }]}
         title="Alertes"
-        description="Générées automatiquement à partir des objectifs, de la charge, de la météo et du calendrier des entretiens."
+        description="Générées automatiquement à partir des objectifs, de la charge, du pouls de l’équipe et du calendrier des entretiens."
         actions={
           <Button asChild>
             <Link to="/parametres">

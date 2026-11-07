@@ -5,8 +5,7 @@ import { usePulses } from '@/features/pulse/queries';
 import { useReviewActions, useReviewRequests, useReviews } from '@/features/reviews/queries';
 import { useSettings } from '@/features/settings/queries';
 import { useTeamMembers } from '@/features/team/queries';
-import { useWeather } from '@/features/weather/queries';
-import { daysFromToday, todayIso, weekStartIso } from '@/shared/lib/dates';
+import { daysFromToday, todayIso } from '@/shared/lib/dates';
 import { formatDate, fullName, relativeDays } from '@/shared/lib/format';
 import type { Alert } from './lib/alerts';
 import { useAlerts } from './queries';
@@ -15,11 +14,10 @@ export type Reminder = Pick<Alert, 'id' | 'severity' | 'title' | 'detail' | 'to'
 
 const isWeekday = () => new Date().getDay() % 6 !== 0;
 
-/** Rappels automatiques du collaborateur (pouls du jour, préparation d'entretien, météo, actions en retard). */
+/** Rappels automatiques du collaborateur (pouls du jour, préparation d'entretien, actions en retard). */
 function useCollaboratorReminders(enabled: boolean): Reminder[] {
   const { profile } = useCurrentUser();
   const reviews = useReviews();
-  const weather = useWeather();
   const actions = useReviewActions();
   const settings = useSettings();
   const pulses = usePulses();
@@ -29,7 +27,7 @@ function useCollaboratorReminders(enabled: boolean): Reminder[] {
     const out: Reminder[] = [];
     const today = todayIso();
     if (isWeekday() && pulses.data && !pulses.data.some((p) => p.collaborator_id === profile.id && p.day === today)) {
-      out.push({ id: 'pouls', severity: 'warning', title: 'Votre pouls du jour', detail: 'Humeur et motivation en 10 secondes', to: '/' });
+      out.push({ id: 'pouls', severity: 'warning', title: 'Votre pouls du jour', detail: 'Humeur, motivation et charge en 10 secondes', to: '/' });
     }
     const limit = settings.data?.prep_reminder_days ?? 3;
     for (const r of reviews.data ?? []) {
@@ -39,17 +37,13 @@ function useCollaboratorReminders(enabled: boolean): Reminder[] {
         out.push({ id: `prep-${r.id}`, severity: days <= 1 ? 'danger' : 'warning', title: 'Préparez votre entretien', detail: `Prévu ${relativeDays(days)}, le ${formatDate(r.scheduled_at)}`, to: `/entretiens/${r.id}` });
       }
     }
-    const thisWeek = weekStartIso(new Date());
-    if (weather.data && !weather.data.some((w) => w.collaborator_id === profile.id && w.week_start === thisWeek)) {
-      out.push({ id: 'meteo', severity: 'warning', title: 'Météo de la semaine à saisir', detail: 'Deux questions, moins d’une minute', to: '/meteo' });
-    }
     for (const a of actions.data ?? []) {
       if (a.owner_id === profile.id && a.status !== 'fait' && a.due_date && a.due_date < today) {
         out.push({ id: `act-${a.id}`, severity: 'danger', title: `Action en retard : ${a.title}`, detail: `Échéance le ${formatDate(a.due_date)}`, to: '/' });
       }
     }
     return out;
-  }, [enabled, reviews.data, weather.data, actions.data, settings.data, pulses.data, profile.id]);
+  }, [enabled, reviews.data, actions.data, settings.data, pulses.data, profile.id]);
 }
 
 /** Côté manager : demandes de one-to-one en attente et signaux du pouls, en tête des alertes. */
