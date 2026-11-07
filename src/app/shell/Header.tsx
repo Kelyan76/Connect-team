@@ -39,7 +39,7 @@ export function Header({ user, teamName, onOpenPalette, onSignOut, notifications
   const { period, setPreset } = usePeriod();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface/90 px-4 backdrop-blur lg:px-6">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-line/60 bg-surface/70 px-4 backdrop-blur-md lg:px-6">
       {/* Sur téléphone, la barre latérale est masquée : on rappelle l'application et l'équipe ici. */}
       <Link to="/" className="flex min-w-0 items-center gap-2 md:hidden">
         <BrandMark className="size-7 shrink-0" />

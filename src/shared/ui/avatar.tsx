@@ -8,7 +8,26 @@ const sizes = {
   lg: 'size-12 text-md',
 } as const;
 
-/** Initiales sur fond neutre : pas de couleur décorative, la hiérarchie reste typographique. */
+/** Palette douce : chaque personne garde toujours la même couleur (calculée depuis son nom). */
+const PALETTE = [
+  'bg-sec-home/15 text-sec-home',
+  'bg-sec-team/15 text-sec-team',
+  'bg-sec-reviews/15 text-sec-reviews',
+  'bg-sec-goals/15 text-sec-goals',
+  'bg-sec-planning/15 text-sec-planning',
+  'bg-sec-meetings/15 text-sec-meetings',
+  'bg-mood-3/20 text-warning',
+  'bg-energy-2/15 text-energy-2',
+] as const;
+
+function colorFor(person: NamedPerson): string {
+  const key = `${person.first_name}${person.last_name}`;
+  let h = 0;
+  for (let i = 0; i < key.length; i += 1) h = (h * 31 + key.charCodeAt(i)) | 0;
+  return PALETTE[Math.abs(h) % PALETTE.length];
+}
+
+/** Initiales sur une pastille de couleur propre à la personne. */
 export function Avatar({
   person,
   size = 'md',
@@ -21,7 +40,8 @@ export function Avatar({
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 select-none items-center justify-center rounded-full border border-line bg-surface-muted font-medium text-fg-muted',
+        'inline-flex shrink-0 select-none items-center justify-center rounded-full font-semibold ring-2 ring-surface',
+        colorFor(person),
         sizes[size],
         className,
       )}

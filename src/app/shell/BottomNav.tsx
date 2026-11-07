@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 import { matchesPath, sectionsForRole, type Role } from './nav';
+import { SECTION_COLOR } from './section-colors';
 
 /** Barre de navigation fixée en bas de l'écran sur téléphone (la barre latérale prend le relais dès la tablette). */
 export function BottomNav({ role }: { role: Role }) {
@@ -14,20 +15,18 @@ export function BottomNav({ role }: { role: Role }) {
       <ul className="grid" style={{ gridTemplateColumns: `repeat(${sections.length}, minmax(0, 1fr))` }}>
         {sections.map((s) => {
           const active = s.tabs.some((t) => matchesPath(t.to, pathname));
+          const color = SECTION_COLOR[s.tone];
           return (
             <li key={s.label}>
               <Link
                 to={s.to}
                 aria-current={active ? 'page' : undefined}
-                className={cn(
-                  'flex h-16 flex-col items-center justify-center gap-1 text-xs transition-colors',
-                  active ? 'font-medium text-accent' : 'text-fg-subtle',
-                )}
+                className={cn('flex h-16 flex-col items-center justify-center gap-1 text-xs transition-colors', active ? cn('font-semibold', color.text) : 'text-fg-subtle')}
               >
                 <span
                   className={cn(
                     'flex h-7 w-12 items-center justify-center rounded-full transition-all duration-300 ease-out',
-                    active ? 'scale-100 bg-accent-subtle' : 'scale-90',
+                    active ? cn('scale-100', color.solid, 'shadow-sm') : 'scale-90',
                   )}
                 >
                   <s.icon className="size-5" aria-hidden />

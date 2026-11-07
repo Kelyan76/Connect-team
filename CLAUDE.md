@@ -39,6 +39,7 @@ Comptes de démo : voir README (mot de passe commun dans `supabase/seed.sql`).
 ## Règles de design (section 2 du SPEC)
 
 - Thème clair uniquement (pas de mode sombre). Seule zone foncée : la barre latérale bleu nuit (`bg-sidebar`).
+- Une couleur par section (`app/shell/section-colors.ts`, tokens `sec-*`) : icônes du menu, entrée et onglet actifs, barre du bas, halo de page (`PageHalo`). Avatars colorés par personne. Pouls : échelles `mood-1…5` et `energy-1…5`.
 - Uniquement les tokens : couleurs sémantiques (`bg-surface`, `text-fg-muted`, `border-line`, `bg-accent`…), tailles `text-xs|sm|base|md|lg|xl` (12/13/14/16/20/24), espacements multiples de 4.
 - Formes arrondies : contrôles `rounded` (10 px), cartes `rounded-lg` (16 px), bandeaux `rounded-xl`, onglets et segments en pastilles `rounded-full`.
 - Cartes blanches avec bordure fine + ombre très légère (`Panel`, `shadow-sm`). KPI : `Stat` avec icône dans une pastille de couleur douce.

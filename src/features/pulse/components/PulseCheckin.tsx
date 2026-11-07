@@ -1,21 +1,17 @@
-import { Flame, Loader2, Pencil } from 'lucide-react';
+import { Flame, HeartPulse, Loader2, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { cn } from '@/shared/lib/cn';
 import { todayIso } from '@/shared/lib/dates';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/feedback';
-import { ENERGY, lastWorkdays, MOOD, streak, toneOf, type ScaleStep } from '../lib/pulse';
+import { ENERGY, ENERGY_COLOR, lastWorkdays, MOOD, MOOD_COLOR, streak, type ScaleStep } from '../lib/pulse';
 import { usePulses, useSavePulse } from '../queries';
 
-const TONE_ON: Record<string, string> = {
-  danger: 'border-danger bg-danger-subtle text-danger',
-  warning: 'border-warning bg-warning-subtle text-warning',
-  success: 'border-success bg-success-subtle text-success',
-};
-const DOT: Record<string, string> = { danger: 'bg-danger', warning: 'bg-warning', success: 'bg-success' };
+type Colors = typeof MOOD_COLOR;
 
-function Scale({ label, steps, value, onChange }: { label: string; steps: Record<number, ScaleStep>; value: number | null; onChange: (n: number) => void }) {
+/** Échelle de 5 boutons-icônes : chaque niveau a sa couleur, le choix se remplit et grossit. */
+function Scale({ label, steps, colors, value, onChange }: { label: string; steps: Record<number, ScaleStep>; colors: Colors | typeof ENERGY_COLOR; value: number | null; onChange: (n: number) => void }) {
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="pb-2 text-sm font-medium text-fg-muted">{label}</legend>
@@ -23,6 +19,7 @@ function Scale({ label, steps, value, onChange }: { label: string; steps: Record
         {[1, 2, 3, 4, 5].map((n) => {
           const Icon = steps[n].icon;
           const on = value === n;
+          const dim = value !== null && !on;
           return (
             <button
               key={n}
@@ -32,11 +29,12 @@ function Scale({ label, steps, value, onChange }: { label: string; steps: Record
               onClick={() => onChange(n)}
               className={cn(
                 'flex flex-col items-center gap-1 rounded border px-1 py-2 transition-all duration-200 active:scale-95',
-                on ? `${TONE_ON[toneOf(n)]} scale-105 shadow-sm` : 'border-line bg-surface text-fg-subtle hover:border-line-strong hover:text-fg',
+                on ? cn(colors[n].solid, 'scale-105 shadow-md') : colors[n].soft,
+                dim && 'opacity-50 hover:opacity-100',
               )}
             >
-              <Icon className={cn('size-6 transition-transform', on && 'scale-110')} aria-hidden />
-              <span className="text-[11px] leading-tight">{steps[n].label}</span>
+              <Icon className={cn('size-6 transition-transform duration-200', on && 'scale-110')} aria-hidden />
+              <span className={cn('text-[11px] font-medium leading-tight', !on && 'text-fg-muted')}>{steps[n].label}</span>
             </button>
           );
         })}
@@ -52,9 +50,19 @@ function History({ byDay }: { byDay: Map<string, number> }) {
     <div className="flex items-center gap-1" aria-label="Humeur des 10 derniers jours ouvrés">
       {days.map((d) => {
         const v = byDay.get(d);
-        return <span key={d} title={d} className={cn('size-3 rounded-full', v ? DOT[toneOf(v)] : 'bg-line-strong')} />;
+        return <span key={d} title={d} className={cn('size-3 rounded-full', v ? MOOD_COLOR[v].dot : 'bg-line-strong')} />;
       })}
     </div>
+  );
+}
+
+function StreakPill({ days, compact }: { days: number; compact?: boolean }) {
+  return (
+    <span className="flex shrink-0 animate-pop-in items-center gap-1 rounded-full bg-gradient-to-r from-mood-3 to-mood-2 px-3 py-1 text-sm font-semibold text-white shadow-sm">
+      <Flame className="size-4" aria-hidden />
+      {days}
+      {!compact && ` jour${days > 1 ? 's' : ''}`}
+    </span>
   );
 }
 
@@ -73,8 +81,10 @@ export function PulseCheckin() {
   const [mood, setMood] = useState<number | null>(null);
   const [energy, setEnergy] = useState<number | null>(null);
   const [note, setNote] = useState('');
-  const days = mine.map((p) => p.day);
-  const series = streak(days, today);
+  const series = streak(
+    mine.map((p) => p.day),
+    today,
+  );
   const byDay = new Map(mine.map((p) => [p.day, p.mood]));
 
   if (!pulses.data) return <Skeleton className="mb-6 h-40 rounded-lg" />;
@@ -91,26 +101,28 @@ export function PulseCheckin() {
     const M = MOOD[current.mood].icon;
     const E = ENERGY[current.energy].icon;
     return (
-      <section className="mb-6 flex animate-page-in flex-wrap items-center gap-4 rounded-lg border border-line bg-surface p-4 shadow-sm sm:p-5">
+      <section
+        className={cn(
+          'mb-6 flex animate-page-in flex-wrap items-center gap-4 rounded-lg border border-line bg-gradient-to-r to-surface p-4 shadow-sm sm:p-5',
+          MOOD_COLOR[current.mood].wash,
+        )}
+      >
         <div className="flex items-center gap-2">
-          <span className={cn('flex size-10 items-center justify-center rounded', TONE_ON[toneOf(current.mood)])}>
-            <M className="size-5" aria-hidden />
+          <span className={cn('flex size-11 items-center justify-center rounded shadow-sm', MOOD_COLOR[current.mood].solid)} title={MOOD[current.mood].label}>
+            <M className="size-6" aria-hidden />
           </span>
-          <span className={cn('flex size-10 items-center justify-center rounded', TONE_ON[toneOf(current.energy)])}>
-            <E className="size-5" aria-hidden />
+          <span className={cn('flex size-11 items-center justify-center rounded shadow-sm', ENERGY_COLOR[current.energy].solid)} title={ENERGY[current.energy].label}>
+            <E className="size-6" aria-hidden />
           </span>
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-base font-medium">Merci, votre pouls du jour est enregistré.</span>
+          <span className="text-base font-medium">
+            {MOOD[current.mood].label} · motivation {ENERGY[current.energy].label.toLowerCase()}
+          </span>
           <History byDay={byDay} />
         </div>
         <div className="flex items-center gap-2">
-          {series > 1 && (
-            <span className="flex items-center gap-1 rounded-full bg-warning-subtle px-3 py-1 text-sm font-semibold text-warning">
-              <Flame className="size-4" aria-hidden />
-              {series} jours
-            </span>
-          )}
+          {series > 1 && <StreakPill days={series} />}
           <Button variant="ghost" size="icon-sm" aria-label="Modifier mon pouls du jour" onClick={start}>
             <Pencil aria-hidden />
           </Button>
@@ -121,30 +133,28 @@ export function PulseCheckin() {
 
   const submit = () => {
     if (!mood || !energy) return;
-    save.mutate(
-      { collaboratorId: profile.id, mood, energy, note: note.trim() },
-      { onSuccess: () => setEditing(false) },
-    );
+    save.mutate({ collaboratorId: profile.id, mood, energy, note: note.trim() }, { onSuccess: () => setEditing(false) });
   };
 
   return (
-    <section className="relative mb-6 animate-page-in overflow-hidden rounded-lg border border-accent/30 bg-surface p-5 shadow-sm">
-      <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-40 rounded-full bg-accent-subtle" />
+    <section className="relative mb-6 animate-page-in overflow-hidden rounded-lg border border-hero-from/20 bg-gradient-to-br from-hero-from/10 via-surface to-hero-to/10 p-5 shadow-sm">
+      <span aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-40 animate-float-slow rounded-full bg-hero-to/10" />
+      <span aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 size-32 animate-float rounded-full bg-mood-4/10" />
       <div className="relative flex flex-col gap-4">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-md font-semibold">Comment vous sentez-vous aujourd’hui ?</h2>
-            <p className="text-sm text-fg-subtle">10 secondes, visible par votre manager uniquement.</p>
-          </div>
-          {series > 0 && (
-            <span className="flex shrink-0 items-center gap-1 rounded-full bg-warning-subtle px-3 py-1 text-sm font-semibold text-warning">
-              <Flame className="size-4" aria-hidden />
-              {series}
+          <div className="flex items-start gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded bg-gradient-to-br from-hero-from to-hero-to text-white shadow-sm">
+              <HeartPulse className="size-5" aria-hidden />
             </span>
-          )}
+            <div>
+              <h2 className="text-md font-semibold">Comment vous sentez-vous aujourd’hui ?</h2>
+              <p className="text-sm text-fg-subtle">10 secondes, visible par votre manager uniquement.</p>
+            </div>
+          </div>
+          {series > 0 && <StreakPill days={series} compact />}
         </div>
-        <Scale label="Mon humeur" steps={MOOD} value={mood} onChange={setMood} />
-        <Scale label="Ma motivation" steps={ENERGY} value={energy} onChange={setEnergy} />
+        <Scale label="Mon humeur" steps={MOOD} colors={MOOD_COLOR} value={mood} onChange={setMood} />
+        <Scale label="Ma motivation" steps={ENERGY} colors={ENERGY_COLOR} value={energy} onChange={setEnergy} />
         {mood && energy && (
           <input
             className="h-10 w-full animate-page-in rounded border border-line-strong bg-surface px-3 text-base placeholder:text-fg-subtle focus-visible:border-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus/15"
@@ -156,7 +166,12 @@ export function PulseCheckin() {
           />
         )}
         <div className="flex gap-2">
-          <Button variant="primary" size="lg" className="flex-1 sm:flex-none" disabled={!mood || !energy || save.isPending} onClick={submit}>
+          <Button
+            size="lg"
+            className="flex-1 border-transparent bg-gradient-to-r from-hero-from to-hero-to text-white shadow-md hover:opacity-95 sm:flex-none"
+            disabled={!mood || !energy || save.isPending}
+            onClick={submit}
+          >
             {save.isPending && <Loader2 className="animate-spin" aria-hidden />}
             {current ? 'Mettre à jour' : 'Envoyer mon pouls'}
           </Button>

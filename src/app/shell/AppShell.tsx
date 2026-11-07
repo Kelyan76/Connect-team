@@ -4,6 +4,7 @@ import { BottomNav } from './BottomNav';
 import { CommandPalette, type PaletteEntry } from './CommandPalette';
 import { Header, type ShellUser } from './Header';
 import type { Role } from './nav';
+import { PageHalo } from './PageHalo';
 import { SectionTabs } from './SectionTabs';
 import { Sidebar } from './Sidebar';
 
@@ -57,7 +58,8 @@ export function AppShell({ role, user, teamName, onSignOut, searchEntries = [], 
         Aller au contenu
       </a>
       <Sidebar role={role} collapsed={collapsed} onToggle={toggle} teamName={teamName} badges={badges} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative isolate flex min-w-0 flex-1 flex-col">
+        <PageHalo role={role} />
         {banner}
         <Header
           user={user}

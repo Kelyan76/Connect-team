@@ -54,6 +54,27 @@
   --hero-from: 234 66% 55%;
   --hero-to: 262 60% 58%;
 
+  /* Une couleur par section de l'application : repères visuels et ambiance. */
+  --sec-home: 234 62% 52%;
+  --sec-team: 174 70% 34%;
+  --sec-reviews: 262 58% 56%;
+  --sec-goals: 152 58% 36%;
+  --sec-planning: 24 90% 50%;
+  --sec-meetings: 330 68% 52%;
+  --sec-settings: 215 16% 45%;
+
+  /* Pouls du jour : humeur du rouge au vert émeraude, motivation du gris-bleu au violet. */
+  --mood-1: 355 72% 54%;
+  --mood-2: 22 88% 54%;
+  --mood-3: 42 92% 48%;
+  --mood-4: 142 55% 42%;
+  --mood-5: 162 72% 36%;
+  --energy-1: 215 16% 52%;
+  --energy-2: 199 80% 46%;
+  --energy-3: 221 78% 56%;
+  --energy-4: 245 70% 60%;
+  --energy-5: 270 68% 58%;
+
   --focus: 234 70% 55%;
   --shadow: 230 35% 20%;
 }

@@ -38,6 +38,17 @@ export default {
       focus: token('focus'),
       sidebar: { DEFAULT: token('sidebar'), hover: token('sidebar-hover'), fg: token('sidebar-fg'), muted: token('sidebar-muted') },
       hero: { from: token('hero-from'), to: token('hero-to') },
+      sec: {
+        home: token('sec-home'),
+        team: token('sec-team'),
+        reviews: token('sec-reviews'),
+        goals: token('sec-goals'),
+        planning: token('sec-planning'),
+        meetings: token('sec-meetings'),
+        settings: token('sec-settings'),
+      },
+      mood: { 1: token('mood-1'), 2: token('mood-2'), 3: token('mood-3'), 4: token('mood-4'), 5: token('mood-5') },
+      energy: { 1: token('energy-1'), 2: token('energy-2'), 3: token('energy-3'), 4: token('energy-4'), 5: token('energy-5') },
     },
     fontFamily: {
       sans: ['"Inter Variable"', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],

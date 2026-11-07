@@ -2,6 +2,7 @@ import { PanelLeftClose, PanelLeftOpen, type LucideIcon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 import { BrandMark } from '@/shared/ui/brand';
+import { SECTION_COLOR, type SectionTone } from './section-colors';
 import { Tooltip } from '@/shared/ui/menu';
 import { itemLabel, matchesPath, sectionsForRole, SETTINGS_ITEM, type Role } from './nav';
 
@@ -20,22 +21,24 @@ interface EntryProps {
   active: boolean;
   collapsed: boolean;
   badge?: number;
+  tone?: SectionTone;
 }
 
-function Entry({ to, label, icon: Icon, active, collapsed, badge }: EntryProps) {
+function Entry({ to, label, icon: Icon, active, collapsed, badge, tone = 'settings' }: EntryProps) {
+  const color = SECTION_COLOR[tone];
   const link = (
     <Link
       to={to}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group flex h-10 items-center gap-3 rounded px-3 text-base transition-colors',
+        'group flex h-10 items-center gap-3 rounded px-3 text-base transition-all duration-200',
         active
-          ? 'bg-accent font-medium text-sidebar-fg shadow-sm'
+          ? cn(color.solid, 'font-medium shadow-md')
           : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-fg',
         collapsed && 'justify-center px-0',
       )}
     >
-      <Icon className="size-4 shrink-0" aria-hidden />
+      <Icon className={cn('size-4 shrink-0 transition-transform group-hover:scale-110', !active && color.icon)} aria-hidden />
       {collapsed ? (
         <span className="sr-only">{label}</span>
       ) : (
@@ -93,6 +96,7 @@ export function Sidebar({ role, collapsed, onToggle, teamName, badges = {} }: Si
                   to={s.to}
                   label={s.label}
                   icon={s.icon}
+                  tone={s.tone}
                   active={s.tabs.some((t) => matchesPath(t.to, pathname))}
                   collapsed={collapsed}
                   badge={badge || undefined}

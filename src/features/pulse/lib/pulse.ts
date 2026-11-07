@@ -25,6 +25,26 @@ export const ENERGY: Record<number, ScaleStep> = {
   5: { label: 'À fond', icon: Zap },
 };
 
+/**
+ * Couleurs du pouls, une par niveau (classes complètes pour que Tailwind les génère).
+ * solid : fond plein + texte blanc ; soft : fond teinté + icône colorée ; dot : pastille.
+ */
+export const MOOD_COLOR: Record<number, { solid: string; soft: string; dot: string; text: string; wash: string }> = {
+  1: { solid: 'bg-mood-1 text-white border-mood-1', soft: 'bg-mood-1/10 text-mood-1 border-mood-1/20', dot: 'bg-mood-1', text: 'text-mood-1', wash: 'from-mood-1/15' },
+  2: { solid: 'bg-mood-2 text-white border-mood-2', soft: 'bg-mood-2/10 text-mood-2 border-mood-2/20', dot: 'bg-mood-2', text: 'text-mood-2', wash: 'from-mood-2/15' },
+  3: { solid: 'bg-mood-3 text-white border-mood-3', soft: 'bg-mood-3/10 text-mood-3 border-mood-3/25', dot: 'bg-mood-3', text: 'text-mood-3', wash: 'from-mood-3/15' },
+  4: { solid: 'bg-mood-4 text-white border-mood-4', soft: 'bg-mood-4/10 text-mood-4 border-mood-4/20', dot: 'bg-mood-4', text: 'text-mood-4', wash: 'from-mood-4/15' },
+  5: { solid: 'bg-mood-5 text-white border-mood-5', soft: 'bg-mood-5/10 text-mood-5 border-mood-5/20', dot: 'bg-mood-5', text: 'text-mood-5', wash: 'from-mood-5/15' },
+};
+
+export const ENERGY_COLOR: Record<number, { solid: string; soft: string; dot: string; text: string }> = {
+  1: { solid: 'bg-energy-1 text-white border-energy-1', soft: 'bg-energy-1/10 text-energy-1 border-energy-1/20', dot: 'bg-energy-1', text: 'text-energy-1' },
+  2: { solid: 'bg-energy-2 text-white border-energy-2', soft: 'bg-energy-2/10 text-energy-2 border-energy-2/20', dot: 'bg-energy-2', text: 'text-energy-2' },
+  3: { solid: 'bg-energy-3 text-white border-energy-3', soft: 'bg-energy-3/10 text-energy-3 border-energy-3/20', dot: 'bg-energy-3', text: 'text-energy-3' },
+  4: { solid: 'bg-energy-4 text-white border-energy-4', soft: 'bg-energy-4/10 text-energy-4 border-energy-4/20', dot: 'bg-energy-4', text: 'text-energy-4' },
+  5: { solid: 'bg-energy-5 text-white border-energy-5', soft: 'bg-energy-5/10 text-energy-5 border-energy-5/20', dot: 'bg-energy-5', text: 'text-energy-5' },
+};
+
 export type PulseTone = 'danger' | 'warning' | 'success';
 export const toneOf = (v: number): PulseTone => (v <= 2 ? 'danger' : v === 3 ? 'warning' : 'success');
 

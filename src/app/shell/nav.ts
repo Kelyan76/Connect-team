@@ -17,6 +17,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import type { SectionTone } from './section-colors';
+
 export type Role = 'manager' | 'collaborateur';
 
 export interface NavItem {
@@ -99,23 +101,25 @@ export interface NavSection {
   /** Libellé court de la barre de navigation mobile. */
   shortLabel: string;
   selfShortLabel?: string;
+  tone: SectionTone;
   icon: LucideIcon;
   /** Chemins des pages (voir NAV), dans l'ordre des onglets ; libellé d'onglet facultatif. */
   tabs: { to: string; tabLabel?: string }[];
 }
 
 export const SECTIONS: NavSection[] = [
-  { label: 'Tableau de bord', selfLabel: 'Accueil', shortLabel: 'Accueil', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }, { to: '/rapports' }] },
-  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', icon: Users, tabs: [{ to: '/equipe' }, { to: '/competences' }, { to: '/meteo' }] },
-  { label: 'Entretiens', selfLabel: 'Mes entretiens', shortLabel: 'Entretiens', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }] },
-  { label: 'Objectifs', selfLabel: 'Mes objectifs', shortLabel: 'Objectifs', icon: Target, tabs: [{ to: '/objectifs' }] },
-  { label: 'Planning', shortLabel: 'Planning', icon: KanbanSquare, tabs: [{ to: '/taches' }, { to: '/plan-de-charge' }, { to: '/absences' }] },
-  { label: 'Réunions', selfLabel: 'Délégation', shortLabel: 'Réunions', selfShortLabel: 'Délégation', icon: CalendarDays, tabs: [{ to: '/reunions' }, { to: '/delegation' }] },
+  { label: 'Tableau de bord', selfLabel: 'Accueil', shortLabel: 'Accueil', tone: 'home', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }, { to: '/rapports' }] },
+  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', tone: 'team', icon: Users, tabs: [{ to: '/equipe' }, { to: '/competences' }, { to: '/meteo' }] },
+  { label: 'Entretiens', selfLabel: 'Mes entretiens', shortLabel: 'Entretiens', tone: 'reviews', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }] },
+  { label: 'Objectifs', selfLabel: 'Mes objectifs', shortLabel: 'Objectifs', tone: 'goals', icon: Target, tabs: [{ to: '/objectifs' }] },
+  { label: 'Planning', shortLabel: 'Planning', tone: 'planning', icon: KanbanSquare, tabs: [{ to: '/taches' }, { to: '/plan-de-charge' }, { to: '/absences' }] },
+  { label: 'Réunions', selfLabel: 'Délégation', shortLabel: 'Réunions', selfShortLabel: 'Délégation', tone: 'meetings', icon: CalendarDays, tabs: [{ to: '/reunions' }, { to: '/delegation' }] },
 ];
 
 export interface ResolvedSection {
   label: string;
   shortLabel: string;
+  tone: SectionTone;
   icon: LucideIcon;
   /** Première page accessible : cible du lien de la section. */
   to: string;
@@ -138,6 +142,7 @@ export function sectionsForRole(role: Role): ResolvedSection[] {
       {
         label: self && s.selfLabel ? s.selfLabel : s.label,
         shortLabel: self && s.selfShortLabel ? s.selfShortLabel : s.shortLabel,
+        tone: s.tone,
         icon: s.icon,
         to: tabs[0].to,
         tabs,

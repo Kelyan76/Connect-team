@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 import { matchesPath, sectionForPath, sectionsForRole, type Role } from './nav';
+import { SECTION_COLOR } from './section-colors';
 
 /** Onglets de la section courante (ex. Planning : Tâches · Plan de charge · Absences), en pastilles défilantes. */
 export function SectionTabs({ role }: { role: Role }) {
@@ -21,7 +22,7 @@ export function SectionTabs({ role }: { role: Role }) {
               className={cn(
                 'flex h-9 shrink-0 items-center rounded-full px-4 text-sm transition-colors',
                 active
-                  ? 'bg-accent text-accent-fg shadow-sm'
+                  ? cn(SECTION_COLOR[section.tone].solid, 'shadow-md')
                   : 'border border-line bg-surface text-fg-muted hover:border-line-strong hover:text-fg',
               )}
             >
