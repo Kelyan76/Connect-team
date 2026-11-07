@@ -475,3 +475,6 @@ insert into seed_deleg values
 insert into public.delegations (collaborator_id, domain_id, level)
 select pg_temp.p(d.key), dd.id, d.levels[sd.pos]::public.delegation_level
 from seed_deleg d cross join seed_domains sd join public.delegation_domains dd on dd.name = sd.name;
+
+-- ─── Pouls du jour (historique de démonstration) ────────────────────────
+select public.generate_demo_pulses('22222222-0000-4000-8000-000000000001');

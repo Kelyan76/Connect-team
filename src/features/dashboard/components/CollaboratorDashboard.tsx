@@ -13,6 +13,7 @@ import { ProgressBar } from '@/shared/ui/data';
 import { EmptyState, TableSkeleton } from '@/shared/ui/feedback';
 import { Page, Panel } from '@/shared/ui/layout';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
+import { PulseCheckin } from '@/features/pulse/components/PulseCheckin';
 import { HeroBanner } from './HeroBanner';
 import { MyActions } from './MyActions';
 import { MyWeekTasks } from './MyWeekTasks';
@@ -30,7 +31,8 @@ export function CollaboratorDashboard() {
 
   return (
     <Page>
-      <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`${profile.job_title} · bonne semaine !`} />
+      <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`${profile.job_title} · bonne journée !`} />
+      <PulseCheckin />
       <div className="flex flex-col gap-4">
         {weather.data && !answered && (
           <div className="flex flex-wrap items-center gap-3 rounded-lg bg-accent-subtle px-5 py-4">

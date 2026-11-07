@@ -7,6 +7,7 @@ export const qk = {
   settings: ['settings'] as const,
   logins: ['logins'] as const,
   demoAccounts: ['demo-accounts'] as const,
+  pulses: ['pulses'] as const,
   objectives: ['objectives'] as const,
   keyResults: ['key-results'] as const,
   krHistory: ['kr-history'] as const,

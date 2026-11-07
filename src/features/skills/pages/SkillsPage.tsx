@@ -2,6 +2,7 @@ import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { useTeamMembers } from '@/features/team/queries';
 import { ErrorState, Skeleton } from '@/shared/ui/feedback';
 import { Page, PageHeader } from '@/shared/ui/layout';
+import { PersonSkills } from '../components/PersonSkills';
 import { SelfAssessment } from '../components/SelfAssessment';
 import { SkillMatrix } from '../components/SkillMatrix';
 import { TrainingPanel } from '../components/TrainingPanel';
@@ -41,20 +42,25 @@ export default function SkillsPage() {
         title={isManager ? 'Matrice de compétences' : 'Mes compétences'}
         description={
           isManager
-            ? 'Niveaux validés de 1 à 4. Cliquez sur une case pour valider une auto-évaluation ou ajuster un niveau.'
-            : 'Évaluez votre niveau sur chaque compétence de l’équipe. Votre manager valide le niveau retenu.'
+            ? 'Niveaux validés de 1 à 4 et auto-évaluations à valider.'
+            : 'Choisissez votre niveau sur chaque compétence ; votre manager le valide.'
         }
-        meta={<Legend />}
+        meta={isManager ? <div className="hidden md:block"><Legend /></div> : undefined}
       />
       {error ? (
         <ErrorState error={error} />
       ) : !skills.data || !levels.data || team.isLoading ? (
         <Skeleton className="h-96" />
       ) : isManager ? (
-        <div className="flex flex-col gap-6">
-          <SkillMatrix skills={skills.data} levels={levels.data} people={team.active} />
-          <TrainingPanel skills={skills.data} levels={levels.data} people={team.active} />
-        </div>
+        <>
+          <div className="md:hidden">
+            <PersonSkills skills={skills.data} levels={levels.data} people={team.active} />
+          </div>
+          <div className="hidden flex-col gap-6 md:flex">
+            <SkillMatrix skills={skills.data} levels={levels.data} people={team.active} />
+            <TrainingPanel skills={skills.data} levels={levels.data} people={team.active} />
+          </div>
+        </>
       ) : (
         <SelfAssessment skills={skills.data} levels={levels.data.filter((l) => l.collaborator_id === profile.id)} />
       )}

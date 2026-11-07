@@ -1,6 +1,6 @@
 import { CalendarPlus, ClipboardList, FileText, Gauge, MessageSquareText, Target } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { usePeriod } from '@/app/providers/period';
 import { AlertList } from '@/features/alerts/components/AlertList';
 import { useAlerts } from '@/features/alerts/queries';
@@ -13,6 +13,8 @@ import { ErrorState, Skeleton } from '@/shared/ui/feedback';
 import { Page, Panel } from '@/shared/ui/layout';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
 import { useManagerDashboard } from '../use-manager-dashboard';
+import { TeamPulse } from '@/features/pulse/components/TeamPulse';
+import { useTeamMembers } from '@/features/team/queries';
 import { HeroBanner } from './HeroBanner';
 import { KpiDetailDialog, type KpiKind } from './KpiDetailDialog';
 import { UpcomingReviews } from './UpcomingReviews';
@@ -20,7 +22,8 @@ import { UpcomingReviews } from './UpcomingReviews';
 const pts = (delta: number) => `${formatDecimal(Math.abs(delta * 100)).replace(',0', '')} pt${Math.abs(delta * 100) >= 2 ? 's' : ''}`;
 const trend = (d: number, eps = 0.005) => (d > eps ? 'up' : d < -eps ? 'down' : 'flat') as 'up' | 'down' | 'flat';
 
-type View = 'alertes' | 'entretiens' | 'evolution' | 'meteo';
+type View = 'pouls' | 'alertes' | 'entretiens' | 'evolution' | 'meteo';
+const VIEWS: View[] = ['pouls', 'alertes', 'entretiens', 'evolution', 'meteo'];
 
 /**
  * Accueil du manager : quatre chiffres clés, puis un seul bloc à la fois
@@ -31,7 +34,17 @@ export function ManagerDashboard() {
   const { period } = usePeriod();
   const { data, byId, isLoading, error } = useManagerDashboard(period);
   const alerts = useAlerts();
-  const [view, setView] = useState<View>('alertes');
+  const [params] = useSearchParams();
+  const [view, setView] = useState<View>(() => {
+    const v = params.get('vue') as View | null;
+    return v && VIEWS.includes(v) ? v : 'pouls';
+  });
+  const team = useTeamMembers();
+  // Lien depuis une notification (« /?vue=pouls ») alors que l'accueil est déjà ouvert.
+  const requested = params.get('vue');
+  useEffect(() => {
+    if (requested && VIEWS.includes(requested as View)) setView(requested as View);
+  }, [requested]);
   const [detail, setDetail] = useState<KpiKind | null>(null);
 
   return (
@@ -106,6 +119,7 @@ export function ManagerDashboard() {
           <div className="flex flex-col gap-4">
             <div className="no-scrollbar -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
               <Segmented value={view} onValueChange={(v) => setView(v as View)} aria-label="Afficher">
+                <SegmentedItem value="pouls">Pouls</SegmentedItem>
                 <SegmentedItem value="alertes">
                   Alertes{alerts.data?.length ? <span className="tabular text-xs text-fg-subtle">{alerts.data.length}</span> : null}
                 </SegmentedItem>
@@ -114,6 +128,8 @@ export function ManagerDashboard() {
                 <SegmentedItem value="meteo">Météo</SegmentedItem>
               </Segmented>
             </div>
+
+            {view === 'pouls' && <TeamPulse people={team.active} />}
 
             {view === 'alertes' && (
               <Panel

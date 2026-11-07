@@ -10,7 +10,9 @@ export const useAnswers = (id: string) => useQuery({ queryKey: qk.answers(id), q
 export const useTemplates = () => useQuery({ queryKey: qk.templates, queryFn: api.listTemplates });
 export const useTemplateQuestions = () => useQuery({ queryKey: qk.templateQuestions, queryFn: api.listTemplateQuestions });
 export const useReviewActions = () => useQuery({ queryKey: qk.reviewActions, queryFn: api.listActions });
-export const useReviewRequests = () => useQuery({ queryKey: qk.reviewRequests, queryFn: api.listRequests });
+/** Demandes de one-to-one : rafraîchies toutes les 30 s pour notifier le manager sans recharger la page. */
+export const useReviewRequests = () =>
+  useQuery({ queryKey: qk.reviewRequests, queryFn: api.listRequests, refetchInterval: 30_000, refetchIntervalInBackground: false });
 
 function useInvalidateReview() {
   const qc = useQueryClient();

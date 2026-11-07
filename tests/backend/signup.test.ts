@@ -65,7 +65,7 @@ describe('inscription manager', () => {
     const tables = (
       await db.query<{ t: string }>(
         `select table_name as t from information_schema.columns
-         where table_schema = 'public' and column_name = 'team_id' and table_name not in ('teams', 'demo_accounts')
+         where table_schema = 'public' and column_name = 'team_id' and table_name not in ('teams', 'demo_accounts', 'daily_pulses')
            and table_name in (select table_name from information_schema.tables where table_schema = 'public' and table_type = 'BASE TABLE')`,
       )
     ).rows.map((r) => r.t);
@@ -119,6 +119,11 @@ describe('inscription manager', () => {
     expect((await collab.from('demo_accounts').select('*')).data).toEqual([]);
     const { data: teams } = await collab.from('teams').select('id');
     expect(teams).toEqual([{ id: teamId }]);
+  });
+
+  it('génère un historique de pouls pour l’équipe de démonstration', async () => {
+    const { data } = await manager.from('daily_pulses').select('id');
+    expect((data ?? []).length).toBeGreaterThan(20);
   });
 
   it('la fonction de copie n’est pas appelable depuis le navigateur', async () => {

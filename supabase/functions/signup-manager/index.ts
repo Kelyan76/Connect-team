@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
       demo.push({ template_id: p.id, user_id: data.user.id, email });
     }
 
-    const { error } = await admin.rpc('provision_manager_team', {
+    const { data: teamId, error } = await admin.rpc('provision_manager_team', {
       p_manager_id: me.user.id,
       p_first_name: v.first_name,
       p_last_name: v.last_name,
@@ -116,6 +116,9 @@ Deno.serve(async (req) => {
       p_demo_password: demoPassword,
     });
     if (error) throw error;
+    // Historique du pouls du jour pour l'équipe de démonstration (non bloquant).
+    const { error: pulseError } = await admin.rpc('generate_demo_pulses', { p_team: teamId });
+    if (pulseError) console.error('generate_demo_pulses', pulseError);
   } catch (e) {
     console.error('signup-manager', e);
     await rollback();

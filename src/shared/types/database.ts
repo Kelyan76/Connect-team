@@ -49,6 +49,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      daily_pulses: {
+        Row: {
+          id: string;
+          team_id: string;
+          collaborator_id: string;
+          day: string;
+          mood: number;
+          energy: number;
+          note: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id?: string;
+          collaborator_id?: string;
+          day?: string;
+          mood: number;
+          energy: number;
+          note?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          collaborator_id?: string;
+          day?: string;
+          mood?: number;
+          energy?: number;
+          note?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       decisions: {
         Row: {
           id: string;

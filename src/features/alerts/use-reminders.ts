@@ -1,26 +1,36 @@
 import { useMemo } from 'react';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
-import { useReviewActions, useReviews } from '@/features/reviews/queries';
+import { pulseSignals } from '@/features/pulse/lib/pulse';
+import { usePulses } from '@/features/pulse/queries';
+import { useReviewActions, useReviewRequests, useReviews } from '@/features/reviews/queries';
 import { useSettings } from '@/features/settings/queries';
+import { useTeamMembers } from '@/features/team/queries';
 import { useWeather } from '@/features/weather/queries';
 import { daysFromToday, todayIso, weekStartIso } from '@/shared/lib/dates';
-import { formatDate, relativeDays } from '@/shared/lib/format';
+import { formatDate, fullName, relativeDays } from '@/shared/lib/format';
 import type { Alert } from './lib/alerts';
 import { useAlerts } from './queries';
 
 export type Reminder = Pick<Alert, 'id' | 'severity' | 'title' | 'detail' | 'to'>;
 
-/** Rappels automatiques du collaborateur (préparation d'entretien, météo, actions en retard). */
+const isWeekday = () => new Date().getDay() % 6 !== 0;
+
+/** Rappels automatiques du collaborateur (pouls du jour, préparation d'entretien, météo, actions en retard). */
 function useCollaboratorReminders(enabled: boolean): Reminder[] {
   const { profile } = useCurrentUser();
   const reviews = useReviews();
   const weather = useWeather();
   const actions = useReviewActions();
   const settings = useSettings();
+  const pulses = usePulses();
 
   return useMemo(() => {
     if (!enabled) return [];
     const out: Reminder[] = [];
+    const today = todayIso();
+    if (isWeekday() && pulses.data && !pulses.data.some((p) => p.collaborator_id === profile.id && p.day === today)) {
+      out.push({ id: 'pouls', severity: 'warning', title: 'Votre pouls du jour', detail: 'Humeur et motivation en 10 secondes', to: '/' });
+    }
     const limit = settings.data?.prep_reminder_days ?? 3;
     for (const r of reviews.data ?? []) {
       if (r.status !== 'planifie' || r.collaborator_prepared_at) continue;
@@ -33,20 +43,46 @@ function useCollaboratorReminders(enabled: boolean): Reminder[] {
     if (weather.data && !weather.data.some((w) => w.collaborator_id === profile.id && w.week_start === thisWeek)) {
       out.push({ id: 'meteo', severity: 'warning', title: 'Météo de la semaine à saisir', detail: 'Deux questions, moins d’une minute', to: '/meteo' });
     }
-    const today = todayIso();
     for (const a of actions.data ?? []) {
       if (a.owner_id === profile.id && a.status !== 'fait' && a.due_date && a.due_date < today) {
         out.push({ id: `act-${a.id}`, severity: 'danger', title: `Action en retard : ${a.title}`, detail: `Échéance le ${formatDate(a.due_date)}`, to: '/' });
       }
     }
     return out;
-  }, [enabled, reviews.data, weather.data, actions.data, settings.data, profile.id]);
+  }, [enabled, reviews.data, weather.data, actions.data, settings.data, pulses.data, profile.id]);
+}
+
+/** Côté manager : demandes de one-to-one en attente et signaux du pouls, en tête des alertes. */
+function useManagerReminders(enabled: boolean): Reminder[] {
+  const alerts = useAlerts();
+  const requests = useReviewRequests();
+  const pulses = usePulses();
+  const team = useTeamMembers();
+
+  return useMemo(() => {
+    if (!enabled) return [];
+    const out: Reminder[] = [];
+    for (const r of requests.data ?? []) {
+      if (r.status !== 'en_attente') continue;
+      const who = team.byId.get(r.collaborator_id);
+      out.push({
+        id: `demande-${r.id}`,
+        severity: 'danger',
+        title: `Demande de one-to-one : ${who ? fullName(who) : 'un collaborateur'}`,
+        detail: r.message ? `« ${r.message.slice(0, 80)} »` : r.preferred_date ? `Souhaité le ${formatDate(r.preferred_date)}` : 'À planifier',
+        to: '/entretiens',
+      });
+    }
+    for (const s of pulseSignals(pulses.data ?? [], team.active, todayIso())) {
+      out.push({ id: `pouls-${s.personId}-${s.kind}`, severity: s.severity, title: s.title, detail: s.detail, to: '/?vue=pouls' });
+    }
+    return [...out, ...(alerts.data ?? [])];
+  }, [enabled, alerts.data, requests.data, pulses.data, team.byId, team.active]);
 }
 
 export function useReminders(): Reminder[] {
   const { isManager } = useCurrentUser();
-  const alerts = useAlerts();
+  const manager = useManagerReminders(isManager);
   const own = useCollaboratorReminders(!isManager);
-  return isManager ? (alerts.data ?? []) : own;
+  return isManager ? manager : own;
 }
-

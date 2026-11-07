@@ -43,7 +43,7 @@ async function signupManager(req: LocalRequest): Promise<Response> {
       const userId = await createConfirmedUser(tx, demoMail, password, { first_name: p.first_name, last_name: p.last_name });
       demo.push({ template_id: p.id, user_id: userId, email: demoMail });
     }
-    await tx.query('select public.provision_manager_team($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9)', [
+    const created = await tx.query<{ team: string }>('select public.provision_manager_team($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9) as team', [
       managerId,
       v.first_name,
       v.last_name,
@@ -54,6 +54,7 @@ async function signupManager(req: LocalRequest): Promise<Response> {
       JSON.stringify(demo),
       password,
     ]);
+    await tx.query('select public.generate_demo_pulses($1)', [created.rows[0].team]);
   });
   return json(200, { ok: true });
 }
