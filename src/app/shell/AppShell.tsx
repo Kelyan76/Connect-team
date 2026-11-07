@@ -27,10 +27,12 @@ interface AppShellProps {
   searchEntries?: PaletteEntry[];
   notifications?: ReactNode;
   badges?: Partial<Record<string, number>>;
+  /** Bandeau au-dessus de l'en-tête (ex. mode test collaborateur). */
+  banner?: ReactNode;
   children: ReactNode;
 }
 
-export function AppShell({ role, user, teamName, onSignOut, searchEntries = [], notifications, badges, children }: AppShellProps) {
+export function AppShell({ role, user, teamName, onSignOut, searchEntries = [], notifications, badges, banner, children }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
@@ -56,6 +58,7 @@ export function AppShell({ role, user, teamName, onSignOut, searchEntries = [], 
       </a>
       <Sidebar role={role} collapsed={collapsed} onToggle={toggle} teamName={teamName} badges={badges} />
       <div className="flex min-w-0 flex-1 flex-col">
+        {banner}
         <Header
           user={user}
           teamName={teamName}

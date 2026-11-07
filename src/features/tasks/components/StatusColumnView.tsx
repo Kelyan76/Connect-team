@@ -51,7 +51,7 @@ export function StatusColumnView({ tasks, projects, byId, onOpen }: Props) {
           Aucune tâche « {TASK_STATUS[index].label} ».
         </p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="stagger flex flex-col gap-2">
           {items.map((t) => {
             const project = projects.find((p) => p.id === t.project_id);
             const who = t.assignee_id ? byId.get(t.assignee_id) : undefined;

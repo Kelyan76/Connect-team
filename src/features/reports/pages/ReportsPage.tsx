@@ -22,7 +22,7 @@ const TEAM = '';
 function ObjectiveList({ objectives }: { objectives: MonthlyReport['objectives'] }) {
   if (objectives.length === 0) return <EmptyState title="Aucun objectif" description="Aucun objectif suivi sur cette période." />;
   return (
-    <ul className="divide-y divide-line">
+    <ul className="stagger divide-y divide-line">
       {objectives.map((o) => {
         const meta = OBJECTIVE_STATUS[o.status];
         return (

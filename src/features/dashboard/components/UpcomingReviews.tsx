@@ -17,7 +17,7 @@ export function UpcomingReviews({ reviews, byId }: { reviews: Review[]; byId: Ma
       {reviews.length === 0 ? (
         <EmptyState title="Aucun entretien planifié" description="Planifiez les one-to-one de l’équipe depuis la page Entretiens." />
       ) : (
-        <ul className="divide-y divide-line">
+        <ul className="stagger divide-y divide-line">
           {reviews.map((r) => {
             const person = byId.get(r.collaborator_id);
             const prep = PREP_META[prepStatus(r)];

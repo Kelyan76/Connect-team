@@ -65,7 +65,7 @@ export function CollaboratorDashboard() {
             ) : objectives.data.length === 0 ? (
               <EmptyState title="Aucun objectif" description="Vos objectifs apparaîtront ici dès que votre manager les aura définis." />
             ) : (
-              <ul className="divide-y divide-line">
+              <ul className="stagger divide-y divide-line">
                 {objectives.data.map((o) => {
                   const meta = OBJECTIVE_STATUS[o.status];
                   return (

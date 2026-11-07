@@ -7,7 +7,8 @@ export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogClose = DialogPrimitive.Close;
 
-const overlay = 'fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm';
+const overlay =
+  'fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out';
 
 interface ContentProps
   extends Omit<React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, 'title'> {
@@ -32,6 +33,7 @@ export const DialogContent = forwardRef<HTMLDivElement, ContentProps>(
         className={cn(
           'pb-safe fixed inset-x-0 bottom-0 z-50 flex max-h-[88vh] w-full flex-col rounded-t-xl border border-line bg-surface shadow-md focus:outline-none',
           'sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-[12vh] sm:max-h-[76vh] sm:w-[calc(100vw-32px)] sm:-translate-x-1/2 sm:rounded-lg sm:pb-0',
+          'data-[state=open]:animate-sheet-up data-[state=closed]:animate-sheet-down sm:data-[state=open]:animate-scale-in sm:data-[state=closed]:animate-scale-out',
           widths[size],
           className,
         )}
@@ -76,7 +78,7 @@ export const SheetContent = forwardRef<HTMLDivElement, ContentProps>(
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed inset-y-0 right-0 z-50 flex w-full max-w-130 flex-col border-l border-line bg-surface shadow-md focus:outline-none',
+          'fixed inset-y-0 right-0 z-50 flex w-full max-w-130 flex-col border-l border-line bg-surface shadow-md focus:outline-none data-[state=open]:animate-slide-in-right data-[state=closed]:animate-slide-out-right',
           className,
         )}
         {...props}

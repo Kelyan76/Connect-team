@@ -99,7 +99,7 @@ export default function ObjectivesPage() {
           />
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="stagger flex flex-col gap-3">
           {list.map((o) => (
             <ObjectiveCard key={o.id} objective={o} owner={o.owner_id ? team.byId.get(o.owner_id) : undefined} />
           ))}

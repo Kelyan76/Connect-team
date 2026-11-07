@@ -5,8 +5,8 @@ export function HeroBanner({ title, subtitle, children }: { title: string; subti
   return (
     <section className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-hero-from to-hero-to px-5 py-6 text-white shadow-md sm:px-8 sm:py-8">
       {/* Formes décoratives discrètes. */}
-      <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 size-56 rounded-full bg-white/10" />
-      <span aria-hidden className="pointer-events-none absolute -bottom-20 right-24 size-40 rounded-full bg-white/10" />
+      <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 size-56 animate-float rounded-full bg-white/10" />
+      <span aria-hidden className="pointer-events-none absolute -bottom-20 right-24 size-40 animate-float-slow rounded-full bg-white/10" />
       <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
           <h1 className="text-xl font-semibold">{title}</h1>

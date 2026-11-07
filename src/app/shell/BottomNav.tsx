@@ -26,8 +26,8 @@ export function BottomNav({ role }: { role: Role }) {
               >
                 <span
                   className={cn(
-                    'flex h-7 w-12 items-center justify-center rounded-full transition-colors',
-                    active && 'bg-accent-subtle',
+                    'flex h-7 w-12 items-center justify-center rounded-full transition-all duration-300 ease-out',
+                    active ? 'scale-100 bg-accent-subtle' : 'scale-90',
                   )}
                 >
                   <s.icon className="size-5" aria-hidden />

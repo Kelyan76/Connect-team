@@ -34,7 +34,7 @@ export function ProgressBar({
       aria-label={label}
       className={cn('h-2 w-full overflow-hidden rounded-full bg-surface-muted', className)}
     >
-      <div className={cn('h-full rounded-full', barTone[tone])} style={{ width: `${pct}%` }} />
+      <div className={cn('h-full origin-left animate-grow rounded-full', barTone[tone])} style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -109,5 +109,5 @@ export function Stat({ label, value, icon: TileIcon, tone = 'accent', delta, tre
 
 /** Grille de KPI en cartes : 2 colonnes sur téléphone, 4 sur grand écran. */
 export function StatGroup({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4', className)}>{children}</div>;
+  return <div className={cn('stagger grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4', className)}>{children}</div>;
 }

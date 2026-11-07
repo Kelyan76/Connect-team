@@ -1,4 +1,4 @@
-import { LogOut, Search, Settings, UserRound } from 'lucide-react';
+import { FlaskConical, LogOut, Search, Settings, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { usePeriod } from '@/app/providers/period';
@@ -110,6 +110,14 @@ export function Header({ user, teamName, onOpenPalette, onSignOut, notifications
                 Mon profil
               </Link>
             </DropdownMenuItem>
+            {showSettings && (
+              <DropdownMenuItem asChild>
+                <Link to="/equipe#comptes-demo">
+                  <FlaskConical aria-hidden />
+                  Tester en collaborateur
+                </Link>
+              </DropdownMenuItem>
+            )}
             {showSettings && (
               <DropdownMenuItem asChild>
                 <Link to="/parametres">

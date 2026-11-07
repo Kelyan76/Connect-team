@@ -1,10 +1,11 @@
 import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { toUserMessage } from '@/shared/lib/errors';
 import { supabase } from '@/shared/lib/supabase';
 import { toast } from '@/shared/ui/toaster';
 import { fetchProfile, fetchTeam, signOut, type Profile, type Team } from './api';
+import { clearDemoReturn } from './demo-switch';
 
 export type AuthState =
   | { status: 'loading' }
@@ -36,6 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const userId = session?.user.id;
+  // Changement d'utilisateur sans déconnexion (compte de démonstration) : aucune donnée de l'ancien
+  // compte ne doit rester en cache.
+  const previousUser = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (previousUser.current && userId && previousUser.current !== userId) queryClient.clear();
+    previousUser.current = userId;
+  }, [userId, queryClient]);
+
   useEffect(() => {
     if (session === undefined) return;
     if (!session || !userId) {
@@ -44,6 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     let cancelled = false;
+    // Nouvel utilisateur : on repasse par l'écran de chargement plutôt que d'afficher l'ancien profil.
+    setState((s) => (s.status === 'signed_in' && s.profile.id !== userId ? { status: 'loading' } : s));
     (async () => {
       try {
         const profile = await fetchProfile(userId);
@@ -69,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       state,
       session: session ?? null,
       signOut: async (reason?: string) => {
+        clearDemoReturn();
         await signOut();
         queryClient.clear();
         if (reason) toast(reason);

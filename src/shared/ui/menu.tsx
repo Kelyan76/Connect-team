@@ -4,7 +4,8 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { forwardRef, type ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 
-const floating = 'z-50 rounded border border-line bg-surface text-fg shadow-md';
+const floating =
+  'z-50 rounded-lg border border-line bg-surface text-fg shadow-md data-[state=open]:animate-pop-in data-[state=closed]:animate-fade-out';
 
 export const DropdownMenu = DropdownPrimitive.Root;
 export const DropdownMenuTrigger = DropdownPrimitive.Trigger;
@@ -18,7 +19,7 @@ export const DropdownMenuContent = forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       align={align}
-      className={cn(floating, 'min-w-48 p-1', className)}
+      className={cn(floating, 'min-w-48 origin-[var(--radix-dropdown-menu-content-transform-origin)] p-1', className)}
       {...props}
     />
   </DropdownPrimitive.Portal>
@@ -32,7 +33,7 @@ export const DropdownMenuItem = forwardRef<
   <DropdownPrimitive.Item
     ref={ref}
     className={cn(
-      'flex h-8 cursor-default select-none items-center gap-2 rounded-sm px-2 text-base outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-surface-muted data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:text-fg-subtle',
+      'flex h-9 cursor-default select-none items-center gap-2 rounded px-2 text-base outline-none transition-colors data-[disabled]:pointer-events-none data-[highlighted]:bg-surface-muted data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:text-fg-subtle',
       destructive && 'text-danger [&_svg]:text-danger',
       className,
     )}
@@ -60,7 +61,7 @@ export const PopoverContent = forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       align={align}
-      className={cn(floating, 'w-80 focus:outline-none', className)}
+      className={cn(floating, 'w-80 origin-[var(--radix-popover-content-transform-origin)] focus:outline-none', className)}
       {...props}
     />
   </PopoverPrimitive.Portal>
@@ -69,7 +70,7 @@ PopoverContent.displayName = 'PopoverContent';
 
 export const TooltipProvider = TooltipPrimitive.Provider;
 
-/** Info-bulle sobre : texte inversé, sans flèche ni animation. */
+/** Info-bulle sobre : texte inversé, apparition en fondu. */
 export function Tooltip({
   content,
   children,
@@ -86,7 +87,7 @@ export function Tooltip({
         <TooltipPrimitive.Content
           side={side}
           sideOffset={6}
-          className="z-50 max-w-70 rounded-sm bg-slate-900 px-2 py-1 text-xs text-slate-50 dark:bg-slate-100 dark:text-slate-900"
+          className="z-50 max-w-70 rounded-sm bg-slate-900 px-2 py-1 text-xs text-slate-50 data-[state=closed]:animate-fade-out data-[state=delayed-open]:animate-fade-in data-[state=instant-open]:animate-fade-in"
         >
           {content}
         </TooltipPrimitive.Content>

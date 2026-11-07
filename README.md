@@ -43,6 +43,8 @@ Page **Créer un compte manager** (`/inscription`, lien sous le formulaire de co
 
 Chaque manager obtient sa propre équipe, copiée depuis l'équipe modèle (Valmont Équipements) : collaborateurs fictifs, objectifs, tâches, entretiens… Chaque collaborateur fictif a un vrai compte (adresse en `@cadence-demo.example`, mot de passe commun généré) : les identifiants sont affichés au manager en bas de la page **Équipe**. Les collaborateurs réels continuent d'arriver par invitation.
 
+Pour tester l'application côté collaborateur : **Équipe › Tester en tant que collaborateur › Se connecter** (ou menu du profil › *Tester en collaborateur*). Un bandeau en haut permet ensuite de revenir au compte manager sans retaper son mot de passe.
+
 Les e-mails (invitations, réinitialisation du mot de passe) arrivent dans la **boîte mail de démonstration** (`/boite-mail`), comme Inbucket/Mailpit avec la CLI Supabase.
 
 ### Version partageable

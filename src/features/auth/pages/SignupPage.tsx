@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
@@ -136,7 +137,14 @@ export default function SignupPage() {
         </Field>
         <PasswordRules value={password} />
         <Button type="submit" variant="primary" size="lg" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Création de votre équipe…' : 'Créer mon compte'}
+          {form.formState.isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin" aria-hidden />
+              Création de votre équipe…
+            </>
+          ) : (
+            'Créer mon compte'
+          )}
         </Button>
         <p className="text-sm text-fg-muted">
           Déjà un compte ?{' '}

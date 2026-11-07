@@ -4,7 +4,15 @@ import { cn } from '@/shared/lib/cn';
 import { Button } from './button';
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-[pulse_1.6s_ease-in-out_infinite] rounded-sm bg-surface-muted', className)} />;
+  // Reflet lumineux qui glisse : chargement perçu comme plus rapide qu'un simple clignotement.
+  return (
+    <div
+      className={cn(
+        'animate-shimmer rounded bg-[linear-gradient(90deg,hsl(var(--surface-muted))_25%,hsl(var(--line))_50%,hsl(var(--surface-muted))_75%)] bg-[length:200%_100%]',
+        className,
+      )}
+    />
+  );
 }
 
 /** Squelette de tableau : reproduit la grille réelle pour éviter les sauts de mise en page. */
@@ -33,7 +41,7 @@ interface EmptyStateProps {
 /** État vide utile : ce qui manque, pourquoi, et l'action pour y remédier. */
 export function EmptyState({ title, description, action, icon, className }: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-start gap-3 px-5 py-8', className)}>
+    <div className={cn('flex animate-page-in flex-col items-start gap-3 px-5 py-8', className)}>
       {icon && <span className="text-fg-subtle [&_svg]:size-5">{icon}</span>}
       <div className="flex max-w-prose flex-col gap-1">
         <p className="text-base font-medium text-fg">{title}</p>

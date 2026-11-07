@@ -65,7 +65,7 @@ export function KpiDetailDialog({ kind, onClose, byId, objectives, loadByPerson,
             </Button>
           }
         >
-          <ul className="divide-y divide-line">
+          <ul className="stagger divide-y divide-line">
             {kind === 'objectifs' &&
               objectives.map((o) => {
                 const status = OBJECTIVE_STATUS[o.status];

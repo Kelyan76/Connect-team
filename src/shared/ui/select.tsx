@@ -37,7 +37,7 @@ export const SelectContent = forwardRef<
       position={position}
       sideOffset={4}
       className={cn(
-        'relative z-50 max-h-80 min-w-32 overflow-hidden rounded border border-line bg-surface text-fg shadow-md',
+        'relative z-50 max-h-80 min-w-32 origin-[var(--radix-select-content-transform-origin)] overflow-hidden rounded-lg border border-line bg-surface text-fg shadow-md data-[state=open]:animate-pop-in data-[state=closed]:animate-fade-out',
         position === 'popper' && 'w-full min-w-[var(--radix-select-trigger-width)]',
         className,
       )}
@@ -56,7 +56,7 @@ export const SelectItem = forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex h-8 w-full cursor-default select-none items-center rounded-sm pl-2 pr-8 text-base outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-surface-muted data-[disabled]:opacity-50',
+      'relative flex h-9 w-full cursor-default select-none items-center rounded pl-2 pr-8 text-base outline-none transition-colors data-[disabled]:pointer-events-none data-[highlighted]:bg-surface-muted data-[disabled]:opacity-50',
       className,
     )}
     {...props}

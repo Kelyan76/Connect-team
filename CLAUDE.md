@@ -42,7 +42,8 @@ Comptes de démo : voir README (mot de passe commun dans `supabase/seed.sql`).
 - Uniquement les tokens : couleurs sémantiques (`bg-surface`, `text-fg-muted`, `border-line`, `bg-accent`…), tailles `text-xs|sm|base|md|lg|xl` (12/13/14/16/20/24), espacements multiples de 4.
 - Formes arrondies : contrôles `rounded` (10 px), cartes `rounded-lg` (16 px), bandeaux `rounded-xl`, onglets et segments en pastilles `rounded-full`.
 - Cartes blanches avec bordure fine + ombre très légère (`Panel`, `shadow-sm`). KPI : `Stat` avec icône dans une pastille de couleur douce.
-- Dégradé réservé au bandeau d'accueil (`HeroBanner`, `from-hero-from to-hero-to`). Interdits : emojis, glassmorphism, ombres marquées, animations décoratives.
+- Dégradé réservé au bandeau d'accueil (`HeroBanner`, `from-hero-from to-hero-to`). Interdits : emojis, glassmorphism, ombres marquées.
+- Animations (config Tailwind + `.stagger` dans index.css) : entrée de page `animate-page-in`, listes et cartes en cascade `stagger`, fenêtres/menus animés à l'ouverture et à la fermeture, barres qui se remplissent. Toujours courtes (≤ 500 ms), en `backwards` si l'élément peut contenir du `position: fixed`, et coupées par « réduire les animations ».
 - Pages légères : un seul bloc détaillé à la fois via `Segmented` ou menu déroulant plutôt que tout empiler.
 - Mobile d'abord : barre de navigation en bas (`BottomNav`), aucune page ne déborde à 375 px, champs en 16 px. Zoom de page désactivé (`app/no-zoom.ts`).
 - Tableaux denses : `Table`, `SortableTh`, nombres alignés à droite en `tabular`.

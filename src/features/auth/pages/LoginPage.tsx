@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate, useLocation } from 'react-router-dom';
@@ -68,7 +69,14 @@ export default function LoginPage() {
           </Link>
         </div>
         <Button type="submit" variant="primary" size="lg" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Connexion…' : 'Se connecter'}
+          {form.formState.isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin" aria-hidden />
+              Connexion…
+            </>
+          ) : (
+            'Se connecter'
+          )}
         </Button>
         <div className="flex flex-col gap-1 border-t border-line pt-4">
           <p className="text-sm text-fg-muted">
@@ -77,7 +85,9 @@ export default function LoginPage() {
               Créer un compte
             </Link>
           </p>
-          <p className="text-xs text-fg-subtle">Collaborateur : votre manager vous envoie une invitation par e-mail.</p>
+          <p className="text-xs text-fg-subtle">
+            Collaborateur : votre manager vous invite par e-mail, ou vous donne un compte de démonstration (page Équipe).
+          </p>
         </div>
       </form>
     </AuthLayout>
