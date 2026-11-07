@@ -70,8 +70,16 @@ export function useManagerDashboard(period: Period) {
     const weekMoods = meteo.filter((w) => w.week_start === thisWeek);
     const prevMoods = meteo.filter((w) => w.week_start === prevWeek);
 
+    // Détail des cartes chiffres : objectifs du plus en retard au plus avancé, charge par personne.
+    const objectivesByProgress = [...objs].sort((a, b) => a.progress - b.progress);
+    const loadByPerson = team.active
+      .map((p) => ({ person: p, load: loads.get(p.id)?.get(thisWeek) ?? null }))
+      .sort((a, b) => (b.load ?? -1) - (a.load ?? -1));
+
     return {
       trend,
+      objectivesByProgress,
+      loadByPerson,
       attainment,
       attainmentDelta: attainment - lastMonth,
       load,

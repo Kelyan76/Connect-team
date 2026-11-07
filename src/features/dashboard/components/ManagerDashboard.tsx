@@ -14,6 +14,7 @@ import { Page, Panel } from '@/shared/ui/layout';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
 import { useManagerDashboard } from '../use-manager-dashboard';
 import { HeroBanner } from './HeroBanner';
+import { KpiDetailDialog, type KpiKind } from './KpiDetailDialog';
 import { UpcomingReviews } from './UpcomingReviews';
 
 const pts = (delta: number) => `${formatDecimal(Math.abs(delta * 100)).replace(',0', '')} pt${Math.abs(delta * 100) >= 2 ? 's' : ''}`;
@@ -31,6 +32,7 @@ export function ManagerDashboard() {
   const { data, byId, isLoading, error } = useManagerDashboard(period);
   const alerts = useAlerts();
   const [view, setView] = useState<View>('alertes');
+  const [detail, setDetail] = useState<KpiKind | null>(null);
 
   return (
     <Page>
@@ -63,6 +65,7 @@ export function ManagerDashboard() {
         <div className="flex flex-col gap-6">
           <StatGroup>
             <Stat
+              onClick={() => setDetail('objectifs')}
               icon={Target}
               tone="accent"
               label="Objectifs atteints"
@@ -72,6 +75,7 @@ export function ManagerDashboard() {
               hint="vs mois dernier"
             />
             <Stat
+              onClick={() => setDetail('charge')}
               icon={Gauge}
               tone="success"
               label="Charge de l’équipe"
@@ -81,8 +85,16 @@ export function ManagerDashboard() {
               upIsGood={false}
               hint="cette semaine"
             />
-            <Stat icon={ClipboardList} tone="danger" label="Tâches en retard" value={data.late.length} hint={`dont ${data.urgentLate} prioritaires`} />
             <Stat
+              onClick={() => setDetail('retard')}
+              icon={ClipboardList}
+              tone="danger"
+              label="Tâches en retard"
+              value={data.late.length}
+              hint={`dont ${data.urgentLate} prioritaires`}
+            />
+            <Stat
+              onClick={() => setDetail('entretiens')}
               icon={MessageSquareText}
               tone="warning"
               label="Entretiens à préparer"
@@ -156,6 +168,15 @@ export function ManagerDashboard() {
               </Panel>
             )}
           </div>
+          <KpiDetailDialog
+            kind={detail}
+            onClose={() => setDetail(null)}
+            byId={byId}
+            objectives={data.objectivesByProgress}
+            loadByPerson={data.loadByPerson}
+            late={data.late}
+            toPrepare={data.toPrepare}
+          />
         </div>
       )}
     </Page>

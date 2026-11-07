@@ -1,9 +1,10 @@
-import { Archive, Check, X } from 'lucide-react';
+import { Archive, Check, ChevronDown, X } from 'lucide-react';
 import { useState } from 'react';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import type { Person } from '@/features/team/api';
-import { formatDate, formatPercent } from '@/shared/lib/format';
-import { PersonLabel } from '@/shared/ui/avatar';
+import { cn } from '@/shared/lib/cn';
+import { formatDate, formatPercent, fullName } from '@/shared/lib/format';
+import { Avatar } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
@@ -25,7 +26,7 @@ function KeyResultRow({ kr, canUpdate, isManager }: { kr: KeyResult; canUpdate: 
   };
 
   return (
-    <li className="grid gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_200px_220px] md:items-center">
+    <li className="grid gap-3 px-5 py-4 md:grid-cols-[minmax(0,1fr)_200px_220px] md:items-center">
       <div className="flex min-w-0 flex-col">
         <span className="text-base">{kr.title}</span>
         <span className="tabular text-xs text-fg-subtle">
@@ -36,7 +37,7 @@ function KeyResultRow({ kr, canUpdate, isManager }: { kr: KeyResult; canUpdate: 
         <ProgressBar value={progress} label={`Avancement de ${kr.title}`} />
         <span className="tabular w-10 shrink-0 text-right text-sm">{formatPercent(progress)}</span>
       </div>
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center gap-2 md:justify-end">
         {kr.pending_value !== null ? (
           <>
             <span className="tabular text-sm text-warning">
@@ -86,45 +87,84 @@ function KeyResultRow({ kr, canUpdate, isManager }: { kr: KeyResult; canUpdate: 
   );
 }
 
+/**
+ * Objectif replié par défaut : titre, statut, responsable et avancement tiennent sur une carte courte.
+ * Un toucher déplie la description et les résultats clés (mise à jour, validation, archivage).
+ */
 export function ObjectiveCard({ objective: o, owner }: { objective: ObjectiveView; owner?: Person }) {
   const { profile, isManager } = useCurrentUser();
   const archive = useArchiveObjective();
   const [confirm, setConfirm] = useState(false);
+  const [open, setOpen] = useState(false);
   const meta = OBJECTIVE_STATUS[o.status];
   const canUpdate = isManager || (o.scope === 'individuel' && o.owner_id === profile.id);
 
   return (
     <article className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm">
-      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-line px-5 py-4">
-        <div className="flex min-w-0 flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-md font-semibold">{o.title}</h2>
-            <Badge tone={meta.tone}>{meta.label}</Badge>
-            {o.pending > 0 && isManager && <Badge tone="warning">{o.pending} à valider</Badge>}
-          </div>
-          {o.description && <p className="max-w-prose text-sm text-fg-muted">{o.description}</p>}
-          <span className="text-xs text-fg-subtle">
-            {o.scope === 'equipe' ? 'Objectif d’équipe' : 'Objectif individuel'} · du {formatDate(o.start_date)} au {formatDate(o.due_date)}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full flex-col gap-3 px-5 py-4 text-left transition-colors hover:bg-surface-muted/50"
+      >
+        <span className="flex items-start justify-between gap-3">
+          <span className="flex min-w-0 flex-col gap-1">
+            <span className="text-md font-semibold">{o.title}</span>
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-fg-subtle">
+              {owner ? (
+                <span className="flex items-center gap-2">
+                  <Avatar person={owner} size="xs" />
+                  {fullName(owner)}
+                </span>
+              ) : (
+                <span>Objectif d’équipe</span>
+              )}
+              <span aria-hidden>·</span>
+              <span>{formatDate(o.due_date)}</span>
+            </span>
           </span>
-        </div>
-        <div className="flex w-full flex-wrap items-center gap-4 sm:w-auto">
-          {owner && <PersonLabel person={owner} detail={owner.job_title} />}
-          <div className="flex min-w-36 flex-1 items-center gap-2 sm:w-36 sm:flex-none">
-            <ProgressBar value={o.progress} tone={meta.tone} label="Avancement global" />
-            <span className="tabular w-10 text-right text-base font-semibold">{formatPercent(o.progress)}</span>
-          </div>
-          {isManager && (
-            <Button size="icon-sm" variant="ghost" aria-label="Archiver l’objectif" onClick={() => setConfirm(true)}>
-              <Archive aria-hidden />
-            </Button>
+          <span className="flex shrink-0 items-center gap-2">
+            <Badge tone={meta.tone}>{meta.label}</Badge>
+            <ChevronDown className={cn('size-4 text-fg-subtle transition-transform', open && 'rotate-180')} aria-hidden />
+          </span>
+        </span>
+        <span className="flex items-center gap-3">
+          <ProgressBar value={o.progress} tone={meta.tone} label="Avancement global" />
+          <span className="tabular w-10 shrink-0 text-right text-sm font-semibold">{formatPercent(o.progress)}</span>
+        </span>
+        {o.pending > 0 && isManager && (
+          <span>
+            <Badge tone="warning">{o.pending} mise{o.pending > 1 ? 's' : ''} à jour à valider</Badge>
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="border-t border-line">
+          {(o.description || isManager) && (
+            <div className="flex items-start justify-between gap-3 px-5 pt-4">
+              <div className="flex min-w-0 flex-col gap-1">
+                {o.description && <p className="max-w-prose text-sm text-fg-muted">{o.description}</p>}
+                <span className="text-xs text-fg-subtle">
+                  {o.scope === 'equipe' ? 'Objectif d’équipe' : 'Objectif individuel'} · du {formatDate(o.start_date)} au{' '}
+                  {formatDate(o.due_date)}
+                </span>
+              </div>
+              {isManager && (
+                <Button size="icon-sm" variant="ghost" aria-label="Archiver l’objectif" onClick={() => setConfirm(true)}>
+                  <Archive aria-hidden />
+                </Button>
+              )}
+            </div>
           )}
+          <p className="px-5 pt-4 text-xs font-medium uppercase tracking-wide text-fg-subtle">Résultats clés</p>
+          <ul className="divide-y divide-line">
+            {o.keyResults.map((kr) => (
+              <KeyResultRow key={kr.id} kr={kr} canUpdate={canUpdate} isManager={isManager} />
+            ))}
+          </ul>
         </div>
-      </header>
-      <ul className="divide-y divide-line">
-        {o.keyResults.map((kr) => (
-          <KeyResultRow key={kr.id} kr={kr} canUpdate={canUpdate} isManager={isManager} />
-        ))}
-      </ul>
+      )}
       <ConfirmDialog
         open={confirm}
         onOpenChange={setConfirm}

@@ -7,7 +7,7 @@ import { fullName } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
 import { EmptyState, ErrorState, Skeleton } from '@/shared/ui/feedback';
 import { NativeSelect } from '@/shared/ui/input';
-import { Page, PageHeader, Toolbar } from '@/shared/ui/layout';
+import { CollapsibleFilters, Page, PageHeader, Toolbar } from '@/shared/ui/layout';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
 import { ObjectiveCard } from '../components/ObjectiveCard';
 import { ObjectiveDialog } from '../components/ObjectiveDialog';
@@ -39,8 +39,8 @@ export default function ObjectivesPage() {
           isManager
             ? pending > 0
               ? `${pending} mise${pending > 1 ? 's' : ''} à jour d’avancement en attente de votre validation.`
-              : 'Objectifs d’équipe et individuels, avec leurs résultats clés mesurables.'
-            : 'Mettez à jour l’avancement de vos résultats clés : votre manager valide chaque mise à jour.'
+              : 'Objectifs d’équipe et individuels.'
+            : 'Mettez à jour vos résultats clés, votre manager valide.'
         }
         actions={
           isManager && (
@@ -57,25 +57,32 @@ export default function ObjectivesPage() {
           <SegmentedItem value="equipe">Équipe</SegmentedItem>
           <SegmentedItem value="individuel">Individuels</SegmentedItem>
         </Segmented>
-        {isManager && (
-          <NativeSelect aria-label="Filtrer par collaborateur" className="w-56" value={owner} onChange={(e) => setOwner(e.target.value)}>
-            <option value="">Tous les collaborateurs</option>
-            {team.active.map((p) => (
-              <option key={p.id} value={p.id}>
-                {fullName(p)}
+        <CollapsibleFilters active={(owner ? 1 : 0) + (status ? 1 : 0)}>
+          {isManager && (
+            <NativeSelect aria-label="Filtrer par collaborateur" className="sm:w-56" value={owner} onChange={(e) => setOwner(e.target.value)}>
+              <option value="">Tous les collaborateurs</option>
+              {team.active.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {fullName(p)}
+                </option>
+              ))}
+            </NativeSelect>
+          )}
+          <NativeSelect aria-label="Filtrer par statut" className="sm:w-44" value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="">Tous les statuts</option>
+            {(Object.keys(OBJECTIVE_STATUS) as ObjectiveStatus[]).map((s) => (
+              <option key={s} value={s}>
+                {OBJECTIVE_STATUS[s].label}
               </option>
             ))}
           </NativeSelect>
-        )}
-        <NativeSelect aria-label="Filtrer par statut" className="w-44" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="">Tous les statuts</option>
-          {(Object.keys(OBJECTIVE_STATUS) as ObjectiveStatus[]).map((s) => (
-            <option key={s} value={s}>
-              {OBJECTIVE_STATUS[s].label}
-            </option>
-          ))}
-        </NativeSelect>
+        </CollapsibleFilters>
       </Toolbar>
+      {objectives.data && list.length > 0 && (
+        <p className="pb-3 text-sm text-fg-subtle">
+          {list.length} objectif{list.length > 1 ? 's' : ''} · touchez un objectif pour voir ses résultats clés
+        </p>
+      )}
       {objectives.error ? (
         <ErrorState error={objectives.error} onRetry={() => void objectives.refetch()} />
       ) : !objectives.data ? (
@@ -92,7 +99,7 @@ export default function ObjectivesPage() {
           />
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           {list.map((o) => (
             <ObjectiveCard key={o.id} objective={o} owner={o.owner_id ? team.byId.get(o.owner_id) : undefined} />
           ))}

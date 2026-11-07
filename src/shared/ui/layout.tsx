@@ -1,5 +1,5 @@
-import { ChevronRight } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 
@@ -97,6 +97,33 @@ export function Panel({ title, description, actions, children, className, bodyCl
         {children}
       </div>
     </section>
+  );
+}
+
+/**
+ * Filtres secondaires : en ligne sur grand écran ; sur téléphone, repliés derrière
+ * un bouton « Filtres » (avec le nombre de filtres actifs) pour ne pas allonger la page.
+ */
+export function CollapsibleFilters({ active, children }: { active: number; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className={cn(
+          'flex h-9 items-center gap-2 rounded-full border px-4 text-sm font-medium sm:hidden',
+          active > 0 ? 'border-accent bg-accent-subtle text-accent' : 'border-line bg-surface text-fg-muted',
+        )}
+      >
+        <SlidersHorizontal className="size-4" aria-hidden />
+        Filtres{active > 0 ? ` (${active})` : ''}
+      </button>
+      <div className={cn('w-full flex-col gap-2 sm:flex sm:w-auto sm:flex-row sm:flex-wrap sm:items-center', open ? 'flex' : 'hidden')}>
+        {children}
+      </div>
+    </>
   );
 }
 

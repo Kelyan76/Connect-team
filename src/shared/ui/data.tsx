@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowUpRight, Minus, type LucideIcon } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 import type { BadgeTone } from './badge';
@@ -62,14 +62,25 @@ interface StatProps {
   upIsGood?: boolean;
   hint?: ReactNode;
   className?: string;
+  /** Rend la carte cliquable (ouvre le détail). */
+  onClick?: () => void;
 }
 
 /** Indicateur clé : libellé gris, valeur en tabular-nums, variation discrète. */
-export function Stat({ label, value, icon: TileIcon, tone = 'accent', delta, trend = 'flat', upIsGood = true, hint, className }: StatProps) {
+export function Stat({ label, value, icon: TileIcon, tone = 'accent', delta, trend = 'flat', upIsGood = true, hint, className, onClick }: StatProps) {
   const good = trend === 'flat' ? null : (trend === 'up') === upIsGood;
   const Icon = trend === 'up' ? ArrowUpRight : trend === 'down' ? ArrowDownRight : Minus;
+  const Root = onClick ? 'button' : 'div';
   return (
-    <div className={cn('flex min-w-0 flex-col gap-1 rounded-lg border border-line bg-surface p-4 shadow-sm sm:p-5', className)}>
+    <Root
+      {...(onClick ? { type: 'button' as const, onClick } : {})}
+      className={cn(
+        'relative flex min-w-0 flex-col gap-1 rounded-lg border border-line bg-surface p-4 text-left shadow-sm sm:p-5',
+        onClick && 'transition-all hover:border-line-strong hover:shadow-md active:scale-[0.99]',
+        className,
+      )}
+    >
+      {onClick && <ChevronRight className="absolute right-3 top-3 size-4 text-fg-subtle" aria-hidden />}
       {TileIcon && (
         <span className={cn('mb-2 flex size-10 items-center justify-center rounded', tileTone[tone])}>
           <TileIcon className="size-5" aria-hidden />
@@ -92,7 +103,7 @@ export function Stat({ label, value, icon: TileIcon, tone = 'accent', delta, tre
         )}
         {hint && <span>{hint}</span>}
       </span>
-    </div>
+    </Root>
   );
 }
 

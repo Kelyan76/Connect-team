@@ -30,7 +30,7 @@ interface CardProps {
 function TaskCard({ task, project, assignee, onOpen, overlay }: CardProps) {
   const late = task.status !== 'termine' && task.due_date !== null && task.due_date < todayIso();
   return (
-    <div className={cn('flex flex-col gap-2 rounded border border-line bg-surface px-3 py-2 text-left', overlay ? 'shadow-md' : 'hover:border-line-strong')}>
+    <div className={cn('flex flex-col gap-2 rounded border border-line bg-surface px-3 py-3 text-left shadow-sm', overlay ? 'shadow-md' : 'hover:border-line-strong')}>
       <button type="button" onClick={onOpen} className="text-left text-base font-medium leading-5 hover:underline">
         {task.title}
       </button>
