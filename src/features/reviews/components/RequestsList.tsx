@@ -1,6 +1,8 @@
+import { CalendarClock, CalendarPlus, Clock, Quote, X } from 'lucide-react';
 import type { Person } from '@/features/team/api';
-import { formatDate, fullName } from '@/shared/lib/format';
-import { PersonLabel } from '@/shared/ui/avatar';
+import { daysFromToday } from '@/shared/lib/dates';
+import { formatDate, fullName, relativeDays } from '@/shared/lib/format';
+import { Avatar } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { EmptyState } from '@/shared/ui/feedback';
@@ -14,6 +16,10 @@ const STATUS = {
   refusee: { label: 'Refusée', tone: 'danger' },
 } as const;
 
+/**
+ * Demandes de one-to-one en cartes : qui, le message en entier (bien lisible), la date souhaitée,
+ * puis les actions sur toute la largeur sur téléphone.
+ */
 export function RequestsList({
   requests,
   byId,
@@ -28,7 +34,7 @@ export function RequestsList({
   const decide = useDecideRequest();
   if (requests.length === 0) {
     return (
-      <div className="rounded-lg border border-line bg-surface">
+      <div className="rounded-lg border border-line bg-surface shadow-sm">
         <EmptyState
           title="Aucune demande"
           description={isManager ? 'Les demandes de one-to-one de l’équipe apparaîtront ici.' : 'Vous n’avez pas encore demandé de one-to-one.'}
@@ -37,24 +43,43 @@ export function RequestsList({
     );
   }
   return (
-    <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+    <ul className="stagger flex flex-col gap-3">
       {requests.map((r) => {
         const person = byId.get(r.collaborator_id);
+        const status = STATUS[r.status];
+        const pending = r.status === 'en_attente';
         return (
-          <li key={r.id} className="flex flex-wrap items-start gap-4 px-4 py-3">
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              {isManager && person && <PersonLabel person={person} detail={person.job_title} />}
-              <p className="text-base">{r.message || 'Sans précision.'}</p>
-              <span className="text-xs text-fg-subtle">
-                Demandé le {formatDate(r.created_at)}
-                {r.preferred_date ? ` · date souhaitée : ${formatDate(r.preferred_date)}` : ''}
-              </span>
+          <li key={r.id} className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-4 shadow-sm sm:p-5">
+            <div className="flex items-start gap-3">
+              {isManager && person && <Avatar person={person} />}
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-base font-semibold">{isManager && person ? fullName(person) : 'Ma demande de one-to-one'}</span>
+                <span className="flex items-center gap-1 text-sm text-fg-subtle">
+                  <Clock className="size-3" aria-hidden />
+                  Demandée {relativeDays(daysFromToday(r.created_at.slice(0, 10)))}
+                </span>
+              </div>
+              <Badge tone={status.tone}>{status.label}</Badge>
             </div>
-            <Badge tone={STATUS[r.status].tone}>{STATUS[r.status].label}</Badge>
-            {isManager && r.status === 'en_attente' && (
+
+            <div className="flex gap-3 rounded bg-surface-muted px-4 py-3">
+              <Quote className="mt-1 size-4 shrink-0 text-fg-subtle" aria-hidden />
+              <p className="min-w-0 whitespace-pre-wrap break-words text-base leading-6 text-fg">
+                {r.message || <span className="text-fg-subtle">Sans précision.</span>}
+              </p>
+            </div>
+
+            {r.preferred_date && (
+              <span className="flex items-center gap-2 text-sm text-fg-muted">
+                <CalendarClock className="size-4 text-fg-subtle" aria-hidden />
+                Date souhaitée : <span className="font-medium text-fg">{formatDate(r.preferred_date)}</span>
+              </span>
+            )}
+
+            {isManager && pending && (
               <div className="flex gap-2">
                 <Button
-                  size="sm"
+                  className="flex-1 sm:flex-none"
                   onClick={() =>
                     decide.mutate(
                       { id: r.id, status: 'refusee', reviewId: null },
@@ -62,9 +87,11 @@ export function RequestsList({
                     )
                   }
                 >
+                  <X aria-hidden />
                   Refuser
                 </Button>
-                <Button size="sm" variant="primary" onClick={() => onAccept(r)}>
+                <Button className="flex-1 sm:flex-none" variant="primary" onClick={() => onAccept(r)}>
+                  <CalendarPlus aria-hidden />
                   Planifier
                 </Button>
               </div>
