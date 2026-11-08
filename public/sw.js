@@ -1,4 +1,4 @@
-/* Service worker Connect Team : notifications Web Push (rappels, demandes de one-to-one). */
+/* Service worker Connect Team : notifications Web Push (rappels, demandes de one-to-one). v2 */
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
@@ -13,7 +13,8 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(data.title || 'Connect Team', {
       body: data.body || '',
       icon: '/icon-192.png',
-      badge: '/icon-192.png',
+      // Barre d'état Android : silhouette blanche sur fond transparent (Android n'utilise que la transparence).
+      badge: '/badge-96.png',
       tag: data.tag || 'connect-team',
       renotify: true,
       data: { url: data.url || '/' },
