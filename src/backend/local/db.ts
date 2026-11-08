@@ -37,7 +37,9 @@ let instance: Promise<PGlite> | null = null;
  */
 async function loadFsBundle(): Promise<Blob | undefined> {
   if (typeof document === 'undefined') return undefined;
-  const res = await fetch(new URL('pglite-fs.wasm', document.baseURI));
+  // Depuis la racine de l'application (BASE_URL), pas depuis la page courante : sinon un rechargement
+  // sur /entretiens/… demanderait /entretiens/pglite-fs.wasm et recevrait la page HTML.
+  const res = await fetch(new URL(`${import.meta.env.BASE_URL}pglite-fs.wasm`, document.baseURI));
   if (!res.ok) throw new Error('Les fichiers de la base de démonstration sont introuvables.');
   return res.blob();
 }

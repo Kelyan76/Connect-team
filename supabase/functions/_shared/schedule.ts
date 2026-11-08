@@ -31,11 +31,21 @@ export interface Prefs {
   pulse_reminder: boolean;
   pulse_hour: number;
   weekly_recap: boolean;
+  review_alerts: boolean;
   last_pulse_reminder: string | null;
   last_recap: string | null;
+  last_review_reminder: string | null;
 }
 
-export const DEFAULT_PREFS: Prefs = { pulse_reminder: true, pulse_hour: 9, weekly_recap: true, last_pulse_reminder: null, last_recap: null };
+export const DEFAULT_PREFS: Prefs = {
+  pulse_reminder: true,
+  pulse_hour: 9,
+  weekly_recap: true,
+  review_alerts: true,
+  last_pulse_reminder: null,
+  last_recap: null,
+  last_review_reminder: null,
+};
 
 /** Plage des envois : jours ouvrés, de 7 h à 12 h (heure de Paris). */
 export const inSendingWindow = (c: ParisClock) => c.weekday <= 5 && c.hour >= 7 && c.hour <= 12;
@@ -98,4 +108,37 @@ export function pulseWatchlist(pulses: PulseRow[], names: Map<string, string>): 
     if (loads.length >= 2 && loads.reduce((s, w) => s + w, 0) / loads.length >= 4.3) overloaded.push(name);
   }
   return { lowMood, overloaded };
+}
+
+/** Rappel des entretiens du jour, à l'heure choisie, une fois par jour. */
+export function shouldRemindReviews(p: Prefs, c: ParisClock, reviewsToday: number): boolean {
+  return inSendingWindow(c) && p.review_alerts && reviewsToday > 0 && c.hour >= p.pulse_hour && p.last_review_reminder !== c.date;
+}
+
+export interface TodayReview {
+  id: string;
+  /** Heure à Paris, « 14:00 ». */
+  time: string;
+  /** L'autre participant : le collaborateur pour le manager, le manager pour le collaborateur. */
+  with: string;
+  kind: string;
+}
+
+/** « Entretien aujourd'hui à 14:00 avec Nadia Haddad » ; plusieurs : liste courte par heure. */
+export function reviewDayMessage(list: TodayReview[]): { title: string; body: string; url: string } {
+  const sorted = [...list].sort((a, b) => a.time.localeCompare(b.time));
+  if (sorted.length === 1) {
+    const r = sorted[0];
+    return { title: `Entretien aujourd’hui à ${r.time}`, body: `${r.kind} avec ${r.with}. Pensez à le préparer.`, url: `/entretiens/${r.id}` };
+  }
+  return {
+    title: `${sorted.length} entretiens aujourd’hui`,
+    body: sorted.map((r) => `${r.time} ${r.with}`).join(' · '),
+    url: '/entretiens',
+  };
+}
+
+/** Heure de Paris d'un horodatage, « 09:30 ». */
+export function parisTime(iso: string): string {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
 }

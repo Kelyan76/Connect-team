@@ -1314,6 +1314,13 @@ begin
   end if;
 end $$;
 
+-- ===== 20261111090000_review_reminders.sql =====
+-- Cadence — rappel le matin d'un entretien : « Entretien aujourd'hui à 14:00 avec … »,
+-- pour le manager et le collaborateur. Au plus un rappel par jour et par personne.
+alter table public.notification_prefs
+  add column review_alerts boolean not null default true,
+  add column last_review_reminder date;
+
 -- ===== seed.sql =====
 -- Cadence — jeu de démonstration (Valmont Équipements, PME de machines spéciales).
 -- Dates relatives à current_date : le jeu reste crédible quel que soit le jour du lancement.

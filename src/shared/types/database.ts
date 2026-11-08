@@ -413,6 +413,8 @@ export type Database = {
           last_pulse_reminder: string | null;
           last_recap: string | null;
           updated_at: string;
+          review_alerts: boolean;
+          last_review_reminder: string | null;
         };
         Insert: {
           user_id?: string;
@@ -423,6 +425,8 @@ export type Database = {
           last_pulse_reminder?: string | null;
           last_recap?: string | null;
           updated_at?: string;
+          review_alerts?: boolean;
+          last_review_reminder?: string | null;
         };
         Update: {
           user_id?: string;
@@ -433,6 +437,8 @@ export type Database = {
           last_pulse_reminder?: string | null;
           last_recap?: string | null;
           updated_at?: string;
+          review_alerts?: boolean;
+          last_review_reminder?: string | null;
         };
         Relationships: [];
       };

@@ -52,3 +52,7 @@ verify_jwt = false
 
 [functions.push-notify]
 verify_jwt = false
+
+# Récap d'entretien à partir de la transcription vocale (Claude ; secret ANTHROPIC_API_KEY).
+[functions.review-recap]
+verify_jwt = false

@@ -4,7 +4,9 @@ import {
   parisClock,
   pulseWatchlist,
   recapMessage,
+  reviewDayMessage,
   shouldRemindPulse,
+  shouldRemindReviews,
   shouldSendRecap,
 } from '../../supabase/functions/_shared/schedule';
 
@@ -54,5 +56,28 @@ describe('récap du lundi', () => {
       'Moral bas : Julien · surcharge : Julien, Nadia · 2 demandes de one-to-one · 1 tâche en retard',
     );
     expect(recapMessage({ requests: 0, lateTasks: 0, reviewsThisWeek: 0, lowMood: [], overloaded: [] }).body).toBe('Rien d’urgent : bonne semaine !');
+  });
+});
+
+describe('entretiens du jour', () => {
+  const monday9 = { date: '2026-11-09', hour: 9, weekday: 1 };
+  it('rappelle une fois, seulement s’il y a un entretien', () => {
+    expect(shouldRemindReviews(DEFAULT_PREFS, monday9, 1)).toBe(true);
+    expect(shouldRemindReviews(DEFAULT_PREFS, monday9, 0)).toBe(false);
+    expect(shouldRemindReviews({ ...DEFAULT_PREFS, last_review_reminder: '2026-11-09' }, monday9, 2)).toBe(false);
+    expect(shouldRemindReviews({ ...DEFAULT_PREFS, review_alerts: false }, monday9, 1)).toBe(false);
+  });
+  it('compose le message (un ou plusieurs entretiens)', () => {
+    expect(reviewDayMessage([{ id: 'r1', time: '14:00', with: 'Nadia Haddad', kind: 'One-to-one' }])).toEqual({
+      title: 'Entretien aujourd’hui à 14:00',
+      body: 'One-to-one avec Nadia Haddad. Pensez à le préparer.',
+      url: '/entretiens/r1',
+    });
+    const many = reviewDayMessage([
+      { id: 'b', time: '16:00', with: 'Julien Mercier', kind: 'One-to-one' },
+      { id: 'a', time: '10:30', with: 'Nadia Haddad', kind: 'Entretien annuel' },
+    ]);
+    expect(many.title).toBe('2 entretiens aujourd’hui');
+    expect(many.body).toBe('10:30 Nadia Haddad · 16:00 Julien Mercier');
   });
 });

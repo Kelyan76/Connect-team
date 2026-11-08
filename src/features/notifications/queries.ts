@@ -7,14 +7,14 @@ import { supabase } from '@/shared/lib/supabase';
 import type { Tables } from '@/shared/types/database';
 import { canInstall, currentSubscription, disablePush, enablePush, onInstallChange, pushSupported } from './push';
 
-export type NotificationPrefs = Pick<Tables<'notification_prefs'>, 'pulse_reminder' | 'pulse_hour' | 'weekly_recap' | 'request_alerts'>;
-export const DEFAULT_PREFS: NotificationPrefs = { pulse_reminder: true, pulse_hour: 9, weekly_recap: true, request_alerts: true };
+export type NotificationPrefs = Pick<Tables<'notification_prefs'>, 'pulse_reminder' | 'pulse_hour' | 'weekly_recap' | 'request_alerts' | 'review_alerts'>;
+export const DEFAULT_PREFS: NotificationPrefs = { pulse_reminder: true, pulse_hour: 9, weekly_recap: true, request_alerts: true, review_alerts: true };
 
 export function useNotificationPrefs() {
   return useQuery({
     queryKey: qk.notificationPrefs,
     queryFn: async (): Promise<NotificationPrefs> => {
-      const rows = unwrap(await supabase.from('notification_prefs').select('pulse_reminder, pulse_hour, weekly_recap, request_alerts'), 'Préférences');
+      const rows = unwrap(await supabase.from('notification_prefs').select('pulse_reminder, pulse_hour, weekly_recap, request_alerts, review_alerts'), 'Préférences');
       return rows[0] ?? DEFAULT_PREFS;
     },
   });

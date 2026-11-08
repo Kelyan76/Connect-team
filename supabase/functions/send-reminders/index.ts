@@ -1,5 +1,6 @@
 // Edge Function (Deno) appelée chaque heure en matinée par pg_cron (voir migration 20261110090000).
 // • Collaborateurs : rappel du pouls du jour à l'heure choisie, s'il n'est pas encore donné.
+// • Manager et collaborateur : rappel des entretiens du jour (« Entretien aujourd’hui à 14:00 avec … »).
 // • Managers, le lundi : récap de la semaine (moral bas, surcharge, demandes, entretiens, retards).
 // Sans effet hors plage horaire ; au plus un rappel par jour et un récap par semaine et par personne.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -8,9 +9,12 @@ import {
   DEFAULT_PREFS,
   inSendingWindow,
   parisClock,
+  parisTime,
   pulseWatchlist,
   recapMessage,
+  reviewDayMessage,
   shouldRemindPulse,
+  shouldRemindReviews,
   shouldSendRecap,
   type Prefs,
 } from '../_shared/schedule.ts';
@@ -44,10 +48,43 @@ Deno.serve(async () => {
   const answered = new Set((todayPulses ?? []).map((p: { collaborator_id: string }) => p.collaborator_id));
   let reminders = 0;
   let recaps = 0;
+  let reviewReminders = 0;
+
+  // Entretiens planifiés aujourd'hui (heure de Paris) qui concernent une personne abonnée.
+  const { data: reviewRows } = await admin
+    .from('reviews')
+    .select('id, kind, scheduled_at, manager_id, collaborator_id')
+    .eq('status', 'planifie')
+    .gte('scheduled_at', addDays(clock.date, -1))
+    .lte('scheduled_at', `${addDays(clock.date, 1)}T23:59:59Z`);
+  const todayReviews = ((reviewRows ?? []) as { id: string; kind: string; scheduled_at: string; manager_id: string; collaborator_id: string }[]).filter(
+    (r) => parisClock(new Date(r.scheduled_at)).date === clock.date && (userIds.includes(r.manager_id) || userIds.includes(r.collaborator_id)),
+  );
+  const participantIds = [...new Set(todayReviews.flatMap((r) => [r.manager_id, r.collaborator_id]))];
+  const { data: participants } = participantIds.length
+    ? await admin.from('profiles').select('id, first_name, last_name').in('id', participantIds)
+    : { data: [] };
+  const nameOf = new Map((participants ?? []).map((p: { id: string; first_name: string; last_name: string }) => [p.id, `${p.first_name} ${p.last_name}`]));
+  const KIND: Record<string, string> = { one_to_one: 'One-to-one', annuel: 'Entretien annuel', professionnel: 'Entretien professionnel' };
 
   for (const person of (people ?? []) as { id: string; team_id: string; role: string; first_name: string; is_active: boolean }[]) {
     if (!person.is_active) continue;
     const prefs = { ...DEFAULT_PREFS, ...(prefsOf.get(person.id) ?? {}) };
+
+    const mine = todayReviews.filter((r) => r.manager_id === person.id || r.collaborator_id === person.id);
+    if (shouldRemindReviews(prefs, clock, mine.length)) {
+      const msg = reviewDayMessage(
+        mine.map((r) => ({
+          id: r.id,
+          time: parisTime(r.scheduled_at),
+          with: nameOf.get(r.manager_id === person.id ? r.collaborator_id : r.manager_id) ?? 'votre interlocuteur',
+          kind: KIND[r.kind] ?? 'Entretien',
+        })),
+      );
+      const n = await sendToUsers(admin, [person.id], { ...msg, tag: `entretiens-${clock.date}` });
+      if (n) reviewReminders += 1;
+      await admin.from('notification_prefs').upsert({ user_id: person.id, last_review_reminder: clock.date });
+    }
 
     if (person.role === 'collaborateur' && shouldRemindPulse(prefs, clock, answered.has(person.id))) {
       const n = await sendToUsers(admin, [person.id], {
@@ -85,5 +122,5 @@ Deno.serve(async () => {
     }
   }
 
-  return json(200, { clock, reminders, recaps });
+  return json(200, { clock, reminders, recaps, reviewReminders });
 });

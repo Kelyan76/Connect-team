@@ -157,6 +157,10 @@ export function NotificationSettings() {
           </>
         )}
 
+        <Row title="Entretiens du jour" detail="Le matin d’un entretien : heure et participant.">
+          <Switch checked={p.review_alerts} onCheckedChange={(v) => set({ review_alerts: v })} aria-label="Entretiens du jour" />
+        </Row>
+
         {(installable || iosNeedsInstall) && (
           <div className="flex flex-wrap items-center gap-3 pt-4">
             <Smartphone className="size-5 text-fg-subtle" aria-hidden />
