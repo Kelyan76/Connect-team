@@ -10,7 +10,7 @@ import { Panel } from '@/shared/ui/layout';
 import type { Review } from '../api';
 import { reviewStage } from '../lib/review-rules';
 import { useUpdateReview } from '../queries';
-import { VoiceRecap } from './VoiceRecap';
+import { Dictation } from './Dictation';
 
 /** Prise de notes en direct et synthèse, puis clôture de l'entretien. */
 export function MinutesPanel({ review, isManager }: { review: Review; isManager: boolean }) {
@@ -33,17 +33,11 @@ export function MinutesPanel({ review, isManager }: { review: Review; isManager:
   const persist = (patch: { live_notes?: string; summary?: string }) =>
     update.mutate(patch, { onSuccess: () => setSavedAt(new Date().toISOString()) });
 
-  // Récap vocal : ajouté à la suite des notes et de la synthèse existantes, puis enregistré.
-  const insertRecap = (recapNotes: string, synthese: string) => {
-    const nextNotes = notes.trim() ? `${notes.trim()}
-
-${recapNotes}` : recapNotes;
-    const nextSummary = summary.trim() ? `${summary.trim()}
-
-${synthese}` : synthese;
-    setNotes(nextNotes);
-    setSummary(nextSummary);
-    persist({ live_notes: nextNotes.slice(0, 20000), summary: nextSummary.slice(0, 8000) });
+  // Dictée : la transcription relue s'ajoute à la suite des notes, puis elle est enregistrée.
+  const insertDictation = (text: string) => {
+    const next = notes.trim() ? `${notes.trim()}\n\n${text}` : text;
+    setNotes(next);
+    persist({ live_notes: next.slice(0, 20000) });
   };
 
   return (
@@ -61,7 +55,7 @@ ${synthese}` : synthese;
     >
       <div className="flex flex-col gap-4">
         {isManager && !locked && stage === 'preparation' && (
-          <VoiceRecap reviewId={review.id} collaboratorName={collaborator ? fullName(collaborator) : 'le collaborateur'} onInsert={insertRecap} />
+          <Dictation collaboratorName={collaborator ? fullName(collaborator) : 'le collaborateur'} onInsert={insertDictation} />
         )}
         <Field label="Notes prises pendant l’entretien">
           <Textarea

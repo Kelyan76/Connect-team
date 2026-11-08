@@ -1,56 +1,26 @@
-import { Loader2, Mic, RotateCcw, Sparkles, Square, Wand2 } from 'lucide-react';
+import { Mic, NotebookPen, RotateCcw, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { toUserMessage } from '@/shared/lib/errors';
-import { formatDate } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { Textarea } from '@/shared/ui/input';
 import { toast } from '@/shared/ui/toaster';
-import { generateRecap, recapToNotes, speechRecognitionCtor, type ReviewRecap, type SpeechRecognitionLike } from '../lib/recap';
+import { speechRecognitionCtor, type SpeechRecognitionLike } from '../lib/speech';
 
-type Step = 'idle' | 'recording' | 'review' | 'recap';
+type Step = 'idle' | 'recording' | 'review';
 
 const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
-function Section({ title, items }: { title: string; items: string[] }) {
-  if (!items.length) return null;
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-xs font-semibold uppercase tracking-wide text-fg-subtle">{title}</span>
-      <ul className="flex flex-col gap-1 text-sm">
-        {items.map((i) => (
-          <li key={i} className="flex gap-2">
-            <span className="mt-2 size-1 shrink-0 rounded-full bg-fg-subtle" aria-hidden />
-            {i}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 /**
- * Enregistrement vocal pendant l'entretien : transcription en direct (reconnaissance vocale du navigateur),
- * puis récap rédigé par l'IA, relu par le manager avant d'être ajouté au compte-rendu.
- * Aucun son n'est enregistré ni conservé : seule la transcription texte est utilisée.
+ * Dictée pendant l'entretien : la conversation est transcrite en direct par la reconnaissance vocale
+ * du navigateur (gratuite, aucun son conservé), puis le texte relu est ajouté aux notes.
  */
-export function VoiceRecap({
-  reviewId,
-  collaboratorName,
-  onInsert,
-}: {
-  reviewId: string;
-  collaboratorName: string;
-  onInsert: (notes: string, synthese: string) => void;
-}) {
+export function Dictation({ collaboratorName, onInsert }: { collaboratorName: string; onInsert: (text: string) => void }) {
   const Ctor = speechRecognitionCtor();
   const [step, setStep] = useState<Step>('idle');
   const [consent, setConsent] = useState(false);
   const [finalText, setFinalText] = useState('');
   const [interim, setInterim] = useState('');
   const [seconds, setSeconds] = useState(0);
-  const [busy, setBusy] = useState(false);
-  const [recap, setRecap] = useState<{ recap: ReviewRecap; demo: boolean } | null>(null);
   const recognition = useRef<SpeechRecognitionLike | null>(null);
   const recording = useRef(false);
   const live = useRef<HTMLDivElement>(null);
@@ -65,7 +35,7 @@ export function VoiceRecap({
     live.current?.scrollTo({ top: live.current.scrollHeight });
   }, [finalText, interim]);
 
-  // Arrêt propre si l'on quitte la page en cours d'enregistrement.
+  // Arrêt propre si l'on quitte la page en pleine dictée.
   useEffect(
     () => () => {
       recording.current = false;
@@ -106,7 +76,7 @@ export function VoiceRecap({
         setStep(finalText ? 'review' : 'idle');
       }
     };
-    // La reconnaissance s'interrompt après un silence : on la relance tant que l'enregistrement continue.
+    // La reconnaissance s'interrompt après un silence : on la relance tant que la dictée continue.
     r.onend = () => {
       if (recording.current) {
         try {
@@ -134,21 +104,7 @@ export function VoiceRecap({
   const reset = () => {
     setFinalText('');
     setInterim('');
-    setRecap(null);
     setStep('idle');
-  };
-
-  const summarize = async () => {
-    setBusy(true);
-    try {
-      const result = await generateRecap(reviewId, finalText.trim());
-      setRecap(result);
-      setStep('recap');
-    } catch (e) {
-      toast.error(toUserMessage(e));
-    } finally {
-      setBusy(false);
-    }
   };
 
   return (
@@ -159,8 +115,8 @@ export function VoiceRecap({
             <Mic className="size-5" aria-hidden />
           </span>
           <div className="flex min-w-0 flex-1 flex-col">
-            <span className="text-base font-medium">Enregistrer l’entretien</span>
-            <span className="text-sm text-fg-muted">Transcription en direct, puis récap rédigé par l’IA que vous relisez.</span>
+            <span className="text-base font-medium">Dicter les notes</span>
+            <span className="text-sm text-fg-muted">La conversation s’écrit toute seule ; vous relisez avant de l’ajouter.</span>
           </div>
           <Button variant="primary" onClick={() => setConsent(true)}>
             <Mic aria-hidden />
@@ -176,7 +132,7 @@ export function VoiceRecap({
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-danger opacity-60" />
               <span className="relative inline-flex size-3 rounded-full bg-danger" />
             </span>
-            <span className="text-base font-medium">Enregistrement en cours</span>
+            <span className="text-base font-medium">Dictée en cours</span>
             <span className="tabular text-sm text-fg-muted">{mmss(seconds)}</span>
             <Button className="ml-auto" variant="danger" onClick={stop}>
               <Square aria-hidden />
@@ -196,9 +152,17 @@ export function VoiceRecap({
           <span className="text-base font-medium">Transcription ({mmss(seconds)}) · corrigez si besoin</span>
           <Textarea rows={6} value={finalText} onChange={(e) => setFinalText(e.target.value)} aria-label="Transcription de l’entretien" />
           <div className="flex flex-wrap gap-2">
-            <Button variant="primary" disabled={busy || finalText.trim().length < 40} onClick={() => void summarize()}>
-              {busy ? <Loader2 className="animate-spin" aria-hidden /> : <Wand2 aria-hidden />}
-              {busy ? 'Rédaction du récap…' : 'Générer le récap'}
+            <Button
+              variant="primary"
+              disabled={!finalText.trim()}
+              onClick={() => {
+                onInsert(finalText.trim());
+                toast.success('Transcription ajoutée aux notes');
+                reset();
+              }}
+            >
+              <NotebookPen aria-hidden />
+              Ajouter aux notes
             </Button>
             <Button onClick={start}>
               <Mic aria-hidden />
@@ -212,49 +176,11 @@ export function VoiceRecap({
         </>
       )}
 
-      {step === 'recap' && recap && (
-        <>
-          <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-sec-reviews" aria-hidden />
-            <span className="text-base font-medium">Récap proposé</span>
-            {recap.demo && <span className="text-xs text-fg-subtle">(démonstration locale)</span>}
-          </div>
-          <div className="flex flex-col gap-3 rounded bg-surface p-4">
-            <p className="text-base leading-6">{recap.recap.synthese}</p>
-            <Section title="Points abordés" items={recap.recap.points} />
-            <Section title="Décisions" items={recap.recap.decisions} />
-            <Section
-              title="Actions"
-              items={recap.recap.actions.map(
-                (a) => `${a.titre} · ${a.responsable === 'manager' ? 'vous' : collaboratorName}${a.echeance ? ` · ${formatDate(a.echeance)}` : ''}`,
-              )}
-            />
-            <Section title="À suivre (visible par vous seul dans vos notes)" items={recap.recap.vigilance} />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="primary"
-              onClick={() => {
-                onInsert(recapToNotes(recap.recap, formatDate), recap.recap.synthese);
-                toast.success('Récap ajouté au compte-rendu');
-                reset();
-              }}
-            >
-              Ajouter au compte-rendu
-            </Button>
-            <Button onClick={() => setStep('review')}>Revoir la transcription</Button>
-            <Button variant="ghost" onClick={reset}>
-              Ignorer
-            </Button>
-          </div>
-        </>
-      )}
-
       <ConfirmDialog
         open={consent}
         onOpenChange={setConsent}
-        title="Démarrer l’enregistrement ?"
-        description={`Prévenez ${collaboratorName} et obtenez son accord avant de démarrer. Seul le texte est transcrit (aucun son n’est conservé) ; le récap est envoyé à l’IA pour être rédigé, puis vous le relisez.`}
+        title="Démarrer la dictée ?"
+        description={`Prévenez ${collaboratorName} et obtenez son accord avant de démarrer. Seul le texte est transcrit (aucun son n’est conservé), puis vous le relisez avant de l’ajouter aux notes.`}
         confirmLabel="J’ai son accord, démarrer"
         destructive={false}
         onConfirm={() => {
@@ -265,4 +191,3 @@ export function VoiceRecap({
     </section>
   );
 }
-

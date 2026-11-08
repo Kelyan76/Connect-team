@@ -87,28 +87,6 @@ export async function handleFunction(req: LocalRequest, name: string): Promise<R
     return json(200, { id });
   }
 
-  if (name === 'review-recap') {
-    // Démonstration locale (sans IA) : récap simplifié tiré des phrases de la transcription.
-    const transcript = (str(body.transcript) ?? '').trim();
-    if (transcript.length < 40) return fail(400, 'La transcription est trop courte pour en faire un récap.');
-    const review = await req.db.query('select 1 from public.reviews where id = $1 and manager_id = $2', [str(body.review_id) ?? '', caller.id]);
-    if (!review.rows.length) return fail(403, 'Seul le manager de cet entretien peut générer son récap.');
-    const sentences = transcript
-      .split(/(?<=[.!?])\s+|\n+/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 12);
-    return json(200, {
-      demo: true,
-      recap: {
-        synthese: `${sentences.slice(0, 2).join(' ')} (Récap de démonstration : en ligne, il est rédigé par l’IA.)`,
-        points: sentences.slice(0, 5),
-        decisions: [],
-        actions: [],
-        vigilance: [],
-      },
-    });
-  }
-
   if (name === 'manage-member') {
     const userId = str(body.user_id) ?? '';
     const action = str(body.action);
