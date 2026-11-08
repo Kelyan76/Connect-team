@@ -13,6 +13,7 @@ import { ErrorState, Skeleton } from '@/shared/ui/feedback';
 import { Page, Panel } from '@/shared/ui/layout';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
 import { useManagerDashboard } from '../use-manager-dashboard';
+import { EnableNotificationsCard } from '@/features/notifications/components/EnableNotificationsCard';
 import { TeamPulse } from '@/features/pulse/components/TeamPulse';
 import { useTeamMembers } from '@/features/team/queries';
 import { HeroBanner } from './HeroBanner';
@@ -63,6 +64,7 @@ export function ManagerDashboard() {
           </Link>
         </Button>
       </HeroBanner>
+      <EnableNotificationsCard />
       {error ? (
         <ErrorState error={error} />
       ) : !data || isLoading ? (

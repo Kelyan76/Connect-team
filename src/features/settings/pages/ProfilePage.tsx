@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { updatePassword } from '@/features/auth/api';
 import { useAuth, useCurrentUser } from '@/features/auth/AuthProvider';
 import { newPasswordSchema, type NewPasswordValues } from '@/features/auth/lib/password';
+import { NotificationSettings } from '@/features/notifications/components/NotificationSettings';
 import { BackupPanel } from '@/features/settings/components/BackupPanel';
 import { toUserMessage } from '@/shared/lib/errors';
 import { formatDate, fullName } from '@/shared/lib/format';
@@ -75,6 +76,9 @@ export default function ProfilePage() {
             </Button>
           </form>
         </Panel>
+      </div>
+      <div className="mt-6">
+        <NotificationSettings />
       </div>
       {!isManager && (
         <div className="mt-6">

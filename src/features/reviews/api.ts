@@ -1,3 +1,4 @@
+import { notifyReviewRequest } from '@/features/notifications/push';
 import { check, unwrap } from '@/shared/lib/errors';
 import { supabase } from '@/shared/lib/supabase';
 import type { Json, Tables, TablesInsert, TablesUpdate } from '@/shared/types/database';
@@ -97,7 +98,11 @@ export async function setActionStatus(id: string, status: ReviewAction['status']
 export const listRequests = async (): Promise<ReviewRequest[]> =>
   unwrap(await supabase.from('review_requests').select('*').order('created_at', { ascending: false }), 'Demandes');
 
-export const createRequest = async (r: TablesInsert<'review_requests'>) => check(await supabase.from('review_requests').insert(r), 'Demande');
+/** Crée la demande puis prévient le manager sur ses appareils (notification Web Push). */
+export const createRequest = async (r: TablesInsert<'review_requests'>) => {
+  const created = unwrap(await supabase.from('review_requests').insert(r).select('id').single(), 'Demande');
+  notifyReviewRequest(created.id);
+};
 
 export async function decideRequest(id: string, status: 'validee' | 'refusee', reviewId: string | null): Promise<void> {
   check(

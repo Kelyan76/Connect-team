@@ -403,6 +403,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      notification_prefs: {
+        Row: {
+          user_id: string;
+          pulse_reminder: boolean;
+          pulse_hour: number;
+          weekly_recap: boolean;
+          request_alerts: boolean;
+          last_pulse_reminder: string | null;
+          last_recap: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id?: string;
+          pulse_reminder?: boolean;
+          pulse_hour?: number;
+          weekly_recap?: boolean;
+          request_alerts?: boolean;
+          last_pulse_reminder?: string | null;
+          last_recap?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          pulse_reminder?: boolean;
+          pulse_hour?: number;
+          weekly_recap?: boolean;
+          request_alerts?: boolean;
+          last_pulse_reminder?: string | null;
+          last_recap?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       objectives: {
         Row: {
           id: string;
@@ -516,6 +549,36 @@ export type Database = {
           name?: string;
           client?: string;
           is_active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          user_agent: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          user_agent?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          endpoint?: string;
+          p256dh?: string;
+          auth?: string;
+          user_agent?: string;
           created_at?: string;
         };
         Relationships: [];

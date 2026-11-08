@@ -9,6 +9,7 @@ import { ProgressBar } from '@/shared/ui/data';
 import { EmptyState, TableSkeleton } from '@/shared/ui/feedback';
 import { Page, Panel } from '@/shared/ui/layout';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
+import { EnableNotificationsCard } from '@/features/notifications/components/EnableNotificationsCard';
 import { PulseCheckin } from '@/features/pulse/components/PulseCheckin';
 import { HeroBanner } from './HeroBanner';
 import { MyActions } from './MyActions';
@@ -27,6 +28,7 @@ export function CollaboratorDashboard() {
     <Page>
       <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`${profile.job_title} · bonne journée !`} />
       <PulseCheckin />
+      <EnableNotificationsCard />
       <div className="flex flex-col gap-4">
         <div className="no-scrollbar -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
           <Segmented value={view} onValueChange={(v) => setView(v as View)} aria-label="Afficher">

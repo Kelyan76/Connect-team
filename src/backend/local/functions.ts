@@ -61,6 +61,8 @@ async function signupManager(req: LocalRequest): Promise<Response> {
 
 export async function handleFunction(req: LocalRequest, name: string): Promise<Response> {
   if (name === 'signup-manager') return signupManager(req);
+  // Démonstration locale : pas de service d'envoi Web Push, la notification est simplement ignorée.
+  if (name === 'push-notify') return json(200, { sent: 0 });
   const caller = await managerCaller(req);
   if (!caller) return fail(403, 'Seul un manager peut effectuer cette action.');
   const body = isRecord(req.body) ? req.body : {};

@@ -45,6 +45,8 @@ Chaque manager obtient sa propre équipe, copiée depuis l'équipe modèle (Valm
 
 **Pouls du jour** (remplace l'ancienne météo hebdomadaire) : chaque collaborateur indique son humeur, sa motivation et sa charge de travail en haut de son accueil (série de jours consécutifs). Alertes, rapports et préparation d'entretien utilisent les moyennes hebdomadaires du pouls. Le manager suit l'équipe dans l'onglet *Pouls* de son accueil : participation, tendances, signaux (moral bas, baisse, silence) avec « Proposer un 1:1 » en un clic. Les demandes de one-to-one arrivent dans la cloche du manager (notification à l'écran, vérification toutes les 30 s).
 
+**Rappels et notifications** (Web Push, *Mon profil › Notifications et rappels*) : rappel du pouls du jour à l'heure choisie (seulement s'il manque), récap du lundi pour le manager, alerte immédiate quand un collaborateur demande un one-to-one. L'application est installable (manifeste + service worker) ; sur iPhone, les notifications demandent de l'ajouter à l'écran d'accueil. En production : secrets `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` pour les fonctions `send-reminders` et `push-notify` ; la migration `20261110090000_notifications.sql` planifie l'envoi (pg_cron, chaque heure de 7 h à 12 h, jours ouvrés).
+
 Pour tester l'application côté collaborateur : **Équipe › Tester en tant que collaborateur › Se connecter** (ou menu du profil › *Tester en collaborateur*). Un bandeau en haut permet ensuite de revenir au compte manager sans retaper son mot de passe.
 
 Les e-mails (invitations, réinitialisation du mot de passe) arrivent dans la **boîte mail de démonstration** (`/boite-mail`), comme Inbucket/Mailpit avec la CLI Supabase.

@@ -45,3 +45,10 @@ verify_jwt = false
 # Inscription des managers (protégée par le secret SIGNUP_CODE, appelée sans session).
 [functions.signup-manager]
 verify_jwt = false
+
+# Rappels planifiés (pg_cron) et notifications Web Push.
+[functions.send-reminders]
+verify_jwt = false
+
+[functions.push-notify]
+verify_jwt = false
