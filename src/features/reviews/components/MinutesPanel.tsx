@@ -1,7 +1,6 @@
 import { CheckCircle2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useTeamMembers } from '@/features/team/queries';
-import { formatTime, fullName } from '@/shared/lib/format';
+import { formatTime } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { Field } from '@/shared/ui/field';
@@ -10,7 +9,6 @@ import { Panel } from '@/shared/ui/layout';
 import type { Review } from '../api';
 import { reviewStage } from '../lib/review-rules';
 import { useUpdateReview } from '../queries';
-import { Dictation } from './Dictation';
 
 /** Prise de notes en direct et synthèse, puis clôture de l'entretien. */
 export function MinutesPanel({ review, isManager }: { review: Review; isManager: boolean }) {
@@ -22,8 +20,6 @@ export function MinutesPanel({ review, isManager }: { review: Review; isManager:
   const [confirm, setConfirm] = useState(false);
   const locked = !isManager || !!review.manager_signed_at;
   const stage = reviewStage(review);
-  const team = useTeamMembers();
-  const collaborator = team.byId.get(review.collaborator_id);
 
   useEffect(() => {
     setNotes(review.live_notes);
@@ -32,13 +28,6 @@ export function MinutesPanel({ review, isManager }: { review: Review; isManager:
 
   const persist = (patch: { live_notes?: string; summary?: string }) =>
     update.mutate(patch, { onSuccess: () => setSavedAt(new Date().toISOString()) });
-
-  // Dictée : la transcription relue s'ajoute à la suite des notes, puis elle est enregistrée.
-  const insertDictation = (text: string) => {
-    const next = notes.trim() ? `${notes.trim()}\n\n${text}` : text;
-    setNotes(next);
-    persist({ live_notes: next.slice(0, 20000) });
-  };
 
   return (
     <Panel
@@ -54,9 +43,6 @@ export function MinutesPanel({ review, isManager }: { review: Review; isManager:
       }
     >
       <div className="flex flex-col gap-4">
-        {isManager && !locked && stage === 'preparation' && (
-          <Dictation collaboratorName={collaborator ? fullName(collaborator) : 'le collaborateur'} onInsert={insertDictation} />
-        )}
         <Field label="Notes prises pendant l’entretien">
           <Textarea
             rows={7}
