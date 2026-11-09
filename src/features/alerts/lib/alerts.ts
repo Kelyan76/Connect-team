@@ -212,3 +212,29 @@ export function computeAlerts(input: AlertInput): Alert[] {
   const rank = (a: Alert) => (a.severity === 'danger' ? 0 : 100) + order.indexOf(a.kind);
   return alerts.sort((a, b) => rank(a) - rank(b));
 }
+
+// ─── Regroupement pour l'affichage : un menu court plutôt qu'une longue liste ─
+
+export type AlertGroup = 'personnes' | 'lien' | 'objectifs' | 'rappels';
+
+export const ALERT_GROUPS: Record<AlertGroup, { label: string; description: string; kinds: AlertKind[] }> = {
+  personnes: { label: 'À voir en priorité', description: 'Les personnes qui montrent un signal : à comprendre en 1 à 1, sans juger.', kinds: ['decrochage', 'pouls', 'echeances'] },
+  lien: { label: 'Entretenir le lien', description: 'Reconnaissance et 1 à 1 qui se font attendre.', kinds: ['reconnaissance', 'one_to_one'] },
+  objectifs: { label: 'Objectifs', description: 'Objectifs à risque ou en retard.', kinds: ['objectif'] },
+  rappels: { label: 'Rappels', description: 'Préparations et échéances administratives.', kinds: ['preparation', 'echeance', 'surcharge', 'meteo'] },
+};
+
+export const ALERT_GROUP_ORDER: AlertGroup[] = ['personnes', 'lien', 'objectifs', 'rappels'];
+
+export const groupOf = (a: Alert): AlertGroup => ALERT_GROUP_ORDER.find((g) => ALERT_GROUPS[g].kinds.includes(a.kind)) ?? 'rappels';
+
+/** Signaux d'un groupe, réunis par personne (ordre conservé : la personne la plus urgente d'abord). */
+export function byPerson(alerts: Alert[]): { personId: string | null; alerts: Alert[] }[] {
+  const out: { personId: string | null; alerts: Alert[] }[] = [];
+  for (const a of alerts) {
+    const row = out.find((r) => r.personId === a.personId);
+    if (row) row.alerts.push(a);
+    else out.push({ personId: a.personId, alerts: [a] });
+  }
+  return out;
+}

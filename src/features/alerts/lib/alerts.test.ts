@@ -111,3 +111,14 @@ describe('signaux faibles du cours', () => {
     expect(kinds({ ...base, recognitions: [{ collaborator_id: 'p1', created_at: '2026-10-30T10:00:00Z' }] })).not.toContain('reconnaissance');
   });
 });
+
+describe('regroupement des signaux', () => {
+  it('range chaque signal dans un menu et réunit ceux d’une même personne', async () => {
+    const { byPerson, groupOf } = await import('./alerts');
+    const a = (id: string, kind: 'decrochage' | 'echeances' | 'reconnaissance', personId: string) => ({ id, kind, severity: 'warning' as const, personId, title: id, detail: '', to: '/' });
+    const list = [a('1', 'decrochage', 'p1'), a('2', 'echeances', 'p2'), a('3', 'echeances', 'p1')];
+    expect(list.map(groupOf)).toEqual(['personnes', 'personnes', 'personnes']);
+    expect(groupOf(a('4', 'reconnaissance', 'p1'))).toBe('lien');
+    expect(byPerson(list).map((r) => [r.personId, r.alerts.length])).toEqual([['p1', 2], ['p2', 1]]);
+  });
+});
