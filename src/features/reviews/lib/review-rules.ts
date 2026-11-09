@@ -7,7 +7,7 @@ export type ReviewKind = 'one_to_one' | 'annuel' | 'professionnel';
 export type PrepStatus = 'a_preparer' | 'prepare_collaborateur' | 'prepare_manager' | 'pret';
 
 export const KIND_LABEL: Record<ReviewKind, string> = {
-  one_to_one: 'One-to-one',
+  one_to_one: '1 à 1',
   annuel: 'Entretien annuel',
   professionnel: 'Entretien professionnel',
 };

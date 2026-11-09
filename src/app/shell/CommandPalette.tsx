@@ -10,7 +10,7 @@ import {
   CommandList,
 } from '@/shared/ui/command';
 import { Kbd } from '@/shared/ui/feedback';
-import { itemLabel, navForRole, SETTINGS_ITEM, type Role } from './nav';
+import { ETHICS_ITEM, itemLabel, navForRole, SETTINGS_ITEM, type Role } from './nav';
 
 export interface PaletteEntry {
   id: string;
@@ -34,6 +34,7 @@ export function CommandPalette({ open, onOpenChange, role, entries }: CommandPal
   const navigate = useNavigate();
   const pages = navForRole(role).flatMap((g) => g.items);
   if (role === 'manager') pages.push(SETTINGS_ITEM);
+  pages.push(ETHICS_ITEM);
 
   const go = (to: string) => {
     onOpenChange(false);

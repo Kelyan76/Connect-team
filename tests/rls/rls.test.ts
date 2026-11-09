@@ -6,10 +6,10 @@ import { asUser, openTestDatabase } from '../../tools/db-node';
  * Politiques RLS testées sur une vraie base PostgreSQL (PGlite) avec le jeu de démonstration.
  * Règle d'or : un collaborateur ne voit jamais les données d'un autre ni les notes privées du manager.
  */
-const CLAIRE = '11111111-0000-4000-8000-000000000001'; // manager
-const KARIM = '11111111-0000-4000-8000-000000000002';
-const NADIA = '11111111-0000-4000-8000-000000000005';
-const JULIEN = '11111111-0000-4000-8000-000000000006';
+const CLAIRE = '11111111-0000-4000-8000-000000000101'; // manager
+const KARIM = '11111111-0000-4000-8000-000000000106';
+const NADIA = '11111111-0000-4000-8000-000000000103';
+const JULIEN = '11111111-0000-4000-8000-000000000102';
 
 let db: PGlite;
 beforeAll(async () => {
@@ -29,6 +29,9 @@ const PERSONAL_TABLES: [string, string][] = [
   ['delegations', 'collaborator_id'],
   ['tasks', 'assignee_id'],
   ['review_requests', 'collaborator_id'],
+  ['daily_pulses', 'collaborator_id'],
+  ['disc_profiles', 'collaborator_id'],
+  ['delegation_missions', 'collaborator_id'],
 ];
 
 describe('isolation entre collaborateurs', () => {
@@ -38,7 +41,7 @@ describe('isolation entre collaborateurs', () => {
   });
 
   it('le manager voit les données de toute l’équipe', async () => {
-    const people = await asUser(db, CLAIRE, (tx) => count(tx, 'select distinct collaborator_id from public.weather_entries'));
+    const people = await asUser(db, CLAIRE, (tx) => count(tx, 'select distinct collaborator_id from public.daily_pulses'));
     expect(people).toBe(7);
   });
 
@@ -60,9 +63,9 @@ describe('isolation entre collaborateurs', () => {
 });
 
 describe('notes privées et feedbacks privés', () => {
-  it('le collaborateur ne lit jamais les notes privées, même les siennes', async () => {
-    expect(await asUser(db, JULIEN, (tx) => count(tx, 'select 1 from public.manager_notes'))).toBe(0);
-    expect(await asUser(db, CLAIRE, (tx) => count(tx, 'select 1 from public.manager_notes where collaborator_id = $1', [JULIEN]))).toBeGreaterThan(0);
+  it('le collaborateur ne lit jamais le carnet d’observations, même le sien', async () => {
+    expect(await asUser(db, JULIEN, (tx) => count(tx, 'select 1 from public.observations'))).toBe(0);
+    expect(await asUser(db, CLAIRE, (tx) => count(tx, 'select 1 from public.observations where collaborator_id = $1', [JULIEN]))).toBeGreaterThan(0);
   });
 
   it('le collaborateur ne peut pas écrire de note privée', async () => {
@@ -72,15 +75,15 @@ describe('notes privées et feedbacks privés', () => {
   });
 
   it('les feedbacks non partagés restent invisibles pour le collaborateur', async () => {
-    expect(await asUser(db, JULIEN, (tx) => count(tx, 'select 1 from public.feedbacks where not is_shared'))).toBe(0);
-    expect(await asUser(db, CLAIRE, (tx) => count(tx, 'select 1 from public.feedbacks where collaborator_id = $1 and not is_shared', [JULIEN]))).toBe(1);
+    expect(await asUser(db, KARIM, (tx) => count(tx, 'select 1 from public.feedbacks where not is_shared'))).toBe(0);
+    expect(await asUser(db, CLAIRE, (tx) => count(tx, 'select 1 from public.feedbacks where collaborator_id = $1 and not is_shared', [KARIM]))).toBe(1);
   });
 });
 
 describe('préparation des entretiens en deux temps', () => {
-  const NADIA_NEXT = '66666666-0000-4000-8000-000000000042';
-  const JULIEN_ANNUAL = '66666666-0000-4000-8000-000000000044'; // préparé par le collaborateur
-  const THOMAS_NEXT = '66666666-0000-4000-8000-000000000041'; // préparé par le manager seul
+  const NADIA_NEXT = '66666666-0000-4000-8000-000000000142';
+  const JULIEN_ANNUAL = '66666666-0000-4000-8000-000000000144'; // préparé par le collaborateur
+  const THOMAS_NEXT = '66666666-0000-4000-8000-000000000141'; // préparé par le manager seul
 
   it('le manager ne voit pas la préparation en cours du collaborateur', async () => {
     const seen = await asUser(db, CLAIRE, async (tx) => {
@@ -97,7 +100,7 @@ describe('préparation des entretiens en deux temps', () => {
   });
 
   it('le collaborateur ne voit pas la préparation du manager tant que l’entretien n’est pas prêt', async () => {
-    const thomas = '11111111-0000-4000-8000-000000000004';
+    const thomas = '11111111-0000-4000-8000-000000000107';
     expect(await asUser(db, thomas, (tx) => count(tx, "select 1 from public.review_answers where review_id = $1 and author = 'manager'", [THOMAS_NEXT]))).toBe(0);
   });
 
@@ -112,7 +115,7 @@ describe('préparation des entretiens en deux temps', () => {
   });
 
   it('un compte-rendu signé des deux parties est figé', async () => {
-    const signed = '66666666-0000-4000-8000-000000000001';
+    const signed = '66666666-0000-4000-8000-000000000101';
     await expect(asUser(db, CLAIRE, (tx) => tx.query("update public.reviews set summary = 'x' where id = $1", [signed]))).rejects.toThrow(/signé/);
   });
 });
@@ -159,5 +162,39 @@ describe('écritures limitées du collaborateur', () => {
       return count(tx, 'select 1 from public.tasks');
     });
     expect(seen).toBe(0);
+  });
+});
+
+describe('outils du cours : DISC, carnet, délégation, décisions, préparation du 1 à 1', () => {
+  it('le collaborateur voit son profil DISC et peut le corriger, pas celui des autres', async () => {
+    expect(await asUser(db, NADIA, (tx) => count(tx, 'select 1 from public.disc_profiles'))).toBe(1);
+    await asUser(db, NADIA, (tx) => tx.query("update public.disc_profiles set secondary_style = 'C' where collaborator_id = $1", [NADIA]));
+    const changed = await asUser(db, NADIA, (tx) => tx.query("update public.disc_profiles set primary_style = 'D' where collaborator_id = $1", [JULIEN]));
+    expect(changed.affectedRows ?? 0).toBe(0);
+  });
+
+  it('le carnet d’observations est réservé au manager', async () => {
+    await expect(
+      asUser(db, NADIA, (tx) => tx.query('insert into public.observations (team_id, collaborator_id, author_id, body) select team_id, id, id, $2 from public.profiles where id = $1', [NADIA, 'test'])),
+    ).rejects.toThrow(/row-level security/);
+    expect(await asUser(db, CLAIRE, (tx) => count(tx, 'select 1 from public.observations'))).toBeGreaterThan(5);
+  });
+
+  it('les décisions et la préparation privée du 1 à 1 restent invisibles pour le collaborateur', async () => {
+    expect(await asUser(db, KARIM, (tx) => count(tx, 'select 1 from public.posture_notes'))).toBe(0);
+    expect(await asUser(db, CLAIRE, (tx) => count(tx, 'select 1 from public.posture_notes where collaborator_id = $1', [KARIM]))).toBe(1);
+    const insert = "insert into public.review_preps (review_id, theme, posture) values ('66666666-0000-4000-8000-000000000145', 'Comprendre le retrait', 'rassurant')";
+    const seen = await asUser(db, CLAIRE, async (tx) => {
+      await tx.query(insert);
+      return count(tx, 'select 1 from public.review_preps');
+    });
+    expect(seen).toBe(1);
+    await expect(asUser(db, JULIEN, (tx) => tx.query(insert))).rejects.toThrow(/row-level security/);
+  });
+
+  it('le collaborateur lit ses missions déléguées sans pouvoir les modifier', async () => {
+    expect(await asUser(db, JULIEN, (tx) => count(tx, 'select 1 from public.delegation_missions'))).toBe(1);
+    const changed = await asUser(db, JULIEN, (tx) => tx.query("update public.delegation_missions set autonomy = 1 where collaborator_id = $1", [JULIEN]));
+    expect(changed.affectedRows ?? 0).toBe(0);
   });
 });

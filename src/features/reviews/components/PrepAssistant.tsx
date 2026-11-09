@@ -3,11 +3,11 @@ import { useMemo } from 'react';
 import { FEEDBACK_KIND, useFeedbacks } from '@/features/feedback/queries';
 import { OBJECTIVE_STATUS } from '@/features/objectives/lib/status';
 import { useObjectives } from '@/features/objectives/queries';
-import { useSettings } from '@/features/settings/queries';
+import { usePulses } from '@/features/pulse/queries';
+import { MOOD_COLOR, WORKLOAD_COLOR } from '@/features/pulse/lib/pulse';
+import { useTasks } from '@/features/tasks/queries';
 import { useWeather } from '@/features/weather/queries';
-import { weeklyLoad } from '@/features/workload/lib/load';
-import { useAllocations } from '@/features/workload/queries';
-import { isoWeekLabel, lastWeeks, nextWeeks, todayIso } from '@/shared/lib/dates';
+import { daysBetween, lastWeeks, todayIso } from '@/shared/lib/dates';
 import { formatDate, formatPercent } from '@/shared/lib/format';
 import { Badge } from '@/shared/ui/badge';
 import { Sparkline } from '@/shared/ui/charts';
@@ -21,33 +21,40 @@ import { useReviewActions, useReviews } from '../queries';
 export function PrepAssistant({ review }: { review: Review }) {
   const objectives = useObjectives();
   const weather = useWeather();
-  const allocations = useAllocations();
+  const pulses = usePulses();
+  const tasks = useTasks();
   const feedbacks = useFeedbacks();
   const actions = useReviewActions();
   const reviews = useReviews();
-  const settings = useSettings();
   const id = review.collaborator_id;
 
   const data = useMemo(() => {
-    if (!objectives.data || !weather.data || !allocations.data || !feedbacks.data || !actions.data || !reviews.data) return null;
+    if (!objectives.data || !weather.data || !pulses.data || !tasks.data || !feedbacks.data || !actions.data || !reviews.data) return null;
     const previous = reviews.data.find((r) => r.collaborator_id === id && r.status === 'termine' && r.scheduled_at < review.scheduled_at);
     const since = previous?.scheduled_at ?? '1970-01-01';
     const weeks = lastWeeks(8);
     const myWeather = weather.data.filter((w) => w.collaborator_id === id);
-    const loads = weeklyLoad(allocations.data).get(id);
+    const today = todayIso();
+    const myPulses = pulses.data.filter((p) => p.collaborator_id === id).sort((a, b) => a.day.localeCompare(b.day)).slice(-10);
+    const myFeedbacks = feedbacks.data.filter((f) => f.collaborator_id === id);
+    const lastReco = myFeedbacks
+      .filter((f) => f.is_shared && (f.kind === 'reconnaissance' || f.kind === 'point_fort'))
+      .map((f) => f.created_at.slice(0, 10))
+      .sort()
+      .pop();
     const prevIds = new Set(reviews.data.filter((r) => r.collaborator_id === id && r.scheduled_at < review.scheduled_at).map((r) => r.id));
     const input = {
       objectives: objectives.data.filter((o) => o.owner_id === id),
       weather: myWeather,
-      // 4 semaines passées, la semaine en cours et la suivante (surcharge prévue).
-      loads: nextWeeks(6, new Date(), -4).map((w) => ({ week: w, percent: loads?.get(w) ?? 0 })),
-      overloadPct: settings.data?.overload_pct ?? 100,
-      feedbacks: feedbacks.data.filter((f) => f.collaborator_id === id && f.created_at >= since),
+      recentWorkload: myPulses.map((p) => p.workload).filter((w): w is number => w !== null),
+      feedbacks: myFeedbacks.filter((f) => f.created_at >= since),
       openActions: actions.data.filter((a) => prevIds.has(a.review_id) && a.status !== 'fait'),
-      today: todayIso(),
+      lateTasks: tasks.data.filter((t) => t.assignee_id === id && t.status !== 'termine' && t.due_date !== null && t.due_date < today),
+      daysSinceRecognition: lastReco ? daysBetween(lastReco, today) : null,
+      today,
     };
-    return { input, previous, moods: weeks.map((w) => myWeather.find((x) => x.week_start === w)?.mood ?? null), suggestions: suggestTopics(input) };
-  }, [objectives.data, weather.data, allocations.data, feedbacks.data, actions.data, reviews.data, settings.data, id, review.scheduled_at]);
+    return { input, previous, myPulses, moods: weeks.map((w) => myWeather.find((x) => x.week_start === w)?.mood ?? null), suggestions: suggestTopics(input) };
+  }, [objectives.data, weather.data, pulses.data, tasks.data, feedbacks.data, actions.data, reviews.data, id, review.scheduled_at]);
 
   if (!data) {
     return (
@@ -56,7 +63,7 @@ export function PrepAssistant({ review }: { review: Review }) {
       </Panel>
     );
   }
-  const { input, moods, suggestions, previous } = data;
+  const { input, moods, suggestions, previous, myPulses } = data;
 
   return (
     <>
@@ -96,15 +103,32 @@ export function PrepAssistant({ review }: { review: Review }) {
             <Sparkline values={moods} />
           </section>
           <section className="flex flex-col gap-2">
-            <h3 className="text-xs font-medium text-fg-subtle">Charge récente et à venir</h3>
-            <div className="grid grid-cols-6 gap-1">
-              {input.loads.map((l) => (
-                <div key={l.week} className="flex flex-col items-center gap-1">
-                  <span className={`tabular text-xs font-medium ${l.percent > input.overloadPct ? 'text-danger' : 'text-fg'}`}>{l.percent}</span>
-                  <span className="text-xs text-fg-subtle">{isoWeekLabel(l.week)}</span>
+            <h3 className="text-xs font-medium text-fg-subtle">Pouls des 10 derniers jours (humeur, puis charge)</h3>
+            {myPulses.length === 0 ? (
+              <p className="text-sm text-fg-muted">Pas de pouls récent.</p>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <div className="flex gap-1">
+                  {myPulses.map((p) => (
+                    <span key={p.day} title={`${formatDate(p.day)} · humeur ${p.mood} / 5`} className={`h-3 flex-1 rounded-sm ${MOOD_COLOR[p.mood].solid}`} />
+                  ))}
                 </div>
-              ))}
-            </div>
+                <div className="flex gap-1">
+                  {myPulses.map((p) => (
+                    <span key={p.day} title={`${formatDate(p.day)} · charge ${p.workload ?? '?'} / 5`} className={`h-3 flex-1 rounded-sm ${p.workload ? WORKLOAD_COLOR[p.workload].solid : 'bg-surface-muted'}`} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+          <section className="flex flex-col gap-2">
+            <h3 className="text-xs font-medium text-fg-subtle">Échéances manquées ({input.lateTasks.length})</h3>
+            {input.lateTasks.map((t) => (
+              <p key={t.title} className="text-sm">
+                {t.title}
+                {t.due_date && <span className="text-danger"> · prévue le {formatDate(t.due_date)}</span>}
+              </p>
+            ))}
           </section>
           <section className="flex flex-col gap-2">
             <h3 className="text-xs font-medium text-fg-subtle">Feedbacks reçus ({input.feedbacks.length})</h3>

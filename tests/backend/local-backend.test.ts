@@ -22,13 +22,13 @@ let julien: SupabaseClient<Database>;
 beforeAll(async () => {
   manager = client();
   julien = client();
-  expect((await manager.auth.signInWithPassword({ email: 'claire.vasseur@valmont-equipements.fr', password: PASSWORD })).error).toBeNull();
-  expect((await julien.auth.signInWithPassword({ email: 'julien.mercier@valmont-equipements.fr', password: PASSWORD })).error).toBeNull();
+  expect((await manager.auth.signInWithPassword({ email: 'camille.lefevre@nebuleo.example', password: PASSWORD })).error).toBeNull();
+  expect((await julien.auth.signInWithPassword({ email: 'hugo.lambert@nebuleo.example', password: PASSWORD })).error).toBeNull();
 }, 120_000);
 
 describe('authentification', () => {
   it('refuse un mauvais mot de passe', async () => {
-    const { error } = await client().auth.signInWithPassword({ email: 'julien.mercier@valmont-equipements.fr', password: 'mauvais' });
+    const { error } = await client().auth.signInWithPassword({ email: 'hugo.lambert@nebuleo.example', password: 'mauvais' });
     expect(error?.message).toMatch(/invalid login credentials/i);
   });
 
@@ -38,8 +38,8 @@ describe('authentification', () => {
   });
 
   it('envoie un lien de réinitialisation dans la boîte locale', async () => {
-    await client().auth.resetPasswordForEmail('nadia.haddad@valmont-equipements.fr');
-    expect(mailbox.list()[0]?.to).toBe('nadia.haddad@valmont-equipements.fr');
+    await client().auth.resetPasswordForEmail('ines.moreau@nebuleo.example');
+    expect(mailbox.list()[0]?.to).toBe('ines.moreau@nebuleo.example');
   });
 });
 
@@ -93,11 +93,11 @@ describe('lecture et écriture via PostgREST', () => {
 describe('Edge Functions locales', () => {
   it('le manager invite un collaborateur, qui reçoit un e-mail', async () => {
     const { error } = await manager.functions.invoke('invite-member', {
-      body: { email: 'lea.martin@valmont-equipements.fr', first_name: 'Léa', last_name: 'Martin', job_title: 'Dessinatrice projeteuse', hired_on: '2026-11-16' },
+      body: { email: 'lea.martin@nebuleo.example', first_name: 'Léa', last_name: 'Martin', job_title: 'Dessinatrice projeteuse', hired_on: '2026-11-16' },
     });
     expect(error).toBeNull();
     expect(mailbox.list()[0]?.subject).toMatch(/invité/);
-    const { data } = await manager.from('profiles').select('first_name').eq('email', 'lea.martin@valmont-equipements.fr').single();
+    const { data } = await manager.from('profiles').select('first_name').eq('email', 'lea.martin@nebuleo.example').single();
     expect(data?.first_name).toBe('Léa');
   });
 

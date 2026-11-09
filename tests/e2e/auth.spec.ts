@@ -10,11 +10,11 @@ test('connexion manager puis collaborateur : navigation adaptée au rôle', asyn
   await page.getByRole('button', { name: 'Se connecter' }).click();
   await expect(page.getByRole('alert')).toContainText('Adresse e-mail ou mot de passe incorrect', { timeout: 90_000 });
 
-  await login(page, ACCOUNTS.manager, 'Claire');
+  await login(page, ACCOUNTS.manager, 'Camille');
   const nav = page.getByRole('complementary', { name: 'Navigation principale' });
   await expect(nav.getByRole('link', { name: 'Collaborateurs' })).toBeVisible();
   await expect(nav.getByRole('link', { name: 'Paramètres' })).toBeVisible();
-  await expect(page.getByRole('heading', { level: 1, name: 'Bonjour Claire' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Bonjour Camille' })).toBeVisible();
   await expect(page.getByText('Atteinte des objectifs', { exact: true })).toBeVisible();
   await logout(page);
 
@@ -32,7 +32,7 @@ test('connexion manager puis collaborateur : navigation adaptée au rôle', asyn
 });
 
 test('palette de commandes et raccourcis clavier', async ({ page }) => {
-  await login(page, ACCOUNTS.manager, 'Claire');
+  await login(page, ACCOUNTS.manager, 'Camille');
   await page.keyboard.press('Control+k');
   const palette = page.getByRole('dialog');
   await expect(palette).toBeVisible();

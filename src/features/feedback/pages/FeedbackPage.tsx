@@ -1,5 +1,6 @@
 import { Eye, EyeOff, PenLine, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { useTeamMembers } from '@/features/team/queries';
 import { useHotkey } from '@/shared/hooks/use-hotkeys';
@@ -13,9 +14,18 @@ import { NativeSelect } from '@/shared/ui/input';
 import { Page, PageHeader, Toolbar } from '@/shared/ui/layout';
 import { Tooltip } from '@/shared/ui/menu';
 import { FeedbackDialog } from '../components/FeedbackDialog';
+import { DESC_STEPS, FEEDBACK_TYPES, type CourseFeedbackKind } from '../lib/desc';
 import { FEEDBACK_KIND, useDeleteFeedback, useFeedbacks, useToggleShare, type FeedbackKind } from '../queries';
 
-const TONE: Record<FeedbackKind, 'accent' | 'warning' | 'success'> = { point_fort: 'accent', axe_progres: 'warning', reconnaissance: 'success' };
+const TONE: Record<FeedbackKind, 'accent' | 'warning' | 'success' | 'danger'> = {
+  reconnaissance: 'success',
+  point_fort: 'success',
+  amelioration: 'warning',
+  axe_progres: 'warning',
+  recadrage: 'danger',
+};
+/** Les anciens types sont regroupés avec leur équivalent du cours pour le filtre. */
+const FAMILY: Record<FeedbackKind, CourseFeedbackKind> = { reconnaissance: 'reconnaissance', point_fort: 'reconnaissance', amelioration: 'amelioration', axe_progres: 'amelioration', recadrage: 'recadrage' };
 
 export default function FeedbackPage() {
   const { isManager } = useCurrentUser();
@@ -23,13 +33,24 @@ export default function FeedbackPage() {
   const team = useTeamMembers();
   const share = useToggleShare();
   const remove = useDeleteFeedback();
+  const [params, setParams] = useSearchParams();
   const [writing, setWriting] = useState(false);
   const [person, setPerson] = useState('');
+  const [preset, setPreset] = useState<{ person?: string; kind?: CourseFeedbackKind }>({});
   const [kind, setKind] = useState('');
   const [toDelete, setToDelete] = useState<string | null>(null);
   useHotkey('n', () => isManager && setWriting(true));
 
-  const list = (feedbacks.data ?? []).filter((f) => (!person || f.collaborator_id === person) && (!kind || f.kind === kind));
+  // Ouverture directe depuis un lien (fiche collaborateur, leviers DREAM, aide à la décision).
+  useEffect(() => {
+    if (!isManager || params.get('nouveau') !== '1') return;
+    const type = params.get('type');
+    setPreset({ person: params.get('collaborateur') ?? undefined, kind: type && type in FEEDBACK_TYPES ? (type as CourseFeedbackKind) : undefined });
+    setWriting(true);
+    setParams({}, { replace: true });
+  }, [isManager, params, setParams]);
+
+  const list = (feedbacks.data ?? []).filter((f) => (!person || f.collaborator_id === person) && (!kind || FAMILY[f.kind] === kind));
 
   return (
     <Page>
@@ -38,14 +59,14 @@ export default function FeedbackPage() {
         title={isManager ? 'Feedback continu' : 'Mes feedbacks'}
         description={
           isManager
-            ? 'Points forts, axes de progrès et reconnaissance. Choisissez ce qui est partagé : tout alimente la préparation des entretiens.'
+            ? 'Reconnaissance, amélioration ou recadrage, préparés avec la méthode DESC. Choisissez ce qui est partagé : tout alimente la préparation des 1 à 1.'
             : 'Les feedbacks que votre manager a choisi de partager avec vous.'
         }
         actions={
           isManager && (
             <Button variant="primary" onClick={() => setWriting(true)}>
               <PenLine aria-hidden />
-              Rédiger un feedback
+              Préparer un feedback
             </Button>
           )
         }
@@ -63,9 +84,9 @@ export default function FeedbackPage() {
         )}
         <NativeSelect aria-label="Filtrer par type" className="w-48" value={kind} onChange={(e) => setKind(e.target.value)}>
           <option value="">Tous les types</option>
-          {(Object.keys(FEEDBACK_KIND) as FeedbackKind[]).map((k) => (
+          {(Object.keys(FEEDBACK_TYPES) as CourseFeedbackKind[]).map((k) => (
             <option key={k} value={k}>
-              {FEEDBACK_KIND[k]}
+              {FEEDBACK_TYPES[k].label}
             </option>
           ))}
         </NativeSelect>
@@ -94,7 +115,22 @@ export default function FeedbackPage() {
                       <span className="text-xs text-fg-subtle">{formatDate(f.created_at)}</span>
                       {isManager && <span className="text-xs text-fg-subtle">{f.is_shared ? 'Partagé' : 'Privé'}</span>}
                     </div>
-                    <p className="max-w-prose text-base">{f.body}</p>
+                    {f.desc_d ? (
+                      <dl className="flex max-w-prose flex-col gap-1">
+                        {(['d', 'e', 's', 'c'] as const)
+                          .filter((s) => f[`desc_${s}`])
+                          .map((s) => (
+                            <div key={s} className="flex gap-2 text-base">
+                              <dt className="w-5 shrink-0 font-semibold text-sec-reviews" title={DESC_STEPS[s].label}>
+                                {DESC_STEPS[s].letter}
+                              </dt>
+                              <dd>{f[`desc_${s}`]}</dd>
+                            </div>
+                          ))}
+                      </dl>
+                    ) : (
+                      <p className="max-w-prose text-base">{f.body}</p>
+                    )}
                   </div>
                   {isManager && (
                     <div className="flex shrink-0 items-start gap-1">
@@ -114,7 +150,15 @@ export default function FeedbackPage() {
           </ul>
         )}
       </div>
-      {isManager && <FeedbackDialog open={writing} onOpenChange={setWriting} defaultPerson={person} />}
+      {isManager && <FeedbackDialog
+          open={writing}
+          onOpenChange={(o) => {
+            setWriting(o);
+            if (!o) setPreset({});
+          }}
+          defaultPerson={preset.person ?? person}
+          defaultKind={preset.kind}
+        />}
       <ConfirmDialog
         open={toDelete !== null}
         onOpenChange={(o) => !o && setToDelete(null)}

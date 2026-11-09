@@ -63,6 +63,7 @@ const routes: RouteObject[] = [
       { path: '/plan-de-charge', element: page(() => import('@/features/workload/pages/WorkloadPage')) },
       { path: '/absences', element: page(() => import('@/features/absences/pages/AbsencesPage')) },
       { path: '/delegation', element: page(() => import('@/features/delegation/pages/DelegationPage')) },
+      { path: '/ethique', element: page(() => import('@/features/ethics/pages/EthicsPage')) },
       { path: '/profil', element: page(() => import('@/features/settings/pages/ProfilePage')) },
       {
         element: <ManagerOnly />,
@@ -70,6 +71,8 @@ const routes: RouteObject[] = [
           { path: '/equipe', element: page(() => import('@/features/team/pages/TeamPage')) },
           { path: '/equipe/:id', element: page(() => import('@/features/team/pages/PersonPage')) },
           { path: '/entretiens/trames', element: page(() => import('@/features/reviews/pages/TemplatesPage')) },
+          { path: '/leviers', element: page(() => import('@/features/dream/pages/DreamPage')) },
+          { path: '/posture', element: page(() => import('@/features/posture/pages/PosturePage')) },
           { path: '/alertes', element: page(() => import('@/features/alerts/pages/AlertsPage')) },
           { path: '/reunions', element: page(() => import('@/features/meetings/pages/MeetingsPage')) },
           { path: '/reunions/:id', element: page(() => import('@/features/meetings/pages/MeetingPage')) },

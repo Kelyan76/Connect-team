@@ -7,7 +7,7 @@ import { Field } from '@/shared/ui/field';
 import { Input, Textarea } from '@/shared/ui/input';
 import { useCreateRequest } from '../queries';
 
-/** Demande de one-to-one par le collaborateur. */
+/** Demande de 1 à 1 par le collaborateur. */
 export function RequestDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { profile, team } = useCurrentUser();
   const create = useCreateRequest();
@@ -17,7 +17,7 @@ export function RequestDialog({ open, onOpenChange }: { open: boolean; onOpenCha
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        title="Demander un one-to-one"
+        title="Demander un 1 à 1"
         description="Votre manager reçoit la demande et vous propose un créneau."
         footer={
           <>

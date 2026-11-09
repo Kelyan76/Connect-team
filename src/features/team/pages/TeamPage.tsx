@@ -129,7 +129,7 @@ export default function TeamPage() {
                   <span className="tabular w-10 text-right text-sm">{progress === null ? '—' : formatPercent(progress)}</span>
                 </div>
                 <span className="text-xs text-fg-subtle">
-                  Dernier one-to-one : {lastOneToOne ? formatDate(lastOneToOne) : 'aucun'}
+                  Dernier 1 à 1 : {lastOneToOne ? formatDate(lastOneToOne) : 'aucun'}
                 </span>
               </button>
             </li>
@@ -144,7 +144,7 @@ export default function TeamPage() {
                 <SortableTh label="Poste" sortKey="job" sort={sort} onSort={toggle} />
                 <SortableTh label="Arrivée" sortKey="hired" sort={sort} onSort={toggle} align="right" />
                 <SortableTh label="Objectifs" sortKey="progress" sort={sort} onSort={toggle} align="right" />
-                <SortableTh label="Dernier one-to-one" sortKey="last" sort={sort} onSort={toggle} align="right" />
+                <SortableTh label="Dernier 1 à 1" sortKey="last" sort={sort} onSort={toggle} align="right" />
                 <Th>Compte</Th>
               </tr>
             </THead>

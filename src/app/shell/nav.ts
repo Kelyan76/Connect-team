@@ -1,18 +1,17 @@
 import {
-  BarChart3,
   Bell,
-  CalendarDays,
+  Compass,
   HeartPulse,
-  FileText,
-  Gauge,
-  GitFork,
-  Grid3x3,
   KanbanSquare,
   LayoutDashboard,
   MessageSquareText,
   NotebookPen,
   Settings,
+  ShieldCheck,
+  Sparkles,
   Target,
+  Grid3x3,
+  GitFork,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -38,34 +37,34 @@ export interface NavGroup {
 const both: Role[] = ['manager', 'collaborateur'];
 const manager: Role[] = ['manager'];
 
+// Menu recentré sur les questions du manager et les outils du cours.
+// Plan de charge, absences, réunions et rapports restent accessibles par leur adresse, hors menu.
 export const NAV: NavGroup[] = [
   {
     label: 'Pilotage',
     items: [
       { to: '/', label: 'Tableau de bord', icon: LayoutDashboard, roles: both },
-      { to: '/alertes', label: 'Alertes', icon: Bell, roles: manager },
-      { to: '/rapports', label: 'Rapports', icon: FileText, roles: manager },
+      { to: '/alertes', label: 'Signaux faibles', icon: Bell, roles: manager },
     ],
   },
   {
     label: 'Équipe',
     items: [
       { to: '/equipe', label: 'Collaborateurs', icon: Users, roles: manager },
-      { to: '/entretiens', label: 'Entretiens', icon: MessageSquareText, selfLabel: 'Mes entretiens', roles: both },
-      { to: '/objectifs', label: 'Objectifs', icon: Target, selfLabel: 'Mes objectifs', roles: both },
-      { to: '/competences', label: 'Compétences', icon: Grid3x3, selfLabel: 'Mes compétences', roles: both },
-      { to: '/feedbacks', label: 'Feedbacks', icon: NotebookPen, roles: both },
       { to: '/pouls', label: 'Pouls', icon: HeartPulse, selfLabel: 'Mon pouls', roles: both },
+      { to: '/leviers', label: 'Leviers DREAM', icon: Sparkles, roles: manager },
+      { to: '/competences', label: 'Compétences', icon: Grid3x3, selfLabel: 'Mes compétences', roles: both },
+      { to: '/entretiens', label: '1 à 1', icon: MessageSquareText, selfLabel: 'Mes 1 à 1', roles: both },
+      { to: '/feedbacks', label: 'Feedbacks', icon: NotebookPen, roles: both },
+      { to: '/posture', label: 'Décider', icon: Compass, roles: manager },
     ],
   },
   {
     label: 'Organisation',
     items: [
-      { to: '/taches', label: 'Tâches', icon: KanbanSquare, selfLabel: 'Mes tâches', roles: both },
-      { to: '/plan-de-charge', label: 'Plan de charge', icon: Gauge, selfLabel: 'Ma charge', roles: both },
-      { to: '/absences', label: 'Absences', icon: CalendarDays, selfLabel: 'Mes absences', roles: both },
-      { to: '/reunions', label: 'Réunions', icon: BarChart3, roles: manager },
+      { to: '/objectifs', label: 'Objectifs', icon: Target, selfLabel: 'Mes objectifs', roles: both },
       { to: '/delegation', label: 'Délégation', icon: GitFork, roles: both },
+      { to: '/taches', label: 'Tâches', icon: KanbanSquare, selfLabel: 'Mes tâches', roles: both },
     ],
   },
 ];
@@ -75,6 +74,14 @@ export const SETTINGS_ITEM: NavItem = {
   label: 'Paramètres',
   icon: Settings,
   roles: manager,
+};
+
+/** Charte éthique et données : accessible à tous, en bas du menu. */
+export const ETHICS_ITEM: NavItem = {
+  to: '/ethique',
+  label: 'Éthique et données',
+  icon: ShieldCheck,
+  roles: both,
 };
 
 const SELF_GROUP_LABEL: Record<string, string> = { Pilotage: 'Mon espace', Équipe: 'Progression' };
@@ -108,12 +115,10 @@ export interface NavSection {
 }
 
 export const SECTIONS: NavSection[] = [
-  { label: 'Tableau de bord', selfLabel: 'Accueil', shortLabel: 'Accueil', tone: 'home', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }, { to: '/rapports' }] },
-  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', tone: 'team', icon: Users, tabs: [{ to: '/equipe' }, { to: '/pouls' }, { to: '/competences' }] },
-  { label: 'Entretiens', selfLabel: 'Mes entretiens', shortLabel: 'Entretiens', tone: 'reviews', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }] },
-  { label: 'Objectifs', selfLabel: 'Mes objectifs', shortLabel: 'Objectifs', tone: 'goals', icon: Target, tabs: [{ to: '/objectifs' }] },
-  { label: 'Planning', shortLabel: 'Planning', tone: 'planning', icon: KanbanSquare, tabs: [{ to: '/taches' }, { to: '/plan-de-charge' }, { to: '/absences' }] },
-  { label: 'Réunions', selfLabel: 'Délégation', shortLabel: 'Réunions', selfShortLabel: 'Délégation', tone: 'meetings', icon: CalendarDays, tabs: [{ to: '/reunions' }, { to: '/delegation' }] },
+  { label: 'Tableau de bord', selfLabel: 'Accueil', shortLabel: 'Accueil', tone: 'home', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }] },
+  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', tone: 'team', icon: Users, tabs: [{ to: '/equipe' }, { to: '/pouls' }, { to: '/leviers' }, { to: '/competences' }] },
+  { label: '1 à 1 et feedback', selfLabel: 'Mes 1 à 1', shortLabel: '1 à 1', tone: 'reviews', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }, { to: '/posture' }] },
+  { label: 'Objectifs', selfLabel: 'Mes objectifs', shortLabel: 'Objectifs', tone: 'goals', icon: Target, tabs: [{ to: '/objectifs' }, { to: '/delegation' }, { to: '/taches' }] },
 ];
 
 export interface ResolvedSection {
@@ -126,7 +131,7 @@ export interface ResolvedSection {
   tabs: { to: string; label: string }[];
 }
 
-const ALL_ITEMS = [...NAV.flatMap((g) => g.items), SETTINGS_ITEM];
+const ALL_ITEMS = [...NAV.flatMap((g) => g.items), SETTINGS_ITEM, ETHICS_ITEM];
 
 /** Sections visibles pour un rôle (onglets filtrés selon les droits, sections vides retirées). */
 export function sectionsForRole(role: Role): ResolvedSection[] {

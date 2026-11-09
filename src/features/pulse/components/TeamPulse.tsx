@@ -28,7 +28,7 @@ function Trend({ now, before }: { now: number | null; before: number | null }) {
 
 /**
  * Pouls de l'équipe (manager) : participation du jour, humeur et motivation moyennes,
- * signaux à traiter avec un one-to-one en un clic, carte des 10 derniers jours et derniers mots.
+ * signaux à traiter avec un 1 à 1 en un clic, carte des 10 derniers jours et derniers mots.
  */
 export function TeamPulse({ people }: { people: Person[] }) {
   const pulses = usePulses();

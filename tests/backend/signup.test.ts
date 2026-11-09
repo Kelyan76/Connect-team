@@ -13,7 +13,7 @@ const client = () =>
     global: { fetch: localFetch },
   });
 
-const TEMPLATE = '22222222-0000-4000-8000-000000000001';
+const TEMPLATE = '22222222-0000-4000-8000-000000000002';
 const signup = {
   code: LOCAL_SIGNUP_CODE,
   first_name: 'Inès',

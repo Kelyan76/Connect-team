@@ -17,7 +17,7 @@ const STATUS = {
 } as const;
 
 /**
- * Demandes de one-to-one en cartes : qui, le message en entier (bien lisible), la date souhaitée,
+ * Demandes de 1 à 1 en cartes : qui, le message en entier (bien lisible), la date souhaitée,
  * puis les actions sur toute la largeur sur téléphone.
  */
 export function RequestsList({
@@ -37,7 +37,7 @@ export function RequestsList({
       <div className="rounded-lg border border-line bg-surface shadow-sm">
         <EmptyState
           title="Aucune demande"
-          description={isManager ? 'Les demandes de one-to-one de l’équipe apparaîtront ici.' : 'Vous n’avez pas encore demandé de one-to-one.'}
+          description={isManager ? 'Les demandes de 1 à 1 de l’équipe apparaîtront ici.' : 'Vous n’avez pas encore demandé de 1 à 1.'}
         />
       </div>
     );
@@ -53,7 +53,7 @@ export function RequestsList({
             <div className="flex items-start gap-3">
               {isManager && person && <Avatar person={person} />}
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-base font-semibold">{isManager && person ? fullName(person) : 'Ma demande de one-to-one'}</span>
+                <span className="truncate text-base font-semibold">{isManager && person ? fullName(person) : 'Ma demande de 1 à 1'}</span>
                 <span className="flex items-center gap-1 text-sm text-fg-subtle">
                   <Clock className="size-3" aria-hidden />
                   Demandée {relativeDays(daysFromToday(r.created_at.slice(0, 10)))}

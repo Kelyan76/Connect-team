@@ -32,4 +32,9 @@ export const qk = {
   meetingActions: ['meeting-actions'] as const,
   domains: ['delegation-domains'] as const,
   delegations: ['delegations'] as const,
+  missions: ['delegation-missions'] as const,
+  discProfiles: ['disc-profiles'] as const,
+  observations: ['observations'] as const,
+  postureNotes: ['posture-notes'] as const,
+  reviewPrep: (reviewId: string) => ['review-prep', reviewId] as const,
 };

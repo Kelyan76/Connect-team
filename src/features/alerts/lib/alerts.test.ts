@@ -87,3 +87,27 @@ describe('alertes intelligentes', () => {
     expect(kinds({ ...base, reviews, settings: { ...settings, no_one_to_one_days: 60 } })).not.toContain('one_to_one');
   });
 });
+
+describe('signaux faibles du cours', () => {
+  const retreat = { personId: 'p1', kind: 'en_baisse' as const, severity: 'warning' as const, title: 'Humeur en baisse : Julien', detail: '4,5 → 2,0 / 5' };
+  const late = [
+    { assignee_id: 'p1', title: 'Livrer le module agenda', due_date: '2026-10-28' },
+    { assignee_id: 'p1', title: 'Corriger l’export iCal', due_date: '2026-11-01' },
+  ];
+
+  it('retrait au pouls et deux échéances manquées : signal de décrochage, pas de doublon', () => {
+    const k = kinds({ ...base, pulseSignals: [retreat], lateTasks: late });
+    expect(k).toContain('decrochage');
+    expect(k).not.toContain('pouls');
+    expect(k).not.toContain('echeances');
+  });
+
+  it('échéances manquées sans signal de moral : simple alerte d’échéances', () => {
+    expect(kinds({ ...base, pulseSignals: [], lateTasks: late })).toContain('echeances');
+  });
+
+  it('aucune reconnaissance depuis plus de 30 jours : levier à activer', () => {
+    expect(kinds({ ...base, recognitions: [{ collaborator_id: 'p1', created_at: '2026-09-01T10:00:00Z' }] })).toContain('reconnaissance');
+    expect(kinds({ ...base, recognitions: [{ collaborator_id: 'p1', created_at: '2026-10-30T10:00:00Z' }] })).not.toContain('reconnaissance');
+  });
+});

@@ -23,10 +23,10 @@ export function NextReview() {
         <EmptyState
           className="p-0"
           title="Aucun entretien planifié"
-          description="Vous pouvez demander un one-to-one à votre manager."
+          description="Vous pouvez demander un 1 à 1 à votre manager."
           action={
             <Button asChild size="sm">
-              <Link to="/entretiens?demande=1">Demander un one-to-one</Link>
+              <Link to="/entretiens?demande=1">Demander un 1 à 1</Link>
             </Button>
           }
         />

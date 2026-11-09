@@ -136,6 +136,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      delegation_missions: {
+        Row: {
+          id: string;
+          team_id: string;
+          collaborator_id: string;
+          title: string;
+          expected_result: string;
+          limits: string;
+          support: string;
+          checkpoints: string;
+          due_date: string | null;
+          autonomy: number;
+          status: string;
+          debrief: string;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id?: string;
+          collaborator_id: string;
+          title: string;
+          expected_result?: string;
+          limits?: string;
+          support?: string;
+          checkpoints?: string;
+          due_date?: string | null;
+          autonomy?: number;
+          status?: string;
+          debrief?: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          collaborator_id?: string;
+          title?: string;
+          expected_result?: string;
+          limits?: string;
+          support?: string;
+          checkpoints?: string;
+          due_date?: string | null;
+          autonomy?: number;
+          status?: string;
+          debrief?: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       delegations: {
         Row: {
           collaborator_id: string;
@@ -178,6 +232,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      disc_profiles: {
+        Row: {
+          collaborator_id: string;
+          team_id: string;
+          primary_style: string;
+          secondary_style: string | null;
+          source: string;
+          note: string;
+          updated_by: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          collaborator_id: string;
+          team_id?: string;
+          primary_style: string;
+          secondary_style?: string | null;
+          source?: string;
+          note?: string;
+          updated_by?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          collaborator_id?: string;
+          team_id?: string;
+          primary_style?: string;
+          secondary_style?: string | null;
+          source?: string;
+          note?: string;
+          updated_by?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       feedbacks: {
         Row: {
           id: string;
@@ -188,6 +275,10 @@ export type Database = {
           body: string;
           is_shared: boolean;
           created_at: string;
+          desc_d: string;
+          desc_e: string;
+          desc_s: string;
+          desc_c: string;
         };
         Insert: {
           id?: string;
@@ -198,6 +289,10 @@ export type Database = {
           body: string;
           is_shared?: boolean;
           created_at?: string;
+          desc_d?: string;
+          desc_e?: string;
+          desc_s?: string;
+          desc_c?: string;
         };
         Update: {
           id?: string;
@@ -208,6 +303,10 @@ export type Database = {
           body?: string;
           is_shared?: boolean;
           created_at?: string;
+          desc_d?: string;
+          desc_e?: string;
+          desc_s?: string;
+          desc_c?: string;
         };
         Relationships: [];
       };
@@ -456,6 +555,8 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          means: string;
+          agreed: boolean;
         };
         Insert: {
           id?: string;
@@ -470,6 +571,8 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          means?: string;
+          agreed?: boolean;
         };
         Update: {
           id?: string;
@@ -484,6 +587,80 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          means?: string;
+          agreed?: boolean;
+        };
+        Relationships: [];
+      };
+      observations: {
+        Row: {
+          id: string;
+          team_id: string;
+          collaborator_id: string;
+          author_id: string;
+          observed_on: string;
+          tone: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id?: string;
+          collaborator_id: string;
+          author_id?: string;
+          observed_on?: string;
+          tone?: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          collaborator_id?: string;
+          author_id?: string;
+          observed_on?: string;
+          tone?: string;
+          body?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      posture_notes: {
+        Row: {
+          id: string;
+          team_id: string;
+          collaborator_id: string;
+          situation: string;
+          diagnosis: string;
+          scarf: Json;
+          decision: string;
+          next_step: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id?: string;
+          collaborator_id: string;
+          situation: string;
+          diagnosis: string;
+          scarf?: Json;
+          decision?: string;
+          next_step?: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          collaborator_id?: string;
+          situation?: string;
+          diagnosis?: string;
+          scarf?: Json;
+          decision?: string;
+          next_step?: string;
+          created_by?: string | null;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -649,6 +826,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      review_preps: {
+        Row: {
+          review_id: string;
+          theme: string;
+          company_news: string;
+          posture: string | null;
+          checklist: Json;
+          updated_at: string;
+        };
+        Insert: {
+          review_id: string;
+          theme?: string;
+          company_news?: string;
+          posture?: string | null;
+          checklist?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          review_id?: string;
+          theme?: string;
+          company_news?: string;
+          posture?: string | null;
+          checklist?: Json;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       review_requests: {
         Row: {
           id: string;
@@ -740,6 +944,8 @@ export type Database = {
           manager_signed_at: string | null;
           created_at: string;
           updated_at: string;
+          priority: string;
+          reformulated_at: string | null;
         };
         Insert: {
           id?: string;
@@ -762,6 +968,8 @@ export type Database = {
           manager_signed_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          priority?: string;
+          reformulated_at?: string | null;
         };
         Update: {
           id?: string;
@@ -784,6 +992,8 @@ export type Database = {
           manager_signed_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          priority?: string;
+          reformulated_at?: string | null;
         };
         Relationships: [];
       };
@@ -1043,6 +1253,7 @@ export type Database = {
       auth_is_manager: { Args: Record<PropertyKey, never>; Returns: boolean };
       auth_is_self: { Args: { target: string }; Returns: boolean };
       auth_manages: { Args: { target: string }; Returns: boolean };
+      auth_manages_review: { Args: { p_review_id: string }; Returns: boolean };
       auth_team_id: { Args: Record<PropertyKey, never>; Returns: string };
       can_read_answer: { Args: { p_review_id: string; p_author: Database['public']['Enums']['answer_author'] }; Returns: boolean };
       can_write_answer: { Args: { p_review_id: string; p_author: Database['public']['Enums']['answer_author'] }; Returns: boolean };
@@ -1060,7 +1271,7 @@ export type Database = {
       answer_author: 'manager' | 'collaborateur';
       app_role: 'manager' | 'collaborateur';
       delegation_level: 'decide' | 'propose' | 'execute';
-      feedback_kind: 'point_fort' | 'axe_progres' | 'reconnaissance';
+      feedback_kind: 'point_fort' | 'axe_progres' | 'reconnaissance' | 'amelioration' | 'recadrage';
       objective_scope: 'equipe' | 'individuel';
       question_type: 'texte' | 'echelle' | 'choix' | 'oui_non';
       request_status: 'en_attente' | 'validee' | 'refusee';

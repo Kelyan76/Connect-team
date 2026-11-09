@@ -64,7 +64,7 @@ export function ActionPlan({ review, isManager, previousOnly = false }: { review
   );
 
   const carriedPanel = (
-    <Panel title="Suivi des actions précédentes" description="Reprises automatiquement des entretiens antérieurs" flush>
+    <Panel title="Engagements du dernier 1 à 1" description="On commence par eux : objectif fixé, résultat obtenu, écart, ajustement" flush>
       {carried.length === 0 ? (
         <EmptyState title="Rien en suspens" description="Toutes les actions des entretiens précédents sont terminées." />
       ) : (
@@ -76,9 +76,9 @@ export function ActionPlan({ review, isManager, previousOnly = false }: { review
 
   return (
     <>
-      <Panel title="Plan d’action" description="Action, responsable, échéance" flush>
+      <Panel title="Engagements réciproques" description="Ce que chacun s’engage à faire : le collaborateur et vous" flush>
         {current.length === 0 && !isManager ? (
-          <EmptyState title="Aucune action" description="Les actions décidées pendant l’entretien apparaîtront ici." />
+          <EmptyState title="Aucun engagement" description="Un 1 à 1 ne se termine pas par une conversation, mais par un engagement." />
         ) : (
           <ul className="divide-y divide-line">{current.map(row)}</ul>
         )}

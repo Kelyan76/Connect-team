@@ -11,9 +11,9 @@ const MANAGER_ROUTES: [string, string][] = [
   ['alertes', '/alertes'],
   ['rapports', '/rapports'],
   ['equipe', '/equipe'],
-  ['fiche', '/equipe/11111111-0000-4000-8000-000000000006'],
+  ['fiche', '/equipe/11111111-0000-4000-8000-000000000102'],
   ['entretiens', '/entretiens'],
-  ['entretien', '/entretiens/66666666-0000-4000-8000-000000000043'],
+  ['entretien', '/entretiens/66666666-0000-4000-8000-000000000143'],
   ['trames', '/entretiens/trames'],
   ['objectifs', '/objectifs'],
   ['competences', '/competences'],
@@ -29,7 +29,7 @@ const MANAGER_ROUTES: [string, string][] = [
 const COLLAB_ROUTES: [string, string][] = [
   ['tableau-de-bord', '/'],
   ['entretiens', '/entretiens'],
-  ['preparation', '/entretiens/66666666-0000-4000-8000-000000000042'],
+  ['preparation', '/entretiens/66666666-0000-4000-8000-000000000142'],
   ['objectifs', '/objectifs'],
   ['competences', '/competences'],
   ['meteo', '/meteo'],
@@ -61,7 +61,7 @@ test('captures des écrans', async ({ page }) => {
   mkdirSync('screenshots/public', { recursive: true });
   await page.waitForTimeout(1500);
   await page.screenshot({ path: 'screenshots/public/connexion-desktop-clair.png' });
-  await login(page, ACCOUNTS.manager, 'Claire');
+  await login(page, ACCOUNTS.manager, 'Camille');
   await shoot(page, 'manager', MANAGER_ROUTES);
   await logout(page);
   await login(page, ACCOUNTS.nadia, 'Nadia');

@@ -63,7 +63,7 @@ export function EnableNotificationsCard() {
           {iosNeedsInstall
             ? 'Sur iPhone : Partager › « Sur l’écran d’accueil », puis ouvrez Connect Team depuis son icône.'
             : isManager
-              ? 'Demandes de one-to-one en direct et récap de l’équipe chaque lundi.'
+              ? 'Demandes de 1 à 1 en direct et récap de l’équipe chaque lundi.'
               : 'Une notification pour votre pouls du jour, seulement si vous l’avez oublié.'}
         </span>
       </div>

@@ -15,7 +15,7 @@ export function UpcomingReviews({ reviews, byId }: { reviews: Review[]; byId: Ma
   return (
     <Panel title="Prochains entretiens" flush>
       {reviews.length === 0 ? (
-        <EmptyState title="Aucun entretien planifié" description="Planifiez les one-to-one de l’équipe depuis la page Entretiens." />
+        <EmptyState title="Aucun entretien planifié" description="Planifiez les 1 à 1 de l’équipe depuis la page Entretiens." />
       ) : (
         <ul className="stagger divide-y divide-line">
           {reviews.map((r) => {

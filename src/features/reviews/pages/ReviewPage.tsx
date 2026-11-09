@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { reviewQuestions } from '../api';
 import { ActionPlan } from '../components/ActionPlan';
 import { AnswerForm } from '../components/AnswerForm';
+import { KeyliaPrep } from '../components/KeyliaPrep';
+import { OneToOneGuide } from '../components/OneToOneGuide';
 import { MinutesPanel } from '../components/MinutesPanel';
 import { PrepAssistant } from '../components/PrepAssistant';
 import { SideBySide } from '../components/SideBySide';
@@ -116,13 +118,27 @@ export default function ReviewPage() {
             <SideBySide review={r} questions={questions} answers={answers.data} viewer={viewer} />
           </TabsContent>
           <TabsContent value="compte-rendu" className="flex flex-col gap-6">
+            {isManager && r.kind === 'one_to_one' && <OneToOneGuide review={r} locked={!!r.manager_signed_at} />}
+            {!isManager && r.priority && (
+              <div className="rounded-lg border border-line bg-surface px-4 py-3 text-base">
+                <span className="font-medium">Priorité d’ici le prochain 1 à 1 : </span>
+                {r.priority}
+              </div>
+            )}
             <MinutesPanel review={r} isManager={isManager} />
             <ActionPlan review={r} isManager={isManager} />
             <Signatures review={r} viewer={viewer} />
           </TabsContent>
         </Tabs>
         <aside className="flex min-w-0 flex-col gap-6">
-          {isManager ? <PrepAssistant review={r} /> : <ActionPlan review={r} isManager={false} previousOnly />}
+          {isManager ? (
+            <>
+              {r.kind === 'one_to_one' && stage === 'preparation' && <KeyliaPrep review={r} />}
+              <PrepAssistant review={r} />
+            </>
+          ) : (
+            <ActionPlan review={r} isManager={false} previousOnly />
+          )}
         </aside>
       </div>
     </Page>

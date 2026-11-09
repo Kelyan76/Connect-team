@@ -151,8 +151,8 @@ export function NotificationSettings() {
                 <Switch checked={p.weekly_recap} onCheckedChange={(v) => set({ weekly_recap: v })} aria-label="Récap du lundi" />
               </div>
             </Row>
-            <Row title="Demandes de one-to-one" detail="Dès qu’un collaborateur vous en demande un.">
-              <Switch checked={p.request_alerts} onCheckedChange={(v) => set({ request_alerts: v })} aria-label="Demandes de one-to-one" />
+            <Row title="Demandes de 1 à 1" detail="Dès qu’un collaborateur vous en demande un.">
+              <Switch checked={p.request_alerts} onCheckedChange={(v) => set({ request_alerts: v })} aria-label="Demandes de 1 à 1" />
             </Row>
           </>
         )}

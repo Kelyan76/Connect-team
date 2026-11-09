@@ -46,7 +46,7 @@ function useCollaboratorReminders(enabled: boolean): Reminder[] {
   }, [enabled, reviews.data, actions.data, settings.data, pulses.data, profile.id]);
 }
 
-/** Côté manager : demandes de one-to-one en attente et signaux du pouls, en tête des alertes. */
+/** Côté manager : demandes de 1 à 1 en attente et signaux du pouls, en tête des alertes. */
 function useManagerReminders(enabled: boolean): Reminder[] {
   const alerts = useAlerts();
   const requests = useReviewRequests();
@@ -62,7 +62,7 @@ function useManagerReminders(enabled: boolean): Reminder[] {
       out.push({
         id: `demande-${r.id}`,
         severity: 'danger',
-        title: `Demande de one-to-one : ${who ? fullName(who) : 'un collaborateur'}`,
+        title: `Demande de 1 à 1 : ${who ? fullName(who) : 'un collaborateur'}`,
         detail: r.message ? `« ${r.message.slice(0, 80)} »` : r.preferred_date ? `Souhaité le ${formatDate(r.preferred_date)}` : 'À planifier',
         to: '/entretiens',
       });

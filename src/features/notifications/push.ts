@@ -77,7 +77,7 @@ export async function sendTestPush(): Promise<number> {
   return data?.sent ?? 0;
 }
 
-/** Prévient le manager d'une nouvelle demande de one-to-one (sans bloquer si l'envoi échoue). */
+/** Prévient le manager d'une nouvelle demande de 1 à 1 (sans bloquer si l'envoi échoue). */
 export function notifyReviewRequest(requestId: string): void {
   void supabase.functions.invoke('push-notify', { body: { type: 'review_request', request_id: requestId } }).catch(() => undefined);
 }

@@ -4,8 +4,9 @@ import { longestOverloadStreak, weeklyLoad, type Allocation } from '@/features/w
 import { daysBetween, isoWeekLabel } from '@/shared/lib/dates';
 import { formatDate } from '@/shared/lib/format';
 import type { ObjectiveStatus } from '@/features/objectives/lib/status';
+import type { Signal } from '@/features/pulse/lib/pulse';
 
-export type AlertKind = 'objectif' | 'one_to_one' | 'surcharge' | 'meteo' | 'echeance' | 'preparation';
+export type AlertKind = 'decrochage' | 'pouls' | 'echeances' | 'reconnaissance' | 'objectif' | 'one_to_one' | 'surcharge' | 'meteo' | 'echeance' | 'preparation';
 export type Severity = 'danger' | 'warning';
 
 export interface Alert {
@@ -19,8 +20,12 @@ export interface Alert {
 }
 
 export const ALERT_KIND_LABEL: Record<AlertKind, string> = {
+  decrochage: 'Signal faible',
+  pouls: 'Pouls',
+  echeances: 'Échéances',
+  reconnaissance: 'Reconnaissance',
   objectif: 'Objectif',
-  one_to_one: 'One-to-one',
+  one_to_one: '1 à 1',
   surcharge: 'Charge',
   meteo: 'Humeur',
   echeance: 'Échéance réglementaire',
@@ -45,7 +50,15 @@ export interface AlertInput {
   weeks: string[];
   weather: WeatherLike[];
   settings: Thresholds;
+  /** Signaux du pouls du jour (moral bas, baisse, motivation, surcharge, silence). */
+  pulseSignals?: Signal[];
+  /** Tâches non terminées dont l'échéance est passée. */
+  lateTasks?: { assignee_id: string | null; title: string; due_date: string | null }[];
+  /** Feedbacks de reconnaissance partagés (levier DREAM « Reconnaissance »). */
+  recognitions?: { collaborator_id: string; created_at: string }[];
 }
+
+const RETREAT: Signal['kind'][] = ['moral_bas', 'en_baisse', 'motivation_basse', 'silence'];
 
 const name = (p: { first_name: string; last_name: string }) => `${p.first_name} ${p.last_name}`;
 
@@ -73,6 +86,51 @@ export function computeAlerts(input: AlertInput): Alert[] {
     const weekLoads = weeklyLoad(input.allocations);
     for (const p of input.people) {
       const mine = input.reviews.filter((r) => r.collaborator_id === p.id);
+      const signals = (input.pulseSignals ?? []).filter((s) => s.personId === p.id);
+      const late = (input.lateTasks ?? []).filter((t) => t.assignee_id === p.id);
+      const retreat = signals.filter((s) => RETREAT.includes(s.kind));
+      if (retreat.length > 0 && late.length >= 2) {
+        // Le scénario type : un collaborateur en retrait qui manque ses échéances. Comprendre avant de juger.
+        alerts.push({
+          id: `decrochage-${p.id}`,
+          kind: 'decrochage',
+          severity: 'danger',
+          personId: p.id,
+          title: `${name(p)} en retrait : à comprendre en 1 à 1`,
+          detail: `${retreat.map((s) => s.detail).join(' · ')} · ${late.length} échéances manquées`,
+          to: `/equipe/${p.id}`,
+        });
+      } else {
+        for (const s of signals) {
+          alerts.push({ id: `pouls-${s.kind}-${p.id}`, kind: 'pouls', severity: s.severity, personId: p.id, title: s.title, detail: s.detail, to: '/pouls' });
+        }
+        if (late.length > 0) {
+          alerts.push({
+            id: `late-${p.id}`,
+            kind: 'echeances',
+            severity: late.length >= 2 ? 'danger' : 'warning',
+            personId: p.id,
+            title: `${late.length > 1 ? `${late.length} échéances manquées` : 'Échéance manquée'} : ${name(p)}`,
+            detail: late.map((t) => t.title).join(' · '),
+            to: '/taches',
+          });
+        }
+      }
+      if (input.recognitions) {
+        const last = input.recognitions.filter((r) => r.collaborator_id === p.id).map((r) => r.created_at.slice(0, 10)).sort().pop();
+        const days = last ? daysBetween(last, today) : null;
+        if (days === null || days > 30) {
+          alerts.push({
+            id: `reco-${p.id}`,
+            kind: 'reconnaissance',
+            severity: 'warning',
+            personId: p.id,
+            title: `Aucune reconnaissance pour ${name(p)} ${days === null ? 'à ce jour' : `depuis ${days} jours`}`,
+            detail: 'Levier DREAM « Reconnaissance » : nommer une réussite concrète',
+            to: `/feedbacks?nouveau=1&collaborateur=${p.id}&type=reconnaissance`,
+          });
+        }
+      }
       const held = (kind: ReviewKind) =>
         mine.filter((r) => r.kind === kind && r.status === 'termine').sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at))[0];
 
@@ -84,8 +142,8 @@ export function computeAlerts(input: AlertInput): Alert[] {
           kind: 'one_to_one',
           severity: 'warning',
           personId: p.id,
-          title: `${name(p)} sans one-to-one depuis ${since === null ? 'son arrivée' : `${since} jours`}`,
-          detail: lastOne ? `Dernier échange le ${formatDate(lastOne.scheduled_at)}` : 'Aucun one-to-one enregistré',
+          title: `${name(p)} sans 1 à 1 depuis ${since === null ? 'son arrivée' : `${since} jours`}`,
+          detail: lastOne ? `Dernier échange le ${formatDate(lastOne.scheduled_at)}` : 'Aucun 1 à 1 enregistré',
           to: '/entretiens',
         });
       }
@@ -103,7 +161,7 @@ export function computeAlerts(input: AlertInput): Alert[] {
         });
       }
 
-      if (hasMoodDrop(input.weather.filter((w) => w.collaborator_id === p.id), s.weather_drop_weeks)) {
+      if (!input.pulseSignals && hasMoodDrop(input.weather.filter((w) => w.collaborator_id === p.id), s.weather_drop_weeks)) {
         alerts.push({
           id: `meteo-${p.id}`,
           kind: 'meteo',

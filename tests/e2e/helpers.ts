@@ -2,9 +2,9 @@ import { expect, type Page } from '@playwright/test';
 
 export const PASSWORD = 'Cadence-Demo26!';
 export const ACCOUNTS = {
-  manager: 'claire.vasseur@valmont-equipements.fr',
-  nadia: 'nadia.haddad@valmont-equipements.fr',
-  julien: 'julien.mercier@valmont-equipements.fr',
+  manager: 'camille.lefevre@nebuleo.example',
+  nadia: 'ines.moreau@nebuleo.example',
+  julien: 'hugo.lambert@nebuleo.example',
 } as const;
 
 /** Connexion par le formulaire ; attend la page d'arrivée (tableau de bord ou page demandée avant connexion). */

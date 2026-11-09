@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { qk } from '@/shared/lib/query-keys';
 import { toast } from '@/shared/ui/toaster';
+import { check, unwrap } from '@/shared/lib/errors';
+import { supabase } from '@/shared/lib/supabase';
+import type { Tables } from '@/shared/types/database';
 import * as api from './api';
 import type { AnswerValue } from './lib/review-rules';
 
@@ -10,7 +13,7 @@ export const useAnswers = (id: string) => useQuery({ queryKey: qk.answers(id), q
 export const useTemplates = () => useQuery({ queryKey: qk.templates, queryFn: api.listTemplates });
 export const useTemplateQuestions = () => useQuery({ queryKey: qk.templateQuestions, queryFn: api.listTemplateQuestions });
 export const useReviewActions = () => useQuery({ queryKey: qk.reviewActions, queryFn: api.listActions });
-/** Demandes de one-to-one : rafraîchies toutes les 30 s pour notifier le manager sans recharger la page. */
+/** Demandes de 1 à 1 : rafraîchies toutes les 30 s pour notifier le manager sans recharger la page. */
 export const useReviewRequests = () =>
   useQuery({ queryKey: qk.reviewRequests, queryFn: api.listRequests, refetchInterval: 30_000, refetchIntervalInBackground: false });
 
@@ -140,5 +143,27 @@ export function useDeleteQuestion() {
       toast.success('Question supprimée');
       return qc.invalidateQueries({ queryKey: qk.templateQuestions });
     },
+  });
+}
+
+// ─── Préparation privée du manager (kit 1 à 1) ──────────────────────────
+
+export type ReviewPrep = Tables<'review_preps'>;
+export type PrepPatch = Partial<Pick<ReviewPrep, 'theme' | 'company_news' | 'posture' | 'checklist'>>;
+
+export const useReviewPrep = (reviewId: string, enabled = true) =>
+  useQuery({
+    queryKey: qk.reviewPrep(reviewId),
+    queryFn: async (): Promise<ReviewPrep | null> =>
+      unwrap(await supabase.from('review_preps').select('*').eq('review_id', reviewId).maybeSingle(), 'Préparation'),
+    enabled,
+  });
+
+export function useSaveReviewPrep(reviewId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (patch: PrepPatch) =>
+      check(await supabase.from('review_preps').upsert({ review_id: reviewId, ...patch }, { onConflict: 'review_id' }), 'Préparation'),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.reviewPrep(reviewId) }),
   });
 }

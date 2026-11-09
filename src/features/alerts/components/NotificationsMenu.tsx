@@ -11,7 +11,7 @@ import { toast } from '@/shared/ui/toaster';
 import { useReminders } from '../use-reminders';
 
 /**
- * Le manager est prévenu dès qu'un collaborateur demande un one-to-one : notification à l'écran
+ * Le manager est prévenu dès qu'un collaborateur demande un 1 à 1 : notification à l'écran
  * et cloche qui s'anime (les demandes sont relues toutes les 30 s).
  */
 function useNewRequestNotifier(enabled: boolean, onNew: () => void) {
@@ -31,7 +31,7 @@ function useNewRequestNotifier(enabled: boolean, onNew: () => void) {
     for (const r of fresh) {
       seen.current.add(r.id);
       const who = team.byId.get(r.collaborator_id);
-      toast(`${who ? fullName(who) : 'Un collaborateur'} demande un one-to-one`, {
+      toast(`${who ? fullName(who) : 'Un collaborateur'} demande un 1 à 1`, {
         description: r.message || undefined,
         action: { label: 'Voir', onClick: () => navigate('/entretiens') },
         duration: 10_000,

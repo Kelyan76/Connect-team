@@ -50,8 +50,8 @@ export default function ReviewsPage() {
         title={isManager ? 'Entretiens' : 'Mes entretiens'}
         description={
           isManager
-            ? 'One-to-one, entretiens annuels et professionnels de l’équipe.'
-            : 'Préparez vos entretiens, consultez vos comptes-rendus et demandez un one-to-one.'
+            ? '1 à 1, entretiens annuels et professionnels de l’équipe.'
+            : 'Préparez vos entretiens, consultez vos comptes-rendus et demandez un 1 à 1.'
         }
         actions={
           isManager ? (
@@ -70,7 +70,7 @@ export default function ReviewsPage() {
           ) : (
             <Button variant="primary" onClick={() => setRequesting(true)}>
               <MessageSquarePlus aria-hidden />
-              Demander un one-to-one
+              Demander un 1 à 1
             </Button>
           )
         }
@@ -97,7 +97,7 @@ export default function ReviewsPage() {
                     reviews={upcoming}
                     byId={team.byId}
                     showPerson={isManager}
-                    empty={isManager ? 'Aucun entretien planifié. Commencez par les one-to-one de l’équipe.' : 'Aucun entretien planifié pour le moment.'}
+                    empty={isManager ? 'Aucun entretien planifié. Commencez par les 1 à 1 de l’équipe.' : 'Aucun entretien planifié pour le moment.'}
                     when={(r) => daysFromToday(r.scheduled_at.slice(0, 10))}
                   />
                 </TabsContent>

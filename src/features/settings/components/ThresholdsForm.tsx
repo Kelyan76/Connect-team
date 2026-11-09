@@ -24,7 +24,7 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 
 const FIELDS: { key: keyof Values; label: string; unit: string; hint: string }[] = [
-  { key: 'no_one_to_one_days', label: 'One-to-one manquant', unit: 'jours', hint: 'Alerte quand le dernier one-to-one date de plus de N jours.' },
+  { key: 'no_one_to_one_days', label: '1 à 1 manquant', unit: 'jours', hint: 'Alerte quand le dernier 1 à 1 date de plus de N jours.' },
   { key: 'overload_pct', label: 'Seuil de surcharge', unit: '%', hint: 'Charge hebdomadaire au-delà de laquelle on parle de surcharge.' },
   { key: 'overload_weeks', label: 'Durée de surcharge', unit: 'semaines', hint: 'Nombre de semaines consécutives avant alerte.' },
   { key: 'underload_pct', label: 'Seuil de sous-charge', unit: '%', hint: 'Signalé dans le plan de charge.' },

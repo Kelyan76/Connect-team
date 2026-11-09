@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { ACCOUNTS, go, login, logout } from './helpers';
 
-const NADIA_REVIEW = '/entretiens/66666666-0000-4000-8000-000000000042';
+const NADIA_REVIEW = '/entretiens/66666666-0000-4000-8000-000000000142';
 
 test('préparation en deux temps, clôture et signature d’un entretien', async ({ page }) => {
   // 1. La collaboratrice prépare sa partie.
@@ -21,7 +21,7 @@ test('préparation en deux temps, clôture et signature d’un entretien', async
   await logout(page);
 
   // 2. Le manager voit la préparation validée, prépare la sienne et observe l'écart.
-  await login(page, ACCOUNTS.manager, 'Claire');
+  await login(page, ACCOUNTS.manager, 'Camille');
   await go(page, NADIA_REVIEW);
   await page.getByRole('tab', { name: 'Ma préparation' }).click();
   await page.getByRole('radio', { name: '2' }).first().click();

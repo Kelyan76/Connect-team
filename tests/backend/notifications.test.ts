@@ -18,8 +18,8 @@ let manager: SupabaseClient<Database>;
 beforeAll(async () => {
   julien = client();
   manager = client();
-  await julien.auth.signInWithPassword({ email: 'julien.mercier@valmont-equipements.fr', password: PASSWORD });
-  await manager.auth.signInWithPassword({ email: 'claire.vasseur@valmont-equipements.fr', password: PASSWORD });
+  await julien.auth.signInWithPassword({ email: 'hugo.lambert@nebuleo.example', password: PASSWORD });
+  await manager.auth.signInWithPassword({ email: 'camille.lefevre@nebuleo.example', password: PASSWORD });
 }, 120_000);
 
 describe('notifications', () => {

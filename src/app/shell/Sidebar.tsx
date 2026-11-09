@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib/cn';
 import { BrandMark } from '@/shared/ui/brand';
 import { SECTION_COLOR, type SectionTone } from './section-colors';
 import { Tooltip } from '@/shared/ui/menu';
-import { itemLabel, matchesPath, sectionsForRole, SETTINGS_ITEM, type Role } from './nav';
+import { ETHICS_ITEM, itemLabel, matchesPath, sectionsForRole, SETTINGS_ITEM, type Role } from './nav';
 
 interface SidebarProps {
   role: Role;
@@ -108,6 +108,13 @@ export function Sidebar({ role, collapsed, onToggle, teamName, badges = {} }: Si
       </nav>
 
       <div className="flex flex-col gap-1 border-t border-sidebar-hover px-3 py-3">
+        <Entry
+          to={ETHICS_ITEM.to}
+          label={ETHICS_ITEM.label}
+          icon={ETHICS_ITEM.icon}
+          active={matchesPath(ETHICS_ITEM.to, pathname)}
+          collapsed={collapsed}
+        />
         {role === 'manager' && (
           <Entry
             to={SETTINGS_ITEM.to}
