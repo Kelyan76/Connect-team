@@ -1,12 +1,16 @@
-import { Flame, HeartPulse, Loader2, Pencil } from 'lucide-react';
+import { Flame, Loader2, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
+import { defaultAvatar, parseAvatar } from '@/shared/lib/avatar';
 import { cn } from '@/shared/lib/cn';
+import { fullName } from '@/shared/lib/format';
+import { AvatarArt } from '@/shared/ui/avatar-art';
 import { todayIso } from '@/shared/lib/dates';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/feedback';
 import { displayDays, ENERGY, ENERGY_COLOR, MOOD, MOOD_COLOR, streak, WORKLOAD, WORKLOAD_COLOR, type ScaleStep } from '../lib/pulse';
 import { usePulses, useSavePulse } from '../queries';
+import { PulseRewards } from './PulseRewards';
 
 type Colors = typeof MOOD_COLOR;
 
@@ -87,6 +91,8 @@ export function PulseCheckin() {
     today,
   );
   const byDay = new Map(mine.map((p) => [p.day, p.mood]));
+  // Son avatar, ou une proposition tant qu'il n'en a pas créé (Mon profil › Mon avatar).
+  const look = parseAvatar(profile.avatar) ?? defaultAvatar(fullName(profile));
 
   if (!pulses.data) return <Skeleton className="mb-6 h-40 rounded-lg" />;
 
@@ -111,6 +117,9 @@ export function PulseCheckin() {
         )}
       >
         <div className="flex items-center gap-2">
+          <span key={current.mood} className="animate-pop-in">
+            <AvatarArt config={look} mood={current.mood} className="size-14 drop-shadow-md" title={`Mon avatar : ${MOOD[current.mood].label.toLowerCase()}`} />
+          </span>
           <span className={cn('flex size-11 items-center justify-center rounded shadow-sm', MOOD_COLOR[current.mood].solid)} title={MOOD[current.mood].label}>
             <M className="size-6" aria-hidden />
           </span>
@@ -136,6 +145,9 @@ export function PulseCheckin() {
             <Pencil aria-hidden />
           </Button>
         </div>
+        <div className="order-last basis-full">
+          <PulseRewards days={mine.map((p) => p.day)} notes={mine.filter((p) => p.note).length} today={today} />
+        </div>
       </section>
     );
   }
@@ -146,14 +158,14 @@ export function PulseCheckin() {
   };
 
   return (
-    <section className="relative mb-6 animate-page-in overflow-hidden rounded-lg border border-hero-from/20 bg-gradient-to-br from-hero-from/10 via-surface to-hero-to/10 p-5 shadow-sm">
+    <section className="relative mb-6 animate-page-in overflow-clip rounded-lg border border-hero-from/20 bg-gradient-to-br from-hero-from/10 via-surface to-hero-to/10 p-5 shadow-sm">
       <span aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-40 animate-float-slow rounded-full bg-hero-to/10" />
       <span aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 size-32 animate-float rounded-full bg-mood-4/10" />
       <div className="relative flex flex-col gap-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded bg-gradient-to-br from-hero-from to-hero-to text-white shadow-sm">
-              <HeartPulse className="size-5" aria-hidden />
+            <span key={mood ?? 0} className="shrink-0 animate-pop-in">
+              <AvatarArt config={look} mood={mood ?? undefined} className="size-14 drop-shadow-md" title="Mon avatar prend l’humeur choisie" />
             </span>
             <div>
               <h2 className="text-md font-semibold">Comment vous sentez-vous aujourd’hui ?</h2>

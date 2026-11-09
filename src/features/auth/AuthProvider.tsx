@@ -18,6 +18,8 @@ interface AuthContextValue {
   /** Session ouverte mais profil pas encore chargé (ex. définition du mot de passe). */
   session: Session | null;
   signOut: (reason?: string) => Promise<void>;
+  /** Recharge le profil connecté (après modification de l'avatar, par exemple). */
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -84,6 +86,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await signOut();
         queryClient.clear();
         if (reason) toast(reason);
+      },
+      refreshProfile: async () => {
+        if (state.status !== 'signed_in') return;
+        const profile = await fetchProfile(state.profile.id);
+        setState((s) => (s.status === 'signed_in' && s.profile.id === profile.id ? { ...s, profile } : s));
       },
     }),
     [state, session, queryClient],

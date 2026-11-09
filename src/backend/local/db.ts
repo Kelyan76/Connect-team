@@ -62,8 +62,11 @@ async function bootstrap(dataDir: string | undefined): Promise<PGlite> {
   for (const path of Object.keys(migrations).sort()) {
     const name = path.split('/').pop() ?? path;
     if (applied.has(name)) continue;
-    await db.exec(migrations[path]);
-    await db.query('insert into supalite.migrations (name) values ($1)', [name]);
+    // Tout ou rien : une page rechargée en pleine création ne laisse pas une migration à moitié appliquée.
+    await db.transaction(async (tx) => {
+      await tx.exec(migrations[path]);
+      await tx.query('insert into supalite.migrations (name) values ($1)', [name]);
+    });
   }
   const seed = Object.values(seeds)[0];
   if (fresh && seed) await db.exec(seed);

@@ -15,6 +15,7 @@ import { HeroBanner } from './HeroBanner';
 import { MyActions } from './MyActions';
 import { MyWeekTasks } from './MyWeekTasks';
 import { NextReview } from './NextReview';
+import { PrepNudge } from './PrepNudge';
 
 type View = 'objectifs' | 'semaine' | 'entretien';
 
@@ -28,6 +29,7 @@ export function CollaboratorDashboard() {
     <Page>
       <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`${profile.job_title} · bonne journée !`} />
       <PulseCheckin />
+      <PrepNudge />
       <EnableNotificationsCard />
       <div className="flex flex-col gap-4">
         <div className="no-scrollbar -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">

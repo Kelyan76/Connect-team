@@ -13,7 +13,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { reviewQuestions } from '../api';
 import { ActionPlan } from '../components/ActionPlan';
 import { AnswerForm } from '../components/AnswerForm';
+import { CollaboratorTopics } from '../components/CollaboratorTopics';
 import { KeyliaPrep } from '../components/KeyliaPrep';
+import { QuickPrep } from '../components/QuickPrep';
 import { OneToOneGuide } from '../components/OneToOneGuide';
 import { MinutesPanel } from '../components/MinutesPanel';
 import { PrepAssistant } from '../components/PrepAssistant';
@@ -110,7 +112,10 @@ export default function ReviewPage() {
             <TabsTrigger value="compte-rendu">Compte-rendu</TabsTrigger>
           </TabsList>
           {stage === 'preparation' && (
-            <TabsContent value="preparation">
+            <TabsContent value="preparation" className="flex flex-col gap-6">
+              {!isManager && r.kind === 'one_to_one' && (
+                <QuickPrep review={r} answers={answers.data} managerName={team.byId.get(r.manager_id)?.first_name ?? 'votre manager'} />
+              )}
               <AnswerForm review={r} questions={questions} answers={answers.data} author={viewer} editable={canEditOwnAnswers(viewer, r)} />
             </TabsContent>
           )}
@@ -133,7 +138,12 @@ export default function ReviewPage() {
         <aside className="flex min-w-0 flex-col gap-6">
           {isManager ? (
             <>
-              {r.kind === 'one_to_one' && stage === 'preparation' && <KeyliaPrep review={r} />}
+              {r.kind === 'one_to_one' && stage === 'preparation' && (
+                <>
+                  <CollaboratorTopics review={r} answers={answers.data} firstName={person?.first_name ?? 'Le collaborateur'} />
+                  <KeyliaPrep review={r} />
+                </>
+              )}
               <PrepAssistant review={r} />
             </>
           ) : (
