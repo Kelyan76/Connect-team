@@ -316,6 +316,11 @@ insert into seed_reviews values
   ('66666666-0000-4000-8000-000000000126', 'sarah',    'annuel', -250, '14:00', 'signe', 'Intégration réussie, recherche utilisateur structurée.', ''),
   ('66666666-0000-4000-8000-000000000131', 'mehdi',    'professionnel', -712, '14:00', 'signe', 'Souhaite évoluer vers un rôle d''architecte infrastructure.', ''),
   ('66666666-0000-4000-8000-000000000132', 'hugo',     'professionnel', -455, '10:00', 'signe', 'Intérêt pour un rôle de lead technique.', ''),
+  ('66666666-0000-4000-8000-000000000133', 'yanis',    'professionnel', -300, '11:00', 'signe', 'Souhaite se spécialiser sur l''accessibilité mobile.', ''),
+  ('66666666-0000-4000-8000-000000000134', 'ines',     'professionnel', -410, '10:00', 'signe', 'Projet : animer la communauté front de l''entreprise.', ''),
+  ('66666666-0000-4000-8000-000000000135', 'sarah',    'professionnel', -230, '14:00', 'signe', 'Premier entretien professionnel après l''intégration.', ''),
+  ('66666666-0000-4000-8000-000000000136', 'amandine', 'professionnel', -520, '15:00', 'signe', 'Intérêt pour une certification en automatisation des tests.', ''),
+  ('66666666-0000-4000-8000-000000000127', 'lucas',    'annuel', -40, '11:00', 'signe', 'Bilan de la première année d''alternance : progression nette, besoin de cadre sur les tests.', ''),
   -- clos, pas encore signé par le collaborateur
   ('66666666-0000-4000-8000-000000000108', 'amandine', 'one_to_one', -2, '15:00', 'clos', 'Binôme avec Lucas en place. Outil de test : licence validée.', 'Automatiser le parcours de réservation'),
   -- à venir

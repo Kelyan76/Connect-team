@@ -87,15 +87,15 @@ export function dreamLevers(i: DreamInput): LeverState[] {
       ? { lever: 'R', status: 'a_activer', detail: 'Aucune reconnaissance partagée' }
       : lastReco <= 21
         ? { lever: 'R', status: 'ok', detail: `Dernière reconnaissance il y a ${plural(lastReco, 'jour')}` }
-        : { lever: 'R', status: lastReco <= 45 ? 'partiel' : 'a_activer', detail: `Aucune reconnaissance depuis ${plural(lastReco, 'jour')}` };
+        : { lever: 'R', status: lastReco <= 30 ? 'partiel' : 'a_activer', detail: `Aucune reconnaissance depuis ${plural(lastReco, 'jour')}` };
 
   const mood = i.recentMoods.length ? i.recentMoods.reduce((s, m) => s + m, 0) / i.recentMoods.length : null;
   const environment: LeverState =
     mood === null
       ? { lever: 'E', status: 'inconnu', detail: 'Pas de pouls récent' }
       : mood >= 3.5
-        ? { lever: 'E', status: 'ok', detail: `Humeur ${mood.toFixed(1).replace('.', ',')} / 5 sur 10 jours` }
-        : { lever: 'E', status: mood >= 2.5 ? 'partiel' : 'a_activer', detail: `Humeur ${mood.toFixed(1).replace('.', ',')} / 5 sur 10 jours : prendre des nouvelles` };
+        ? { lever: 'E', status: 'ok', detail: `Humeur ${mood.toFixed(1).replace('.', ',')} / 5 sur 14 jours` }
+        : { lever: 'E', status: mood >= 2.5 ? 'partiel' : 'a_activer', detail: `Humeur ${mood.toFixed(1).replace('.', ',')} / 5 sur 14 jours : prendre des nouvelles` };
 
   const autonomy: LeverState =
     i.activeMissions.length > 0
@@ -117,6 +117,16 @@ export function dreamLevers(i: DreamInput): LeverState[] {
 }
 
 export const leversToActivate = (states: LeverState[]) => states.filter((s) => s.status === 'a_activer');
+
+/** Leviers sur lesquels agir en priorité : ceux à activer, sinon ceux à entretenir. */
+export function nextLevers(states: LeverState[]): LeverState[] {
+  const todo = leversToActivate(states);
+  return todo.length ? todo : states.filter((s) => s.status === 'partiel').slice(0, 2);
+}
+
+/** Tri : d'abord les collaborateurs qui ont le plus de leviers en sommeil. */
+export const leverUrgency = (states: LeverState[]) =>
+  states.reduce((s, l) => s + (l.status === 'a_activer' ? 10 : l.status === 'partiel' ? 1 : 0), 0);
 
 /** Libellé et couleur de pastille de chaque état. */
 export const LEVER_STATUS: Record<LeverStatus, { label: string; chip: string }> = {

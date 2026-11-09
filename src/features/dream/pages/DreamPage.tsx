@@ -8,7 +8,7 @@ import { EmptyState, TableSkeleton } from '@/shared/ui/feedback';
 import { NativeSelect } from '@/shared/ui/input';
 import { Page, PageHeader, Panel } from '@/shared/ui/layout';
 import { LeverChips } from '../components/LeverChips';
-import { LEVER_ORDER, LEVER_STATUS, LEVERS, leversToActivate, type Lever } from '../lib/dream';
+import { LEVER_ORDER, LEVER_STATUS, LEVERS, leverUrgency, nextLevers, type Lever } from '../lib/dream';
 import { useDreamStates } from '../queries';
 
 /** « Comment je crée et j'entretiens le lien ? » : les leviers DREAM de chaque collaborateur. */
@@ -20,7 +20,7 @@ export default function DreamPage() {
   const rows = team.active
     .map((p) => ({ p, states: dream.data?.get(p.id) ?? [] }))
     .filter((r) => !focus || r.states.find((s) => s.lever === focus)?.status !== 'ok')
-    .sort((a, b) => leversToActivate(b.states).length - leversToActivate(a.states).length);
+    .sort((a, b) => leverUrgency(b.states) - leverUrgency(a.states));
 
   return (
     <Page>
@@ -62,7 +62,7 @@ export default function DreamPage() {
         ) : (
           <ul className="divide-y divide-line">
             {rows.map(({ p, states }) => {
-              const todo = leversToActivate(states).filter((s) => !focus || s.lever === focus);
+              const todo = nextLevers(states).filter((s) => !focus || s.lever === focus);
               return (
                 <li key={p.id} className="flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center">
                   <Link to={`/equipe/${p.id}`} className="min-w-0 md:w-56">
@@ -71,7 +71,7 @@ export default function DreamPage() {
                   <LeverChips states={states} />
                   <div className="flex min-w-0 flex-1 flex-wrap gap-2 md:justify-end">
                     {todo.length === 0 ? (
-                      <span className="text-sm text-fg-subtle">{LEVER_STATUS.ok.label} ou à entretenir</span>
+                      <span className="text-sm text-fg-subtle">Tous les leviers : {LEVER_STATUS.ok.label.toLowerCase()}</span>
                     ) : (
                       todo.map((s) => (
                         <Button key={s.lever} asChild size="sm">

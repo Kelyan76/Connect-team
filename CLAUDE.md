@@ -1,6 +1,6 @@
 # CLAUDE.md — Connect Team
 
-Application de pilotage et de management d'équipe (manager de PME industrielle + collaborateurs). Interface 100 % en français.
+Application d’accompagnement du manager de proximité et de ses collaborateurs, fondée sur les outils du cours (1 à 1, DESC, DISC, SMART, délégation, SCARF, DREAM). Interface 100 % en français.
 
 ## Stack
 

@@ -7,6 +7,7 @@ import { useAuth, useCurrentUser } from '@/features/auth/AuthProvider';
 import { newPasswordSchema, type NewPasswordValues } from '@/features/auth/lib/password';
 import { NotificationSettings } from '@/features/notifications/components/NotificationSettings';
 import { BackupPanel } from '@/features/settings/components/BackupPanel';
+import { DiscCard } from '@/features/team/components/DiscCard';
 import { toUserMessage } from '@/shared/lib/errors';
 import { formatDate, fullName } from '@/shared/lib/format';
 import { isLocalBackend } from '@/shared/lib/supabase';
@@ -77,6 +78,11 @@ export default function ProfilePage() {
           </form>
         </Panel>
       </div>
+      {!isManager && (
+        <div className="mt-6">
+          <DiscCard personId={profile.id} self />
+        </div>
+      )}
       <div className="mt-6">
         <NotificationSettings />
       </div>

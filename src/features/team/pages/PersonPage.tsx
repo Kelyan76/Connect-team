@@ -1,7 +1,9 @@
-import { CalendarPlus, FileDown, UserX, UserCheck } from 'lucide-react';
+import { CalendarPlus, Compass, FileDown, NotebookPen, PenLine, UserX, UserCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useCurrentUser } from '@/features/auth/AuthProvider';
+import { FeedbackDialog } from '@/features/feedback/components/FeedbackDialog';
+import { ObservationDialog } from '@/features/notebook/components/ObservationDialog';
+import { NotebookList } from '@/features/notebook/components/NotebookList';
 import { downloadPersonReport } from '@/features/reports/download';
 import { formatDate, fullName } from '@/shared/lib/format';
 import { Avatar } from '@/shared/ui/avatar';
@@ -11,17 +13,19 @@ import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { EmptyState, ErrorState, Skeleton } from '@/shared/ui/feedback';
 import { DescriptionList, Page, PageHeader, Panel } from '@/shared/ui/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
-import { PrivateNotes } from '../components/PrivateNotes';
+import { DiscCard } from '../components/DiscCard';
+import { PersonOverview } from '../components/PersonOverview';
 import { PersonFeedbacks, PersonObjectives, PersonReviews, PersonSkills } from '../components/PersonSections';
 import { useSetActive, useTeamMembers } from '../queries';
 
 export default function PersonPage() {
   const { id = '' } = useParams();
-  const { profile: me } = useCurrentUser();
   const team = useTeamMembers();
   const setActive = useSetActive();
   const [confirm, setConfirm] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [noting, setNoting] = useState(false);
+  const [feedback, setFeedback] = useState(false);
   const person = team.byId.get(id);
 
   if (team.error) return <ErrorState error={team.error} />;
@@ -66,32 +70,57 @@ export default function PersonPage() {
         }
         actions={
           <>
-            <Button onClick={() => setConfirm(true)}>
+            <Button onClick={() => setNoting(true)}>
+              <NotebookPen aria-hidden />
+              Noter
+            </Button>
+            <Button onClick={() => setFeedback(true)}>
+              <PenLine aria-hidden />
+              Feedback
+            </Button>
+            <Button asChild>
+              <Link to={`/posture?collaborateur=${person.id}`}>
+                <Compass aria-hidden />
+                Décider
+              </Link>
+            </Button>
+            <Button className="hidden sm:inline-flex" onClick={() => setConfirm(true)}>
               {person.is_active ? <UserX aria-hidden /> : <UserCheck aria-hidden />}
               {person.is_active ? 'Désactiver' : 'Réactiver'}
             </Button>
-            <Button onClick={() => void exportPdf()} disabled={exporting}>
+            <Button className="hidden sm:inline-flex" onClick={() => void exportPdf()} disabled={exporting}>
               <FileDown aria-hidden />
               {exporting ? 'Génération…' : 'Fiche PDF'}
             </Button>
             <Button asChild variant="primary">
               <Link to={`/entretiens?planifier=1&collaborateur=${person.id}`}>
                 <CalendarPlus aria-hidden />
-                Planifier un entretien
+                Planifier un 1 à 1
               </Link>
             </Button>
           </>
         }
       />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Tabs defaultValue="objectifs" className="min-w-0">
+        <Tabs defaultValue="synthese" className="min-w-0">
           <TabsList>
+            <TabsTrigger value="synthese">Où en est-il ?</TabsTrigger>
+            <TabsTrigger value="carnet">Carnet</TabsTrigger>
+            <TabsTrigger value="disc">DISC</TabsTrigger>
             <TabsTrigger value="objectifs">Objectifs</TabsTrigger>
-            <TabsTrigger value="competences">Compétences</TabsTrigger>
-            <TabsTrigger value="entretiens">Entretiens</TabsTrigger>
+            <TabsTrigger value="entretiens">1 à 1</TabsTrigger>
             <TabsTrigger value="feedbacks">Feedbacks</TabsTrigger>
-            <TabsTrigger value="notes">Notes privées</TabsTrigger>
+            <TabsTrigger value="competences">Compétences</TabsTrigger>
           </TabsList>
+          <TabsContent value="synthese">
+            <PersonOverview person={person} />
+          </TabsContent>
+          <TabsContent value="carnet">
+            <NotebookList personId={person.id} />
+          </TabsContent>
+          <TabsContent value="disc">
+            <DiscCard personId={person.id} self={false} />
+          </TabsContent>
           <TabsContent value="objectifs">
             <PersonObjectives personId={person.id} />
           </TabsContent>
@@ -103,9 +132,6 @@ export default function PersonPage() {
           </TabsContent>
           <TabsContent value="feedbacks">
             <PersonFeedbacks personId={person.id} />
-          </TabsContent>
-          <TabsContent value="notes">
-            <PrivateNotes personId={person.id} authorId={me.id} />
           </TabsContent>
         </Tabs>
         <Panel title="Identité">
@@ -120,6 +146,8 @@ export default function PersonPage() {
           />
         </Panel>
       </div>
+      <ObservationDialog open={noting} onOpenChange={setNoting} defaultPerson={person.id} />
+      <FeedbackDialog open={feedback} onOpenChange={setFeedback} defaultPerson={person.id} />
       <ConfirmDialog
         open={confirm}
         onOpenChange={setConfirm}

@@ -1,4 +1,4 @@
-import { FlaskConical, LogOut, Search, Settings, UserRound } from 'lucide-react';
+import { FlaskConical, LogOut, Search, Settings, ShieldCheck, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { usePeriod } from '@/app/providers/period';
@@ -108,6 +108,12 @@ export function Header({ user, teamName, onOpenPalette, onSignOut, notifications
               <Link to="/profil">
                 <UserRound aria-hidden />
                 Mon profil
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/ethique">
+                <ShieldCheck aria-hidden />
+                Éthique et données
               </Link>
             </DropdownMenuItem>
             {showSettings && (

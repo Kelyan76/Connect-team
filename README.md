@@ -1,6 +1,16 @@
 # Connect Team
 
-Application de pilotage et de management d'équipe pour le responsable d'une PME industrielle et ses collaborateurs : tableau de bord, fiches collaborateurs, entretiens (one-to-one, annuel, professionnel) avec préparation en deux temps et signature, objectifs (OKR), matrice de compétences, feedback, météo d'équipe, tâches en kanban, plan de charge, absences, réunions, délégation, alertes et rapports PDF.
+Application d'accompagnement du manager de proximité et de ses collaborateurs, construite à partir des outils du cours : le **1 à 1** (kit Keylia), le **feedback DESC**, le **DISC**, les **objectifs SMART**, la **délégation**, le modèle **SCARF** et les leviers **DREAM**. Elle répond à cinq questions du manager : où en est chacun de mes collaborateurs ? comment préparer et mener mon prochain échange ? quel signal faible suis-je en train de rater ? quelle décision prendre et avec quelle posture ? comment créer et entretenir le lien ?
+
+| Question du manager | Où dans l'application | Outil du cours |
+| --- | --- | --- |
+| Où en est chacun ? | Fiche collaborateur › *Où en est-il ?* (pouls, échéances, dernier 1 à 1, leviers, missions) | 1 à 1, SMART, délégation |
+| Préparer et mener l'échange | 1 à 1 › *Préparer en 5 étapes*, *Conduire le 1 à 1* (10/10/10, engagement final) | 1 à 1 (kit Keylia) |
+| Quel signal faible ? | Accueil › *Signaux faibles* (retrait + échéances manquées, surcharge, silence, reconnaissance oubliée) | Pouls, DREAM |
+| Quelle décision, quelle posture ? | *Décider* : faits, diagnostic Comprendre / Savoir / Pouvoir / Vouloir, contrôle SCARF, forme DISC | SCARF, DESC, DISC |
+| Créer et entretenir le lien | *Leviers DREAM*, feedback guidé DESC, carnet d'observations | DREAM, feedback |
+
+Charte **Éthique et données** (`/ethique`) : données collectées, finalités, accès, ce que voit le collaborateur et ce qui est refusé. Plan de charge, absences, réunions et rapports restent accessibles par leur adresse mais sont retirés du menu.
 
 React 18 · Vite · TypeScript strict · Tailwind CSS · shadcn/ui (restylé) · TanStack Query · React Hook Form + Zod · Recharts · Supabase (Auth, PostgreSQL, RLS, Edge Functions).
 
@@ -30,18 +40,18 @@ Mot de passe commun : `Cadence-Demo26!`
 
 | Rôle | Compte | Poste |
 | --- | --- | --- |
-| Manager | claire.vasseur@valmont-equipements.fr | Responsable des opérations |
-| Collaboratrice | nadia.haddad@valmont-equipements.fr | Technicienne de mise en service |
-| Collaborateur | julien.mercier@valmont-equipements.fr | Technicien SAV |
-| Collaborateur | karim.benali@valmont-equipements.fr | Chargé d'affaires |
+| Manager | camille.lefevre@nebuleo.example | Engineering Manager (persona) |
+| Collaborateur | hugo.lambert@nebuleo.example | Développeur back-end senior (scénario « moteur en retrait ») |
+| Collaboratrice | ines.moreau@nebuleo.example | Développeuse front-end |
+| Collaborateur | lucas.petit@nebuleo.example | Développeur full-stack (alternant) |
 
-Autres collaborateurs : Élodie Fontaine (assistante ADV), Thomas Girard (responsable atelier), Mathilde Roux (technicienne méthodes), Bastien Le Gall (technicien de maintenance itinérant), mêmes conventions d'adresse.
+Autres collaborateurs : Amandine Roy (ingénieure qualité), Yanis Cherif (développeur mobile), Mehdi Faure (DevOps), Sarah Nguyen (product designer), mêmes conventions d'adresse. Toutes les données sont fictives (Nébuleo, éditeur de logiciels inventé). Le jeu est créé par la migration `20261112090200_demo_nebuleo.sql`.
 
 ### Inscription des managers
 
 Page **Créer un compte manager** (`/inscription`, lien sous le formulaire de connexion). Il faut le code d'accès du groupe : `CADENCE` en démonstration locale, le secret `SIGNUP_CODE` en production.
 
-Chaque manager obtient sa propre équipe, copiée depuis l'équipe modèle (Valmont Équipements) : collaborateurs fictifs, objectifs, tâches, entretiens… Chaque collaborateur fictif a un vrai compte (adresse en `@cadence-demo.example`, mot de passe commun généré) : les identifiants sont affichés au manager en bas de la page **Équipe**. Les collaborateurs réels continuent d'arriver par invitation.
+Chaque manager obtient sa propre équipe, copiée depuis l'équipe modèle (Nébuleo, squad Planning) : collaborateurs fictifs, objectifs, tâches, entretiens… Chaque collaborateur fictif a un vrai compte (adresse en `@cadence-demo.example`, mot de passe commun généré) : les identifiants sont affichés au manager en bas de la page **Équipe**. Les collaborateurs réels continuent d'arriver par invitation.
 
 **Pouls du jour** (remplace l'ancienne météo hebdomadaire) : chaque collaborateur indique son humeur, sa motivation et sa charge de travail en haut de son accueil (série de jours consécutifs). Alertes, rapports et préparation d'entretien utilisent les moyennes hebdomadaires du pouls. Le manager suit l'équipe dans l'onglet *Pouls* de son accueil : participation, tendances, signaux (moral bas, baisse, silence) avec « Proposer un 1:1 » en un clic. Les demandes de one-to-one arrivent dans la cloche du manager (notification à l'écran, vérification toutes les 30 s).
 

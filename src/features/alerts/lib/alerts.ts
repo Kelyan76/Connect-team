@@ -207,6 +207,8 @@ export function computeAlerts(input: AlertInput): Alert[] {
       }
     }
   }
-  const rank = (a: Alert) => (a.severity === 'danger' ? 0 : 1);
+  // Les signaux faibles sur les personnes passent avant les rappels administratifs.
+  const order: AlertKind[] = ['decrochage', 'pouls', 'echeances', 'one_to_one', 'objectif', 'preparation', 'reconnaissance', 'surcharge', 'meteo', 'echeance'];
+  const rank = (a: Alert) => (a.severity === 'danger' ? 0 : 100) + order.indexOf(a.kind);
   return alerts.sort((a, b) => rank(a) - rank(b));
 }

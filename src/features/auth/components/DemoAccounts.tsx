@@ -1,14 +1,14 @@
 import { Avatar } from '@/shared/ui/avatar';
 import { useDemoReady } from '../use-demo-ready';
 
-/** Comptes du jeu de démonstration (supabase/seed.sql). Affichés uniquement sur le backend embarqué. */
+/** Comptes du jeu de démonstration (migration demo_nebuleo, données fictives). Affichés uniquement sur le backend embarqué. */
 export const DEMO_PASSWORD = 'Cadence-Demo26!';
 
 const ACCOUNTS = [
-  { first_name: 'Claire', last_name: 'Vasseur', email: 'claire.vasseur@valmont-equipements.fr', role: 'Manager', job: 'Responsable des opérations' },
-  { first_name: 'Nadia', last_name: 'Haddad', email: 'nadia.haddad@valmont-equipements.fr', role: 'Collaboratrice', job: 'Technicienne de mise en service' },
-  { first_name: 'Julien', last_name: 'Mercier', email: 'julien.mercier@valmont-equipements.fr', role: 'Collaborateur', job: 'Technicien SAV' },
-  { first_name: 'Karim', last_name: 'Benali', email: 'karim.benali@valmont-equipements.fr', role: 'Collaborateur', job: "Chargé d'affaires" },
+  { first_name: 'Camille', last_name: 'Lefèvre', email: 'camille.lefevre@nebuleo.example', role: 'Manager', job: 'Engineering Manager' },
+  { first_name: 'Hugo', last_name: 'Lambert', email: 'hugo.lambert@nebuleo.example', role: 'Collaborateur', job: 'Développeur back-end senior' },
+  { first_name: 'Inès', last_name: 'Moreau', email: 'ines.moreau@nebuleo.example', role: 'Collaboratrice', job: 'Développeuse front-end' },
+  { first_name: 'Lucas', last_name: 'Petit', email: 'lucas.petit@nebuleo.example', role: 'Collaborateur', job: 'Développeur full-stack (alternant)' },
 ];
 
 export function DemoAccounts({ onPick }: { onPick: (email: string, password: string) => void }) {

@@ -18,9 +18,9 @@ export default function AlertsPage() {
   return (
     <Page>
       <PageHeader
-        breadcrumbs={[{ label: 'Pilotage' }, { label: 'Alertes' }]}
-        title="Alertes"
-        description="Générées automatiquement à partir des objectifs, de la charge, du pouls de l’équipe et du calendrier des entretiens."
+        breadcrumbs={[{ label: 'Pilotage' }, { label: 'Signaux faibles' }]}
+        title="Signaux faibles"
+        description="Ce que vous êtes peut-être en train de rater : pouls, échéances, reconnaissance, 1 à 1. Un signal invite à un échange, jamais à une sanction."
         actions={
           <Button asChild>
             <Link to="/parametres">
@@ -33,7 +33,7 @@ export default function AlertsPage() {
       <div className="pb-3">
         <Segmented value={kind} onValueChange={setKind} aria-label="Type d’alerte" className="h-auto flex-wrap">
           <SegmentedItem value="toutes">Toutes · {alerts.data?.length ?? 0}</SegmentedItem>
-          {(Object.keys(ALERT_KIND_LABEL) as AlertKind[]).map((k) => (
+          {(Object.keys(ALERT_KIND_LABEL) as AlertKind[]).filter((k) => count(k) > 0).map((k) => (
             <SegmentedItem key={k} value={k} className="h-7">
               {ALERT_KIND_LABEL[k]} · {count(k)}
             </SegmentedItem>

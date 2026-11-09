@@ -1,10 +1,11 @@
-import { CalendarPlus, ClipboardList, FileText, Gauge, MessageSquareText, Target } from 'lucide-react';
+import { CalendarPlus, ClipboardList, MessageSquareText, NotebookPen, Radar, Target } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { usePeriod } from '@/app/providers/period';
 import { AlertList } from '@/features/alerts/components/AlertList';
 import { useAlerts } from '@/features/alerts/queries';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
+import { ObservationDialog } from '@/features/notebook/components/ObservationDialog';
 import { formatDecimal, formatPercent, pluralize } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
 import { SERIES, TrendChart } from '@/shared/ui/charts';
@@ -35,6 +36,7 @@ export function ManagerDashboard() {
   const { period } = usePeriod();
   const { data, byId, isLoading, error } = useManagerDashboard(period);
   const alerts = useAlerts();
+  const weak = (alerts.data ?? []).filter((a) => a.kind === 'decrochage' || a.kind === 'pouls' || a.kind === 'echeances').length;
   const [params] = useSearchParams();
   const [view, setView] = useState<View>(() => {
     const v = params.get('vue') as View | null;
@@ -47,20 +49,19 @@ export function ManagerDashboard() {
     if (requested && VIEWS.includes(requested as View)) setView(requested as View);
   }, [requested]);
   const [detail, setDetail] = useState<KpiKind | null>(null);
+  const [noting, setNoting] = useState(false);
 
   return (
     <Page>
       <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`Voici l’essentiel de votre équipe · ${period.label}`}>
-        <Button asChild className="flex-1 border-white/30 bg-white/15 text-white shadow-none hover:bg-white/25 sm:flex-none">
-          <Link to="/rapports">
-            <FileText aria-hidden />
-            Rapport
-          </Link>
+        <Button className="flex-1 border-white/30 bg-white/15 text-white shadow-none hover:bg-white/25 sm:flex-none" onClick={() => setNoting(true)}>
+          <NotebookPen aria-hidden />
+          Noter une observation
         </Button>
         <Button asChild className="flex-1 border-transparent bg-white text-accent hover:bg-white/90 sm:flex-none">
           <Link to="/entretiens?planifier=1">
             <CalendarPlus aria-hidden />
-            Planifier un entretien
+            Planifier un 1 à 1
           </Link>
         </Button>
       </HeroBanner>
@@ -90,21 +91,18 @@ export function ManagerDashboard() {
               hint="vs mois dernier"
             />
             <Stat
-              onClick={() => setDetail('charge')}
-              icon={Gauge}
-              tone="success"
-              label="Charge de l’équipe"
-              value={formatPercent(data.load, false)}
-              delta={pts(data.loadDelta / 100)}
-              trend={trend(data.loadDelta / 100)}
-              upIsGood={false}
-              hint="cette semaine"
+              onClick={() => setView('alertes')}
+              icon={Radar}
+              tone="violet"
+              label="Signaux faibles"
+              value={weak}
+              hint={weak ? 'à comprendre en 1 à 1' : 'rien à signaler'}
             />
             <Stat
               onClick={() => setDetail('retard')}
               icon={ClipboardList}
               tone="danger"
-              label="Tâches en retard"
+              label="Échéances manquées"
               value={data.late.length}
               hint={`dont ${data.urgentLate} prioritaires`}
             />
@@ -112,7 +110,7 @@ export function ManagerDashboard() {
               onClick={() => setDetail('entretiens')}
               icon={MessageSquareText}
               tone="warning"
-              label="Entretiens à préparer"
+              label="1 à 1 à préparer"
               value={data.toPrepare.length}
               hint={`sur ${pluralize(data.upcoming.length, 'prévu', 'prévus')}`}
             />
@@ -123,7 +121,7 @@ export function ManagerDashboard() {
               <Segmented value={view} onValueChange={(v) => setView(v as View)} aria-label="Afficher">
                 <SegmentedItem value="pouls">Pouls</SegmentedItem>
                 <SegmentedItem value="alertes">
-                  Alertes{alerts.data?.length ? <span className="tabular text-xs text-fg-subtle">{alerts.data.length}</span> : null}
+                  Signaux{alerts.data?.length ? <span className="tabular text-xs text-fg-subtle">{alerts.data.length}</span> : null}
                 </SegmentedItem>
                 <SegmentedItem value="entretiens">Entretiens</SegmentedItem>
                 <SegmentedItem value="evolution">Évolution</SegmentedItem>
@@ -176,6 +174,7 @@ export function ManagerDashboard() {
           />
         </div>
       )}
+      <ObservationDialog open={noting} onOpenChange={setNoting} />
     </Page>
   );
 }

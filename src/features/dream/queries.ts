@@ -6,7 +6,7 @@ import { usePulses } from '@/features/pulse/queries';
 import { useReviews } from '@/features/reviews/queries';
 import { useSkillLevels } from '@/features/skills/queries';
 import { useTeamMembers } from '@/features/team/queries';
-import { todayIso } from '@/shared/lib/dates';
+import { isoAddDays, todayIso } from '@/shared/lib/dates';
 import { dreamLevers, type LeverState } from './lib/dream';
 
 /** États des leviers DREAM de chaque collaborateur actif, calculés à partir des données de l'équipe. */
@@ -28,11 +28,9 @@ export function useDreamStates(): { data: Map<string, LeverState[]> | undefined;
       const last = reviews.data
         .filter((r) => r.collaborator_id === p.id && r.kind === 'one_to_one' && r.status === 'termine')
         .sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at))[0];
-      const moods = pulses.data
-        .filter((x) => x.collaborator_id === p.id)
-        .sort((a, b) => b.day.localeCompare(a.day))
-        .slice(0, 10)
-        .map((x) => x.mood);
+      // Humeur des 14 derniers jours (pas des 10 dernières réponses : un silence ne doit pas lisser la baisse).
+      const since = isoAddDays(today, -14);
+      const moods = pulses.data.filter((x) => x.collaborator_id === p.id && x.day >= since).map((x) => x.mood);
       const skillDates = levels.data
         .filter((l) => l.collaborator_id === p.id)
         .map((l) => l.validated_at ?? l.updated_at)

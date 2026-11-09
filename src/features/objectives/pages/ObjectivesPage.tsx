@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { useTeamMembers } from '@/features/team/queries';
 import { useHotkey } from '@/shared/hooks/use-hotkeys';
@@ -23,6 +24,15 @@ export default function ObjectivesPage() {
   const [status, setStatus] = useState('');
   const [creating, setCreating] = useState(false);
   useHotkey('n', () => isManager && setCreating(true));
+  const [params, setParams] = useSearchParams();
+  const [presetOwner, setPresetOwner] = useState<string | undefined>();
+  // Ouverture directe depuis un lien (1 à 1, aide à la décision, leviers DREAM).
+  useEffect(() => {
+    if (!isManager || params.get('nouveau') !== '1') return;
+    setPresetOwner(params.get('collaborateur') ?? undefined);
+    setCreating(true);
+    setParams({}, { replace: true });
+  }, [isManager, params, setParams]);
 
   const list = (objectives.data ?? [])
     .filter((o) => scope === 'tous' || o.scope === scope)
@@ -105,7 +115,7 @@ export default function ObjectivesPage() {
           ))}
         </div>
       )}
-      {isManager && <ObjectiveDialog open={creating} onOpenChange={setCreating} />}
+      {isManager && <ObjectiveDialog open={creating} onOpenChange={setCreating} defaultOwner={presetOwner} />}
     </Page>
   );
 }
