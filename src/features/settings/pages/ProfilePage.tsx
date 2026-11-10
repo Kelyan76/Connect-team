@@ -8,7 +8,6 @@ import { newPasswordSchema, type NewPasswordValues } from '@/features/auth/lib/p
 import { NotificationSettings } from '@/features/notifications/components/NotificationSettings';
 import { BackupPanel } from '@/features/settings/components/BackupPanel';
 import { DiscCard } from '@/features/team/components/DiscCard';
-import { AvatarEditor } from '../components/AvatarEditor';
 import { toUserMessage } from '@/shared/lib/errors';
 import { formatDate, fullName } from '@/shared/lib/format';
 import { isLocalBackend } from '@/shared/lib/supabase';
@@ -48,9 +47,6 @@ export default function ProfilePage() {
   return (
     <Page>
       <PageHeader breadcrumbs={[{ label: 'Mon profil' }]} title="Mon profil" />
-      <div className="mb-6">
-        <AvatarEditor />
-      </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel title="Identité">
           <div className="flex items-start gap-4">

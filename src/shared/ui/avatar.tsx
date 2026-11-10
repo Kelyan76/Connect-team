@@ -1,10 +1,5 @@
 import { cn } from '@/shared/lib/cn';
-import { parseStoredAvatar } from '@/shared/lib/avatar';
 import { fullName, initials, type NamedPerson } from '@/shared/lib/format';
-import { AvatarFigure } from './avatar-figure';
-
-/** Une personne, avec son avatar personnalisé éventuel (profiles.avatar). */
-type AvatarPerson = NamedPerson & { avatar?: unknown };
 
 const sizes = {
   xs: 'size-5 text-xs tracking-tighter',
@@ -32,24 +27,16 @@ function colorFor(person: NamedPerson): string {
   return PALETTE[Math.abs(h) % PALETTE.length];
 }
 
-/** Avatar personnalisé s'il existe, sinon initiales sur une pastille de couleur propre à la personne. */
+/** Initiales sur une pastille de couleur propre à la personne. */
 export function Avatar({
   person,
   size = 'md',
   className,
 }: {
-  person: AvatarPerson;
+  person: NamedPerson;
   size?: keyof typeof sizes;
   className?: string;
 }) {
-  const art = parseStoredAvatar(person.avatar);
-  if (art) {
-    return (
-      <span className={cn('inline-flex shrink-0 overflow-hidden rounded-full ring-2 ring-surface', sizes[size], className)} title={fullName(person)} aria-hidden>
-        <AvatarFigure avatar={art} className="size-full" />
-      </span>
-    );
-  }
   return (
     <span
       className={cn(
@@ -73,7 +60,7 @@ export function PersonLabel({
   size = 'sm',
   className,
 }: {
-  person: AvatarPerson;
+  person: NamedPerson;
   detail?: string | null;
   size?: 'xs' | 'sm' | 'md';
   className?: string;

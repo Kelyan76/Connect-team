@@ -2206,6 +2206,14 @@ from public.profiles t, public.demo_accounts d
 where d.user_id = p.id and t.team_id = '22222222-0000-4000-8000-000000000002' and t.role = 'collaborateur'
   and t.first_name = p.first_name and t.last_name = p.last_name;
 
+-- ===== 20261115090000_remove_avatars.sql =====
+-- Connect Team — retrait des avatars : l'application revient aux initiales sur pastille de couleur.
+-- La colonne profiles.avatar reste (la copie de l'équipe modèle la mentionne) mais est vidée,
+-- et plus personne ne peut la remplir.
+
+update public.profiles set avatar = null where avatar is not null;
+drop function if exists public.set_my_avatar(jsonb);
+
 -- ===== seed.sql =====
 -- Connect Team — le jeu de démonstration (Nébuleo, éditeur de logiciels, données fictives)
 -- est créé par la migration 20261112090200_demo_nebuleo.sql, pour être identique en local

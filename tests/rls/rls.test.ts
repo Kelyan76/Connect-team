@@ -199,31 +199,3 @@ describe('outils du cours : DISC, carnet, délégation, décisions, préparation
   });
 });
 
-describe('avatar personnalisé', () => {
-  const ok = { skin: 1, hair: 2, hairColor: 0, eyes: 1, mouth: 0, accessory: 1, shirt: 3, bg: 4 };
-
-  it('chacun ne change que son propre avatar', async () => {
-    const mine = await asUser(db, NADIA, async (tx) => {
-      await tx.query('select public.set_my_avatar($1::jsonb)', [JSON.stringify(ok)]);
-      return (await tx.query<{ avatar: unknown }>('select avatar from public.profiles where id = $1', [NADIA])).rows[0].avatar;
-    });
-    expect(mine).toEqual(ok);
-    const direct = await asUser(db, NADIA, (tx) => tx.query("update public.profiles set avatar = '{}'::jsonb where id = $1", [JULIEN]));
-    expect(direct.affectedRows ?? 0).toBe(0);
-  });
-
-  it('refuse un avatar mal formé', async () => {
-    await expect(asUser(db, NADIA, (tx) => tx.query('select public.set_my_avatar($1::jsonb)', [JSON.stringify({ ...ok, skin: 42 })]))).rejects.toThrow(/Avatar invalide/);
-  });
-});
-
-describe('personnages 3D', () => {
-  it('accepte un personnage connu, refuse un inconnu', async () => {
-    const saved = await asUser(db, NADIA, async (tx) => {
-      await tx.query(`select public.set_my_avatar('{"preset": "noah"}'::jsonb)`);
-      return (await tx.query<{ avatar: unknown }>('select avatar from public.profiles where id = $1', [NADIA])).rows[0].avatar;
-    });
-    expect(saved).toEqual({ preset: 'noah' });
-    await expect(asUser(db, NADIA, (tx) => tx.query(`select public.set_my_avatar('{"preset": "pirate"}'::jsonb)`))).rejects.toThrow(/Avatar invalide/);
-  });
-});

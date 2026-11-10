@@ -20,7 +20,6 @@ const DATA: DataRow[] = [
   { data: 'Compétences', why: 'Accompagner la montée en compétences', who: 'Le collaborateur et son manager', collaborator: 'oui', detail: 'Il s’auto-évalue, le manager valide.' },
   { data: 'Missions déléguées', why: 'Développer l’autonomie avec un cadre clair', who: 'Le collaborateur et son manager', collaborator: 'oui', detail: 'Limites, échéance et points de contrôle connus de tous les deux.' },
   { data: 'Séries et badges du pouls', why: 'Encourager une habitude, sans pression', who: 'Le collaborateur seul', collaborator: 'oui', detail: 'Jamais transmis au manager ; ne pas répondre ne pénalise personne.' },
-  { data: 'Avatar', why: 'Se reconnaître d’un coup d’œil, rendre l’outil sympathique', who: 'Les personnes qui voient déjà votre fiche', collaborator: 'oui', detail: 'Choisi par vous, modifiable ou retirable à tout moment.' },
   { data: 'Carnet d’observations', why: 'Préparer des feedbacks factuels et le prochain 1 à 1', who: 'Le manager seul', collaborator: 'non', detail: 'Faits observables uniquement, à reprendre en 1 à 1 : jamais un dossier à charge.' },
   { data: 'Préparation privée du 1 à 1 et journal de décisions', why: 'Choisir sa posture avant d’agir', who: 'Le manager seul', collaborator: 'non', detail: 'Notes de travail du manager, sans jugement sur la personne.' },
 ];

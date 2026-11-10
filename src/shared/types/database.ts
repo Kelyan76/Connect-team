@@ -1264,7 +1264,6 @@ export type Database = {
       propose_key_result_value: { Args: { p_key_result_id: string; p_value: number }; Returns: undefined };
       record_login: { Args: { p_user_agent?: string }; Returns: undefined };
       review_key_result_value: { Args: { p_key_result_id: string; p_accept: boolean }; Returns: undefined };
-      set_my_avatar: { Args: { p_avatar: Json }; Returns: undefined };
       set_self_skill_level: { Args: { p_skill_id: string; p_level: number }; Returns: undefined };
       sign_review: { Args: { p_review_id: string }; Returns: string };
       submit_review_preparation: { Args: { p_review_id: string }; Returns: undefined };

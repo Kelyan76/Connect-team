@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { valueToTopics, topicsToValue, hasQuickPrep } from '@/features/reviews/lib/quick-prep';
-import { moodFace } from '@/shared/lib/avatar';
 import { bestStreak, pulseBadges } from './badges';
 
 describe('séries et badges du pouls', () => {
@@ -21,10 +20,6 @@ describe('séries et badges du pouls', () => {
     expect(r.next?.id).toBe('mot');
   });
 
-  it('l’avatar sourit les bons jours et fait la moue les mauvais', () => {
-    expect(moodFace(5)).toEqual({ eyes: 1, mouth: 1 });
-    expect(moodFace(1).mouth).toBe(4);
-  });
 });
 
 describe('préparer mon 1 à 1', () => {

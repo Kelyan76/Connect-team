@@ -1,10 +1,7 @@
-import { Flame, Loader2, Pencil } from 'lucide-react';
+import { Flame, HeartPulse, Loader2, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
-import { defaultStoredAvatar, parseStoredAvatar } from '@/shared/lib/avatar';
 import { cn } from '@/shared/lib/cn';
-import { fullName } from '@/shared/lib/format';
-import { AvatarFigure } from '@/shared/ui/avatar-figure';
 import { todayIso } from '@/shared/lib/dates';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/feedback';
@@ -91,8 +88,6 @@ export function PulseCheckin() {
     today,
   );
   const byDay = new Map(mine.map((p) => [p.day, p.mood]));
-  // Son avatar, ou une proposition tant qu'il n'en a pas créé (Mon profil › Mon avatar).
-  const look = parseStoredAvatar(profile.avatar) ?? defaultStoredAvatar(fullName(profile));
 
   if (!pulses.data) return <Skeleton className="mb-6 h-40 rounded-lg" />;
 
@@ -117,9 +112,6 @@ export function PulseCheckin() {
         )}
       >
         <div className="flex items-center gap-2">
-          <span key={current.mood} className="animate-pop-in">
-            <AvatarFigure avatar={look} mood={current.mood} className="size-14 drop-shadow-md" title={`Mon avatar : ${MOOD[current.mood].label.toLowerCase()}`} />
-          </span>
           <span className={cn('flex size-11 items-center justify-center rounded shadow-sm', MOOD_COLOR[current.mood].solid)} title={MOOD[current.mood].label}>
             <M className="size-6" aria-hidden />
           </span>
@@ -164,8 +156,8 @@ export function PulseCheckin() {
       <div className="relative flex flex-col gap-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span key={mood ?? 0} className="shrink-0 animate-pop-in">
-              <AvatarFigure avatar={look} mood={mood ?? undefined} className="size-14 drop-shadow-md" title="Mon avatar prend l’humeur choisie" />
+            <span className="flex size-10 shrink-0 items-center justify-center rounded bg-gradient-to-br from-hero-from to-hero-to text-white shadow-sm">
+              <HeartPulse className="size-5" aria-hidden />
             </span>
             <div>
               <h2 className="text-md font-semibold">Comment vous sentez-vous aujourd’hui ?</h2>
