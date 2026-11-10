@@ -216,3 +216,14 @@ describe('avatar personnalisé', () => {
     await expect(asUser(db, NADIA, (tx) => tx.query('select public.set_my_avatar($1::jsonb)', [JSON.stringify({ ...ok, skin: 42 })]))).rejects.toThrow(/Avatar invalide/);
   });
 });
+
+describe('personnages 3D', () => {
+  it('accepte un personnage connu, refuse un inconnu', async () => {
+    const saved = await asUser(db, NADIA, async (tx) => {
+      await tx.query(`select public.set_my_avatar('{"preset": "noah"}'::jsonb)`);
+      return (await tx.query<{ avatar: unknown }>('select avatar from public.profiles where id = $1', [NADIA])).rows[0].avatar;
+    });
+    expect(saved).toEqual({ preset: 'noah' });
+    await expect(asUser(db, NADIA, (tx) => tx.query(`select public.set_my_avatar('{"preset": "pirate"}'::jsonb)`))).rejects.toThrow(/Avatar invalide/);
+  });
+});

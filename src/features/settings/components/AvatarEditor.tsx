@@ -1,43 +1,46 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Dices, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth, useCurrentUser } from '@/features/auth/AuthProvider';
-import { AVATAR_LABEL, AVATAR_OPTIONS, defaultAvatar, parseAvatar, randomAvatar, type AvatarConfig, type AvatarPart } from '@/shared/lib/avatar';
+import {
+  defaultAvatar,
+  defaultStoredAvatar,
+  parseStoredAvatar,
+  PRESET_IDS,
+  PRESETS,
+  presetSrc,
+  randomAvatar,
+  type StoredAvatar,
+} from '@/shared/lib/avatar';
 import { cn } from '@/shared/lib/cn';
 import { toUserMessage } from '@/shared/lib/errors';
 import { fullName } from '@/shared/lib/format';
 import { qk } from '@/shared/lib/query-keys';
 import { supabase } from '@/shared/lib/supabase';
-import { AvatarArt } from '@/shared/ui/avatar-art';
+import { AvatarFigure } from '@/shared/ui/avatar-figure';
 import { Button } from '@/shared/ui/button';
 import { Panel } from '@/shared/ui/layout';
 import { toast } from '@/shared/ui/toaster';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
-import { useQueryClient } from '@tanstack/react-query';
+import { AvatarBuilder } from './AvatarBuilder';
 
-const GROUPS: { id: string; label: string; parts: AvatarPart[] }[] = [
-  { id: 'visage', label: 'Visage', parts: ['skin', 'eyes', 'mouth'] },
-  { id: 'cheveux', label: 'Cheveux', parts: ['hair', 'hairColor'] },
-  { id: 'style', label: 'Style', parts: ['accessory', 'shirt', 'bg'] },
-];
-const COLOR_PARTS: AvatarPart[] = ['skin', 'hairColor', 'shirt', 'bg'];
+const toJson = (a: StoredAvatar) => (a.kind === 'preset' ? { preset: a.id } : a.config);
 
-/** Création de son avatar : aperçu en grand, choix en vignettes, tirage au hasard. */
+/** Mon avatar : un personnage 3D qui réagit à mon humeur, ou un personnage que je compose. */
 export function AvatarEditor() {
   const { profile } = useCurrentUser();
   const { refreshProfile } = useAuth();
   const qc = useQueryClient();
-  const saved = parseAvatar(profile.avatar);
-  const [config, setConfig] = useState<AvatarConfig>(saved ?? defaultAvatar(fullName(profile)));
-  const [group, setGroup] = useState('visage');
+  const saved = parseStoredAvatar(profile.avatar);
+  const [draft, setDraft] = useState<StoredAvatar>(saved ?? defaultStoredAvatar(fullName(profile)));
   const [busy, setBusy] = useState(false);
   const [spin, setSpin] = useState(0);
-  const dirty = JSON.stringify(config) !== JSON.stringify(saved);
+  const dirty = !saved || JSON.stringify(toJson(draft)) !== JSON.stringify(toJson(saved));
 
-  const set = (part: AvatarPart, value: number) => setConfig((c) => ({ ...c, [part]: value }));
-  const save = async (value: AvatarConfig | null) => {
+  const save = async (value: StoredAvatar | null) => {
     setBusy(true);
     try {
-      const { error } = await supabase.rpc('set_my_avatar', { p_avatar: value });
+      const { error } = await supabase.rpc('set_my_avatar', { p_avatar: value ? toJson(value) : null });
       if (error) throw error;
       await refreshProfile();
       await qc.invalidateQueries({ queryKey: qk.people });
@@ -49,72 +52,80 @@ export function AvatarEditor() {
     }
   };
 
+  const mode = draft.kind;
   return (
-    <Panel title="Mon avatar" description="Composez votre personnage : il remplace vos initiales partout dans l’application.">
+    <Panel title="Mon avatar" description="Il remplace vos initiales partout, et prend l’expression de votre humeur du jour.">
       <div className="flex flex-col gap-6 md:flex-row">
         <div className="flex flex-col items-center gap-3 md:w-52">
           <div key={spin} className="animate-pop-in">
-            <AvatarArt config={config} className="size-40 drop-shadow-md" title={`Avatar de ${fullName(profile)}`} />
+            <AvatarFigure avatar={draft} className="size-40 shadow-md ring-4 ring-surface" title={`Avatar de ${fullName(profile)}`} />
           </div>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Button
-              size="sm"
-              onClick={() => {
-                setConfig(randomAvatar());
-                setSpin((s) => s + 1);
-              }}
-            >
-              <Dices aria-hidden />
-              Surprends-moi
+          {draft.kind === 'preset' && (
+            <div className="flex gap-1" aria-label="Ses expressions selon l’humeur">
+              {[1, 3, 4, 5].map((m) => (
+                <AvatarFigure key={m} avatar={draft} mood={m} className="size-9 ring-1 ring-line" />
+              ))}
+            </div>
+          )}
+          {saved && (
+            <Button size="sm" variant="ghost" disabled={busy} onClick={() => void save(null)}>
+              <RotateCcw aria-hidden />
+              Revenir aux initiales
             </Button>
-            {saved && (
-              <Button size="sm" variant="ghost" disabled={busy} onClick={() => void save(null)}>
-                <RotateCcw aria-hidden />
-                Initiales
-              </Button>
-            )}
-          </div>
+          )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <Segmented value={group} onValueChange={setGroup} aria-label="Partie de l’avatar" className="self-start">
-            {GROUPS.map((g) => (
-              <SegmentedItem key={g.id} value={g.id}>
-                {g.label}
-              </SegmentedItem>
-            ))}
+          <Segmented
+            value={mode}
+            onValueChange={(v) => setDraft(v === 'preset' ? defaultStoredAvatar(fullName(profile)) : { kind: 'custom', config: defaultAvatar(fullName(profile)) })}
+            aria-label="Type d’avatar"
+            className="self-start"
+          >
+            <SegmentedItem value="preset">Personnage 3D</SegmentedItem>
+            <SegmentedItem value="custom">Je compose le mien</SegmentedItem>
           </Segmented>
-          {GROUPS.find((g) => g.id === group)?.parts.map((part) => (
-            <fieldset key={part} className="flex flex-col gap-2">
-              <legend className="mb-2 text-sm font-medium">{AVATAR_LABEL[part]}</legend>
-              <div className="flex flex-wrap gap-2">
-                {AVATAR_OPTIONS[part].map((option, i) => {
-                  const active = config[part] === i;
-                  const color = COLOR_PARTS.includes(part);
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      aria-pressed={active}
-                      aria-label={color ? `${AVATAR_LABEL[part]} ${i + 1}` : option}
-                      title={color ? undefined : option}
-                      onClick={() => set(part, i)}
-                      className={cn(
-                        'rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                        active ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface' : 'ring-1 ring-line',
-                      )}
-                    >
-                      {color ? (
-                        <span className="block size-9 rounded-full" style={{ background: option }} />
-                      ) : (
-                        <AvatarArt config={{ ...config, [part]: i }} className="size-12" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </fieldset>
-          ))}
-          <Button variant="primary" className="self-start" disabled={!dirty || busy} onClick={() => void save(config)}>
+          {draft.kind === 'preset' ? (
+            <div className="flex flex-wrap gap-3">
+              {PRESET_IDS.map((id) => {
+                const active = draft.id === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => {
+                      setDraft({ kind: 'preset', id });
+                      setSpin((s) => s + 1);
+                    }}
+                    className="flex flex-col items-center gap-1 rounded-lg p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  >
+                    <img
+                      src={presetSrc(id, 'sourire')}
+                      alt=""
+                      className={cn('size-20 rounded-full object-cover transition-transform hover:scale-105', active ? 'ring-4 ring-accent' : 'ring-1 ring-line')}
+                    />
+                    <span className={cn('text-sm', active ? 'font-semibold text-accent' : 'text-fg-muted')}>{PRESETS[id].label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              <AvatarBuilder config={draft.config} onChange={(config) => setDraft({ kind: 'custom', config })} />
+              <Button
+                size="sm"
+                className="self-start"
+                onClick={() => {
+                  setDraft({ kind: 'custom', config: randomAvatar() });
+                  setSpin((s) => s + 1);
+                }}
+              >
+                <Dices aria-hidden />
+                Surprends-moi
+              </Button>
+            </>
+          )}
+          <Button variant="primary" className="self-start" disabled={!dirty || busy} onClick={() => void save(draft)}>
             Enregistrer mon avatar
           </Button>
         </div>

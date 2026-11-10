@@ -1,7 +1,7 @@
 import { cn } from '@/shared/lib/cn';
-import { parseAvatar } from '@/shared/lib/avatar';
+import { parseStoredAvatar } from '@/shared/lib/avatar';
 import { fullName, initials, type NamedPerson } from '@/shared/lib/format';
-import { AvatarArt } from './avatar-art';
+import { AvatarFigure } from './avatar-figure';
 
 /** Une personne, avec son avatar personnalisé éventuel (profiles.avatar). */
 type AvatarPerson = NamedPerson & { avatar?: unknown };
@@ -42,11 +42,11 @@ export function Avatar({
   size?: keyof typeof sizes;
   className?: string;
 }) {
-  const art = parseAvatar(person.avatar);
+  const art = parseStoredAvatar(person.avatar);
   if (art) {
     return (
       <span className={cn('inline-flex shrink-0 overflow-hidden rounded-full ring-2 ring-surface', sizes[size], className)} title={fullName(person)} aria-hidden>
-        <AvatarArt config={art} className="size-full" />
+        <AvatarFigure avatar={art} className="size-full" />
       </span>
     );
   }

@@ -24,3 +24,20 @@ describe('avatar personnalisé', () => {
     expect(parseAvatar(c)).not.toBeNull();
   });
 });
+
+describe('personnages 3D', () => {
+  it('reconnaît un personnage et refuse un inconnu', async () => {
+    const { parseStoredAvatar } = await import('./avatar');
+    expect(parseStoredAvatar({ preset: 'lea' })).toEqual({ kind: 'preset', id: 'lea' });
+    expect(parseStoredAvatar({ preset: 'inconnu' })).toBeNull();
+    expect(parseStoredAvatar({ skin: 1, hair: 2, hairColor: 0, eyes: 1, mouth: 0, accessory: 1, shirt: 3, bg: 4 })?.kind).toBe('custom');
+  });
+
+  it('chaque humeur a une expression existante pour chaque personnage', async () => {
+    const { PRESETS, PRESET_IDS, presetFace } = await import('./avatar');
+    for (const id of PRESET_IDS) {
+      for (const mood of [1, 2, 3, 4, 5]) expect(PRESETS[id].faces).toContain(presetFace(id, mood));
+      expect(presetFace(id)).toBe('sourire');
+    }
+  });
+});

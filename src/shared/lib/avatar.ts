@@ -65,3 +65,45 @@ export function moodFace(mood: number): { eyes: number; mouth: number } {
   if (mood === 3) return { eyes: 0, mouth: 2 };
   return { eyes: 2, mouth: 4 };
 }
+
+// ─── Personnages 3D prêts à l'emploi ────────────────────────────────────
+// Portraits rendus en 3D (public/avatars/<personnage>-<expression>.webp), chacun avec plusieurs
+// expressions : l'avatar reprend celle qui correspond à l'humeur du jour.
+
+export const PRESETS = {
+  alex: { label: 'Alex', faces: ['sourire', 'joie', 'reflexion', 'calme', 'bravo', 'salut'], moods: { 1: 'reflexion', 2: 'reflexion', 3: 'calme', 4: 'sourire', 5: 'bravo' } },
+  theo: { label: 'Théo', faces: ['sourire', 'joie', 'reflexion', 'calme', 'bravo'], moods: { 1: 'reflexion', 2: 'reflexion', 3: 'calme', 4: 'sourire', 5: 'bravo' } },
+  lea: { label: 'Léa', faces: ['sourire', 'joie', 'reflexion', 'rire'], moods: { 1: 'reflexion', 2: 'reflexion', 3: 'sourire', 4: 'joie', 5: 'rire' } },
+  noah: { label: 'Noah', faces: ['sourire', 'lunettes', 'joie', 'rire'], moods: { 1: 'lunettes', 2: 'lunettes', 3: 'sourire', 4: 'joie', 5: 'rire' } },
+  jade: { label: 'Jade', faces: ['sourire', 'joie', 'surprise', 'calme'], moods: { 1: 'surprise', 2: 'surprise', 3: 'sourire', 4: 'calme', 5: 'joie' } },
+} as const satisfies Record<string, { label: string; faces: readonly string[]; moods: Record<1 | 2 | 3 | 4 | 5, string> }>;
+
+export type PresetId = keyof typeof PRESETS;
+export const PRESET_IDS = Object.keys(PRESETS) as PresetId[];
+
+/** Avatar enregistré : un personnage 3D, ou un personnage composé (configuration). */
+export type StoredAvatar = { kind: 'preset'; id: PresetId } | { kind: 'custom'; config: AvatarConfig };
+
+export function parseStoredAvatar(value: unknown): StoredAvatar | null {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const preset = (value as Record<string, unknown>).preset;
+    if (typeof preset === 'string') return preset in PRESETS ? { kind: 'preset', id: preset as PresetId } : null;
+  }
+  const config = parseAvatar(value);
+  return config ? { kind: 'custom', config } : null;
+}
+
+/** Expression du personnage 3D : celle de l'humeur du jour, sinon son sourire. */
+export function presetFace(id: PresetId, mood?: number): string {
+  if (mood && mood >= 1 && mood <= 5) return PRESETS[id].moods[mood as 1 | 2 | 3 | 4 | 5];
+  return 'sourire';
+}
+
+export const presetSrc = (id: PresetId, face: string) => `${import.meta.env.BASE_URL}avatars/${id}-${face}.webp`;
+
+/** Avatar proposé tant que la personne n'en a pas choisi : un personnage 3D, stable pour elle. */
+export function defaultStoredAvatar(seed: string): StoredAvatar {
+  let h = 0;
+  for (let i = 0; i < seed.length; i += 1) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  return { kind: 'preset', id: PRESET_IDS[Math.abs(h) % PRESET_IDS.length] };
+}
