@@ -6,6 +6,8 @@ export interface LocalMail {
   body: string;
   /** Lien d'action (activation de compte, réinitialisation), interne à l'application. */
   link: string;
+  /** Version mise en forme (mêmes modèles qu'en production). */
+  html?: string;
   createdAt: string;
 }
 

@@ -53,3 +53,13 @@ verify_jwt = false
 [functions.push-notify]
 verify_jwt = false
 
+
+# Modèles d'e-mails (Supabase CLI en local). En production : Authentication › Email Templates
+# (coller le contenu des mêmes fichiers), et SMTP personnalisé pour l'expéditeur.
+[auth.email.template.invite]
+subject = "Bienvenue sur Connect Team : activez votre compte"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.recovery]
+subject = "Connect Team : choisissez un nouveau mot de passe"
+content_path = "./supabase/templates/recovery.html"

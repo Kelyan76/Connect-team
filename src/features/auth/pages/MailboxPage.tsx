@@ -37,7 +37,17 @@ export default function MailboxPage() {
                     <span className="text-xs text-fg-subtle">{formatDateTime(m.createdAt)}</span>
                   </div>
                   <span className="text-xs text-fg-subtle">À : {m.to}</span>
-                  <p className="text-base text-fg-muted">{m.body}</p>
+                  {m.html ? (
+                    <iframe
+                      title={`Aperçu : ${m.subject}`}
+                      srcDoc={m.html}
+                      sandbox="allow-top-navigation-by-user-activation"
+                      className="w-full rounded border border-line"
+                      style={{ height: 620 }}
+                    />
+                  ) : (
+                    <p className="text-base text-fg-muted">{m.body}</p>
+                  )}
                   <Link to={m.link} className="self-start text-sm font-medium text-accent hover:underline">
                     Ouvrir le lien
                   </Link>

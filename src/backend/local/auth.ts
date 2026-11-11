@@ -1,6 +1,7 @@
 import type { PGlite } from '@electric-sql/pglite';
 import { isRecord, json, str, type LocalRequest } from './http';
 import { randomToken } from './jwt';
+import { renderMail } from './mail-templates';
 import { sendLocalMail } from './mailbox';
 import {
   consumeRefreshToken,
@@ -81,9 +82,10 @@ export async function handleAuth(req: LocalRequest, path: string): Promise<Respo
       await db.query('update auth.users set recovery_token = $2 where id = $1', [user.id, token]);
       sendLocalMail({
         to: user.email,
-        subject: 'Réinitialisation de votre mot de passe Connect Team',
+        subject: 'Connect Team : choisissez un nouveau mot de passe',
         body: 'Vous avez demandé à réinitialiser votre mot de passe. Ce lien ne fonctionne qu’une fois.',
         link: `/lien?type=recovery&token=${token}`,
+        html: renderMail('recovery', { link: `${globalThis.location?.origin ?? ''}/lien?type=recovery&token=${token}`, email: user.email }),
       });
     }
     return json(200, {});
@@ -117,9 +119,10 @@ export async function inviteUser(db: PGlite, email: string, data: Record<string,
   ]);
   sendLocalMail({
     to: email,
-    subject: 'Vous êtes invité sur Connect Team',
+    subject: 'Bienvenue sur Connect Team : activez votre compte',
     body: 'Votre responsable vous a ouvert un accès à Connect Team. Définissez votre mot de passe pour activer votre compte.',
     link: `/lien?type=invite&token=${token}`,
+    html: renderMail('invite', { link: `${globalThis.location?.origin ?? ''}/lien?type=invite&token=${token}`, email, firstName: typeof data.first_name === 'string' ? data.first_name : '' }),
   });
   return id;
 }

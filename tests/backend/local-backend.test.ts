@@ -96,7 +96,8 @@ describe('Edge Functions locales', () => {
       body: { email: 'lea.martin@nebuleo.example', first_name: 'Léa', last_name: 'Martin', job_title: 'Dessinatrice projeteuse', hired_on: '2026-11-16' },
     });
     expect(error).toBeNull();
-    expect(mailbox.list()[0]?.subject).toMatch(/invité/);
+    expect(mailbox.list()[0]?.subject).toMatch(/activez votre compte/);
+    expect(mailbox.list()[0]?.html).toContain("Bienvenue dans votre équipe");
     const { data } = await manager.from('profiles').select('first_name').eq('email', 'lea.martin@nebuleo.example').single();
     expect(data?.first_name).toBe('Léa');
   });
