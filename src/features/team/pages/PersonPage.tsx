@@ -13,6 +13,7 @@ import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { EmptyState, ErrorState, Skeleton } from '@/shared/ui/feedback';
 import { DescriptionList, Page, PageHeader, Panel } from '@/shared/ui/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
+import { JourneyView } from '@/features/journey/components/JourneyView';
 import { DiscCard } from '../components/DiscCard';
 import { PersonOverview } from '../components/PersonOverview';
 import { PersonFeedbacks, PersonObjectives, PersonReviews, PersonSkills } from '../components/PersonSections';
@@ -105,6 +106,7 @@ export default function PersonPage() {
         <Tabs defaultValue="synthese" className="min-w-0">
           <TabsList>
             <TabsTrigger value="synthese">Où en est-il ?</TabsTrigger>
+            <TabsTrigger value="parcours">Parcours</TabsTrigger>
             <TabsTrigger value="carnet">Carnet</TabsTrigger>
             <TabsTrigger value="disc">DISC</TabsTrigger>
             <TabsTrigger value="objectifs">Objectifs</TabsTrigger>
@@ -114,6 +116,9 @@ export default function PersonPage() {
           </TabsList>
           <TabsContent value="synthese">
             <PersonOverview person={person} />
+          </TabsContent>
+          <TabsContent value="parcours">
+            <JourneyView personId={person.id} self={false} />
           </TabsContent>
           <TabsContent value="carnet">
             <NotebookList personId={person.id} />

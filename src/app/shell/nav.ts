@@ -8,6 +8,7 @@ import {
   NotebookPen,
   Settings,
   ShieldCheck,
+  Trophy,
   Sparkles,
   Target,
   Grid3x3,
@@ -51,6 +52,7 @@ export const NAV: NavGroup[] = [
     label: 'Équipe',
     items: [
       { to: '/equipe', label: 'Collaborateurs', icon: Users, roles: manager },
+      { to: '/parcours', label: 'Parcours', icon: Trophy, selfLabel: 'Mon parcours', roles: both },
       { to: '/pouls', label: 'Pouls', icon: HeartPulse, selfLabel: 'Mon pouls', roles: both },
       { to: '/leviers', label: 'Leviers DREAM', icon: Sparkles, roles: manager },
       { to: '/competences', label: 'Compétences', icon: Grid3x3, selfLabel: 'Mes compétences', roles: both },
@@ -116,7 +118,7 @@ export interface NavSection {
 
 export const SECTIONS: NavSection[] = [
   { label: 'Tableau de bord', selfLabel: 'Accueil', shortLabel: 'Accueil', tone: 'home', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }] },
-  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', tone: 'team', icon: Users, tabs: [{ to: '/equipe' }, { to: '/pouls' }, { to: '/leviers' }, { to: '/competences' }] },
+  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', tone: 'team', icon: Users, tabs: [{ to: '/equipe' }, { to: '/parcours' }, { to: '/pouls' }, { to: '/leviers' }, { to: '/competences' }] },
   { label: '1 à 1 et feedback', selfLabel: 'Mes 1 à 1', shortLabel: '1 à 1', tone: 'reviews', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }, { to: '/posture' }] },
   { label: 'Objectifs', selfLabel: 'Mes objectifs', shortLabel: 'Objectifs', tone: 'goals', icon: Target, tabs: [{ to: '/objectifs' }, { to: '/delegation' }, { to: '/taches' }] },
 ];
