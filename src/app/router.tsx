@@ -63,6 +63,7 @@ const routes: RouteObject[] = [
       { path: '/plan-de-charge', element: page(() => import('@/features/workload/pages/WorkloadPage')) },
       { path: '/absences', element: page(() => import('@/features/absences/pages/AbsencesPage')) },
       { path: '/delegation', element: page(() => import('@/features/delegation/pages/DelegationPage')) },
+      { path: '/mon-style', element: page(() => import('@/features/team/pages/DiscTestPage')) },
       { path: '/parcours', element: page(() => import('@/features/journey/pages/JourneyPage')) },
       { path: '/ethique', element: page(() => import('@/features/ethics/pages/EthicsPage')) },
       { path: '/profil', element: page(() => import('@/features/settings/pages/ProfilePage')) },

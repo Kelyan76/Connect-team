@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 import { formatDate } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/button';
@@ -40,9 +41,16 @@ export function DiscCard({ personId, self }: { personId: string; self: boolean }
       description={self ? 'Il aide votre manager à adapter la forme de ses échanges avec vous. Vous pouvez le corriger à tout moment.' : 'Établi avec le collaborateur, visible par lui : on adapte la forme, jamais le fond.'}
       actions={
         !editing && (
-          <Button size="sm" onClick={() => setEditing(true)}>
-            {current ? 'Modifier' : 'Renseigner'}
-          </Button>
+          <div className="flex gap-2">
+            {self && (
+              <Button asChild size="sm" variant={current ? 'secondary' : 'primary'}>
+                <Link to="/mon-style">{current ? 'Refaire le test' : 'Faire le test (2 min)'}</Link>
+              </Button>
+            )}
+            <Button size="sm" variant={self ? 'ghost' : 'secondary'} onClick={() => setEditing(true)}>
+              {current ? 'Modifier' : 'Renseigner'}
+            </Button>
+          </div>
         )
       }
     >
