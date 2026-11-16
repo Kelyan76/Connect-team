@@ -17,6 +17,7 @@ import { CollaboratorTopics } from '../components/CollaboratorTopics';
 import { KeyliaPrep } from '../components/KeyliaPrep';
 import { QuickPrep } from '../components/QuickPrep';
 import { OneToOneGuide } from '../components/OneToOneGuide';
+import { EchoRecorder } from '../components/EchoRecorder';
 import { MinutesPanel } from '../components/MinutesPanel';
 import { PrepAssistant } from '../components/PrepAssistant';
 import { SideBySide } from '../components/SideBySide';
@@ -131,6 +132,7 @@ export default function ReviewPage() {
               </div>
             )}
             <MinutesPanel review={r} isManager={isManager} />
+            {isManager && r.kind === 'one_to_one' && !r.manager_signed_at && <EchoRecorder review={r} />}
             <ActionPlan review={r} isManager={isManager} />
             <Signatures review={r} viewer={viewer} />
           </TabsContent>

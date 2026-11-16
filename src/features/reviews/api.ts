@@ -85,6 +85,9 @@ export const listActions = async (): Promise<ReviewAction[]> =>
 
 export const addAction = async (a: TablesInsert<'review_actions'>) => check(await supabase.from('review_actions').insert(a), 'Action');
 
+export const addActions = async (list: TablesInsert<'review_actions'>[]) =>
+  check(await supabase.from('review_actions').insert(list), 'Actions');
+
 export async function setActionStatus(id: string, status: ReviewAction['status']): Promise<void> {
   check(
     await supabase

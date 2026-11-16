@@ -3,5 +3,8 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/echo", "destination": "https://think-task-flow.lovable.app/api/public/transcribe" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

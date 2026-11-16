@@ -10,7 +10,18 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   optimizeDeps: { exclude: ['@electric-sql/pglite'] },
-  server: { port: 5173, strictPort: true },
+  server: {
+    port: 5173,
+    strictPort: true,
+    // Echo (application de prise de parole) : même chemin qu'en production (réécriture Vercel), pas de CORS.
+    proxy: {
+      '/api/echo': {
+        target: 'https://think-task-flow.lovable.app',
+        changeOrigin: true,
+        rewrite: () => '/api/public/transcribe',
+      },
+    },
+  },
   worker: { format: 'es' },
   build: {
     target: 'es2022',

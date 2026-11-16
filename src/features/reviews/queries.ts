@@ -96,6 +96,17 @@ export function useAddAction() {
   });
 }
 
+export function useAddActions() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.addActions,
+    onSuccess: (_d, list) => {
+      toast.success(list.length > 1 ? `${list.length} actions ajoutées au plan` : 'Action ajoutée au plan');
+      return qc.invalidateQueries({ queryKey: qk.reviewActions });
+    },
+  });
+}
+
 export function useSetActionStatus() {
   const qc = useQueryClient();
   return useMutation({
