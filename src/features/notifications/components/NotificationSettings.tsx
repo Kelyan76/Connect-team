@@ -10,9 +10,24 @@ import { Panel } from '@/shared/ui/layout';
 import { toast } from '@/shared/ui/toaster';
 import { Switch } from '@/shared/ui/toggle';
 import { isIos, isStandalone, promptInstall, sendTestPush } from '../push';
-import { DEFAULT_PREFS, useCanInstall, useNotificationPrefs, usePushState, useSavePrefs, type NotificationPrefs } from '../queries';
+import {
+  DEFAULT_PREFS,
+  useCanInstall,
+  useNotificationPrefs,
+  usePushState,
+  useSavePrefs,
+  type NotificationPrefs,
+} from '../queries';
 
-function Row({ title, detail, children }: { title: string; detail: string; children: React.ReactNode }) {
+function Row({
+  title,
+  detail,
+  children,
+}: {
+  title: string;
+  detail: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex items-center justify-between gap-4 py-3">
       <div className="flex min-w-0 flex-col">
@@ -58,13 +73,18 @@ export function NotificationSettings() {
   const iosNeedsInstall = isIos() && !isStandalone();
 
   return (
-    <Panel title="Notifications et rappels" description="Pour ne rien oublier, sans avoir à ouvrir l’application.">
+    <Panel
+      title="Notifications et rappels"
+      description="Pour ne rien oublier, sans avoir à ouvrir l’application."
+    >
       <div className="flex flex-col divide-y divide-line">
         <div className="flex flex-wrap items-center gap-3 pb-4">
           <span
             className={cn(
               'flex size-10 items-center justify-center rounded',
-              push.state === 'on' ? 'bg-success-subtle text-success' : 'bg-accent-subtle text-accent',
+              push.state === 'on'
+                ? 'bg-success-subtle text-success'
+                : 'bg-accent-subtle text-accent',
             )}
           >
             <BellRing className="size-5" aria-hidden />
@@ -93,14 +113,22 @@ export function NotificationSettings() {
           </div>
           {push.state === 'off' && (
             <Button variant="primary" disabled={busy !== null} onClick={() => void run('on')}>
-              {busy === 'on' ? <Loader2 className="animate-spin" aria-hidden /> : <BellRing aria-hidden />}
+              {busy === 'on' ? (
+                <Loader2 className="animate-spin" aria-hidden />
+              ) : (
+                <BellRing aria-hidden />
+              )}
               Activer
             </Button>
           )}
           {push.state === 'on' && (
             <div className="flex gap-2">
               <Button disabled={busy !== null} onClick={() => void run('test')}>
-                {busy === 'test' ? <Loader2 className="animate-spin" aria-hidden /> : <Send aria-hidden />}
+                {busy === 'test' ? (
+                  <Loader2 className="animate-spin" aria-hidden />
+                ) : (
+                  <Send aria-hidden />
+                )}
                 Tester
               </Button>
               <Button variant="ghost" disabled={busy !== null} onClick={() => void run('off')}>
@@ -111,7 +139,10 @@ export function NotificationSettings() {
         </div>
 
         {!isManager && (
-          <Row title="Rappel du pouls du jour" detail="Les jours ouvrés, si vous ne l’avez pas encore donné.">
+          <Row
+            title="Rappel du pouls du jour"
+            detail="Les jours ouvrés, si vous ne l’avez pas encore donné."
+          >
             <div className="flex items-center gap-2">
               <NativeSelect
                 aria-label="Heure du rappel"
@@ -126,14 +157,21 @@ export function NotificationSettings() {
                   </option>
                 ))}
               </NativeSelect>
-              <Switch checked={p.pulse_reminder} onCheckedChange={(v) => set({ pulse_reminder: v })} aria-label="Rappel du pouls du jour" />
+              <Switch
+                checked={p.pulse_reminder}
+                onCheckedChange={(v) => set({ pulse_reminder: v })}
+                aria-label="Rappel du pouls du jour"
+              />
             </div>
           </Row>
         )}
 
         {isManager && (
           <>
-            <Row title="Récap du lundi" detail="Moral bas, surcharge, demandes, entretiens et retards de la semaine.">
+            <Row
+              title="Récap du lundi"
+              detail="Moral bas, surcharge, demandes, entretiens et retards de la semaine."
+            >
               <div className="flex items-center gap-2">
                 <NativeSelect
                   aria-label="Heure du récap"
@@ -148,23 +186,40 @@ export function NotificationSettings() {
                     </option>
                   ))}
                 </NativeSelect>
-                <Switch checked={p.weekly_recap} onCheckedChange={(v) => set({ weekly_recap: v })} aria-label="Récap du lundi" />
+                <Switch
+                  checked={p.weekly_recap}
+                  onCheckedChange={(v) => set({ weekly_recap: v })}
+                  aria-label="Récap du lundi"
+                />
               </div>
             </Row>
-            <Row title="Demandes de 1 à 1" detail="Dès qu’un collaborateur vous en demande un.">
-              <Switch checked={p.request_alerts} onCheckedChange={(v) => set({ request_alerts: v })} aria-label="Demandes de 1 à 1" />
+            <Row
+              title="Demandes de 1 à 1 et de congés"
+              detail="Dès qu’un collaborateur demande un 1 à 1 ou pose un congé."
+            >
+              <Switch
+                checked={p.request_alerts}
+                onCheckedChange={(v) => set({ request_alerts: v })}
+                aria-label="Demandes de 1 à 1 et de congés"
+              />
             </Row>
           </>
         )}
 
         <Row title="Entretiens du jour" detail="Le matin d’un entretien : heure et participant.">
-          <Switch checked={p.review_alerts} onCheckedChange={(v) => set({ review_alerts: v })} aria-label="Entretiens du jour" />
+          <Switch
+            checked={p.review_alerts}
+            onCheckedChange={(v) => set({ review_alerts: v })}
+            aria-label="Entretiens du jour"
+          />
         </Row>
 
         {(installable || iosNeedsInstall) && (
           <div className="flex flex-wrap items-center gap-3 pt-4">
             <Smartphone className="size-5 text-fg-subtle" aria-hidden />
-            <span className="min-w-0 flex-1 text-sm text-fg-muted">Ajoutez Connect Team à votre écran d’accueil, comme une vraie application.</span>
+            <span className="min-w-0 flex-1 text-sm text-fg-muted">
+              Ajoutez Connect Team à votre écran d’accueil, comme une vraie application.
+            </span>
             {installable && (
               <Button onClick={() => void promptInstall()}>
                 <Download aria-hidden />

@@ -1,6 +1,7 @@
 import { Bell } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAbsenceToasts } from '@/features/absences/use-absence-notices';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { useReviewRequests } from '@/features/reviews/queries';
 import { useTeamMembers } from '@/features/team/queries';
@@ -49,6 +50,7 @@ export function NotificationsMenu() {
   const [ring, setRing] = useState(0);
   const onNew = useRef(() => setRing((n) => n + 1)).current;
   useNewRequestNotifier(isManager, onNew);
+  useAbsenceToasts(onNew);
 
   return (
     <Popover>
@@ -84,7 +86,13 @@ export function NotificationsMenu() {
             {items.slice(0, 10).map((item) => (
               <li key={item.id}>
                 <Link to={item.to} className="flex gap-3 px-4 py-3 hover:bg-surface-muted/60">
-                  <span className={cn('mt-2 size-2 shrink-0 rounded-full', item.severity === 'danger' ? 'bg-danger' : 'bg-warning')} aria-hidden />
+                  <span
+                    className={cn(
+                      'mt-2 size-2 shrink-0 rounded-full',
+                      item.severity === 'danger' ? 'bg-danger' : 'bg-warning',
+                    )}
+                    aria-hidden
+                  />
                   <span className="flex min-w-0 flex-col">
                     <span className="text-sm font-medium text-fg">{item.title}</span>
                     <span className="text-xs text-fg-subtle">{item.detail}</span>

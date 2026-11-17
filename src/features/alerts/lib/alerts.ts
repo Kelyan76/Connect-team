@@ -1,4 +1,9 @@
-import { nextRegulatoryDue, prepStatus, type ReviewKind, type ReviewLike } from '@/features/reviews/lib/review-rules';
+import {
+  nextRegulatoryDue,
+  prepStatus,
+  type ReviewKind,
+  type ReviewLike,
+} from '@/features/reviews/lib/review-rules';
 import { hasMoodDrop, type WeatherLike } from '@/features/weather/lib/weather';
 import { longestOverloadStreak, weeklyLoad, type Allocation } from '@/features/workload/lib/load';
 import { daysBetween, isoWeekLabel } from '@/shared/lib/dates';
@@ -6,7 +11,17 @@ import { formatDate } from '@/shared/lib/format';
 import type { ObjectiveStatus } from '@/features/objectives/lib/status';
 import type { Signal } from '@/features/pulse/lib/pulse';
 
-export type AlertKind = 'decrochage' | 'pouls' | 'echeances' | 'reconnaissance' | 'objectif' | 'one_to_one' | 'surcharge' | 'meteo' | 'echeance' | 'preparation';
+export type AlertKind =
+  | 'decrochage'
+  | 'pouls'
+  | 'echeances'
+  | 'reconnaissance'
+  | 'objectif'
+  | 'one_to_one'
+  | 'surcharge'
+  | 'meteo'
+  | 'echeance'
+  | 'preparation';
 export type Severity = 'danger' | 'warning';
 
 export interface Alert {
@@ -44,7 +59,13 @@ export interface Thresholds {
 export interface AlertInput {
   today: string;
   people: { id: string; first_name: string; last_name: string; hired_on: string | null }[];
-  objectives: { id: string; title: string; owner_id: string | null; status: ObjectiveStatus; due_date: string }[];
+  objectives: {
+    id: string;
+    title: string;
+    owner_id: string | null;
+    status: ObjectiveStatus;
+    due_date: string;
+  }[];
   reviews: (ReviewLike & { id: string; collaborator_id: string })[];
   allocations: Allocation[];
   weeks: string[];
@@ -102,7 +123,15 @@ export function computeAlerts(input: AlertInput): Alert[] {
         });
       } else {
         for (const s of signals) {
-          alerts.push({ id: `pouls-${s.kind}-${p.id}`, kind: 'pouls', severity: s.severity, personId: p.id, title: s.title, detail: s.detail, to: '/pouls' });
+          alerts.push({
+            id: `pouls-${s.kind}-${p.id}`,
+            kind: 'pouls',
+            severity: s.severity,
+            personId: p.id,
+            title: s.title,
+            detail: s.detail,
+            to: '/pouls',
+          });
         }
         if (late.length > 0) {
           alerts.push({
@@ -117,7 +146,11 @@ export function computeAlerts(input: AlertInput): Alert[] {
         }
       }
       if (input.recognitions) {
-        const last = input.recognitions.filter((r) => r.collaborator_id === p.id).map((r) => r.created_at.slice(0, 10)).sort().pop();
+        const last = input.recognitions
+          .filter((r) => r.collaborator_id === p.id)
+          .map((r) => r.created_at.slice(0, 10))
+          .sort()
+          .pop();
         const days = last ? daysBetween(last, today) : null;
         if (days === null || days > 30) {
           alerts.push({
@@ -132,7 +165,9 @@ export function computeAlerts(input: AlertInput): Alert[] {
         }
       }
       const held = (kind: ReviewKind) =>
-        mine.filter((r) => r.kind === kind && r.status === 'termine').sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at))[0];
+        mine
+          .filter((r) => r.kind === kind && r.status === 'termine')
+          .sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at))[0];
 
       const lastOne = held('one_to_one');
       const since = lastOne ? daysBetween(day(lastOne.scheduled_at), today) : null;
@@ -143,7 +178,9 @@ export function computeAlerts(input: AlertInput): Alert[] {
           severity: 'warning',
           personId: p.id,
           title: `${name(p)} sans 1 à 1 depuis ${since === null ? 'son arrivée' : `${since} jours`}`,
-          detail: lastOne ? `Dernier échange le ${formatDate(lastOne.scheduled_at)}` : 'Aucun 1 à 1 enregistré',
+          detail: lastOne
+            ? `Dernier échange le ${formatDate(lastOne.scheduled_at)}`
+            : 'Aucun 1 à 1 enregistré',
           to: '/entretiens',
         });
       }
@@ -161,7 +198,13 @@ export function computeAlerts(input: AlertInput): Alert[] {
         });
       }
 
-      if (!input.pulseSignals && hasMoodDrop(input.weather.filter((w) => w.collaborator_id === p.id), s.weather_drop_weeks)) {
+      if (
+        !input.pulseSignals &&
+        hasMoodDrop(
+          input.weather.filter((w) => w.collaborator_id === p.id),
+          s.weather_drop_weeks,
+        )
+      ) {
         alerts.push({
           id: `meteo-${p.id}`,
           kind: 'meteo',
@@ -185,7 +228,10 @@ export function computeAlerts(input: AlertInput): Alert[] {
             severity: left < 0 ? 'danger' : 'warning',
             personId: p.id,
             title: `${kind === 'annuel' ? 'Entretien annuel' : 'Entretien professionnel'} de ${name(p)} à planifier`,
-            detail: left < 0 ? `Échéance dépassée depuis le ${formatDate(due)}` : `Échéance le ${formatDate(due)}`,
+            detail:
+              left < 0
+                ? `Échéance dépassée depuis le ${formatDate(due)}`
+                : `Échéance le ${formatDate(due)}`,
             to: '/entretiens',
           });
         }
@@ -208,7 +254,18 @@ export function computeAlerts(input: AlertInput): Alert[] {
     }
   }
   // Les signaux faibles sur les personnes passent avant les rappels administratifs.
-  const order: AlertKind[] = ['decrochage', 'pouls', 'echeances', 'one_to_one', 'objectif', 'preparation', 'reconnaissance', 'surcharge', 'meteo', 'echeance'];
+  const order: AlertKind[] = [
+    'decrochage',
+    'pouls',
+    'echeances',
+    'one_to_one',
+    'objectif',
+    'preparation',
+    'reconnaissance',
+    'surcharge',
+    'meteo',
+    'echeance',
+  ];
   const rank = (a: Alert) => (a.severity === 'danger' ? 0 : 100) + order.indexOf(a.kind);
   return alerts.sort((a, b) => rank(a) - rank(b));
 }
@@ -217,16 +274,36 @@ export function computeAlerts(input: AlertInput): Alert[] {
 
 export type AlertGroup = 'personnes' | 'lien' | 'objectifs' | 'rappels';
 
-export const ALERT_GROUPS: Record<AlertGroup, { label: string; description: string; kinds: AlertKind[] }> = {
-  personnes: { label: 'À voir en priorité', description: 'Les personnes qui montrent un signal : à comprendre en 1 à 1, sans juger.', kinds: ['decrochage', 'pouls', 'echeances'] },
-  lien: { label: 'Entretenir le lien', description: 'Reconnaissance et 1 à 1 qui se font attendre.', kinds: ['reconnaissance', 'one_to_one'] },
-  objectifs: { label: 'Objectifs', description: 'Objectifs à risque ou en retard.', kinds: ['objectif'] },
-  rappels: { label: 'Rappels', description: 'Préparations et échéances administratives.', kinds: ['preparation', 'echeance', 'surcharge', 'meteo'] },
+export const ALERT_GROUPS: Record<
+  AlertGroup,
+  { label: string; description: string; kinds: AlertKind[] }
+> = {
+  personnes: {
+    label: 'À voir en priorité',
+    description: 'Les personnes qui montrent un signal : à comprendre en 1 à 1, sans juger.',
+    kinds: ['decrochage', 'pouls', 'echeances'],
+  },
+  lien: {
+    label: 'Entretenir le lien',
+    description: 'Reconnaissance et 1 à 1 qui se font attendre.',
+    kinds: ['reconnaissance', 'one_to_one'],
+  },
+  objectifs: {
+    label: 'Objectifs',
+    description: 'Objectifs à risque ou en retard.',
+    kinds: ['objectif'],
+  },
+  rappels: {
+    label: 'Rappels',
+    description: 'Préparations et échéances administratives.',
+    kinds: ['preparation', 'echeance', 'surcharge', 'meteo'],
+  },
 };
 
 export const ALERT_GROUP_ORDER: AlertGroup[] = ['personnes', 'lien', 'objectifs', 'rappels'];
 
-export const groupOf = (a: Alert): AlertGroup => ALERT_GROUP_ORDER.find((g) => ALERT_GROUPS[g].kinds.includes(a.kind)) ?? 'rappels';
+export const groupOf = (a: Alert): AlertGroup =>
+  ALERT_GROUP_ORDER.find((g) => ALERT_GROUPS[g].kinds.includes(a.kind)) ?? 'rappels';
 
 /** Signaux d'un groupe, réunis par personne (ordre conservé : la personne la plus urgente d'abord). */
 export function byPerson(alerts: Alert[]): { personId: string | null; alerts: Alert[] }[] {

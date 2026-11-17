@@ -25,7 +25,18 @@ export function useAlerts(): { data: Alert[] | undefined; isLoading: boolean; er
   const feedbacks = useFeedbacks();
 
   const data = useMemo(() => {
-    if (!team.data || !objectives.data || !reviews.data || !allocations.data || !weather.data || !settings.data || !pulses.data || !tasks.data || !feedbacks.data) return undefined;
+    if (
+      !team.data ||
+      !objectives.data ||
+      !reviews.data ||
+      !allocations.data ||
+      !weather.data ||
+      !settings.data ||
+      !pulses.data ||
+      !tasks.data ||
+      !feedbacks.data
+    )
+      return undefined;
     const today = todayIso();
     return computeAlerts({
       today,
@@ -38,14 +49,38 @@ export function useAlerts(): { data: Alert[] | undefined; isLoading: boolean; er
       weather: weather.data,
       settings: settings.data,
       pulseSignals: pulseSignals(pulses.data, team.active, today),
-      lateTasks: tasks.data.filter((t) => t.status !== 'termine' && t.due_date !== null && t.due_date < today),
-      recognitions: feedbacks.data.filter((f) => f.is_shared && (f.kind === 'reconnaissance' || f.kind === 'point_fort')),
+      lateTasks: tasks.data.filter(
+        (t) => t.status !== 'termine' && t.due_date !== null && t.due_date < today,
+      ),
+      recognitions: feedbacks.data.filter(
+        (f) => f.is_shared && (f.kind === 'reconnaissance' || f.kind === 'point_fort'),
+      ),
     });
-  }, [team.data, team.active, objectives.data, reviews.data, allocations.data, weather.data, settings.data, pulses.data, tasks.data, feedbacks.data]);
+  }, [
+    team.data,
+    team.active,
+    objectives.data,
+    reviews.data,
+    allocations.data,
+    weather.data,
+    settings.data,
+    pulses.data,
+    tasks.data,
+    feedbacks.data,
+  ]);
 
   return {
     data,
-    isLoading: [team, reviews, allocations, weather, settings, pulses, tasks, feedbacks].some((q) => q.isLoading) || objectives.isLoading,
-    error: team.error ?? objectives.error ?? reviews.error ?? allocations.error ?? weather.error ?? settings.error,
+    isLoading:
+      [team, reviews, allocations, weather, settings, pulses, tasks, feedbacks].some(
+        (q) => q.isLoading,
+      ) || objectives.isLoading,
+    error:
+      team.error ??
+      objectives.error ??
+      reviews.error ??
+      allocations.error ??
+      weather.error ??
+      settings.error,
   };
 }

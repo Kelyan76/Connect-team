@@ -58,11 +58,24 @@ export default function AlertsPage() {
       ) : (
         <div className="flex flex-col gap-4">
           <div className="no-scrollbar -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-            <Segmented value={current} onValueChange={(v) => setGroup(v as AlertGroup)} aria-label="Type de signal">
+            <Segmented
+              value={current}
+              onValueChange={(v) => setGroup(v as AlertGroup)}
+              aria-label="Type de signal"
+            >
               {ALERT_GROUP_ORDER.map((g) => (
                 <SegmentedItem key={g} value={g}>
                   {ALERT_GROUPS[g].label}
-                  <span className={cn('tabular rounded-full px-2 text-xs', count(g) && g === 'personnes' ? 'bg-danger text-white' : 'bg-surface-muted text-fg-subtle')}>{count(g)}</span>
+                  <span
+                    className={cn(
+                      'tabular rounded-full px-2 text-xs',
+                      count(g) && g === 'personnes'
+                        ? 'bg-danger text-white'
+                        : 'bg-surface-muted text-fg-subtle',
+                    )}
+                  >
+                    {count(g)}
+                  </span>
                 </SegmentedItem>
               ))}
             </Segmented>
@@ -71,7 +84,10 @@ export default function AlertsPage() {
 
           {list.length === 0 ? (
             <Panel>
-              <EmptyState title="Rien à signaler" description="Aucun signal dans ce menu pour le moment." />
+              <EmptyState
+                title="Rien à signaler"
+                description="Aucun signal dans ce menu pour le moment."
+              />
             </Panel>
           ) : current === 'personnes' ? (
             <ul className="stagger grid gap-4 md:grid-cols-2">
@@ -79,7 +95,13 @@ export default function AlertsPage() {
                 const p = personId ? team.byId.get(personId) : undefined;
                 const urgent = mine.some((a) => a.severity === 'danger');
                 return (
-                  <li key={personId ?? 'equipe'} className={cn('flex flex-col gap-3 rounded-lg border bg-surface p-4 shadow-sm', urgent ? 'border-danger/20' : 'border-line')}>
+                  <li
+                    key={personId ?? 'equipe'}
+                    className={cn(
+                      'flex flex-col gap-3 rounded-lg border bg-surface p-4 shadow-sm',
+                      urgent ? 'border-danger/20' : 'border-line',
+                    )}
+                  >
                     <div className="flex items-center gap-3">
                       {p && <Avatar person={p} size="lg" />}
                       <span className="flex min-w-0 flex-col">
@@ -118,8 +140,13 @@ export default function AlertsPage() {
             <Panel flush>
               <AlertList alerts={list.slice(0, shown)} />
               {list.length > shown && (
-                <button type="button" className="w-full border-t border-line px-4 py-3 text-sm font-medium text-accent hover:bg-surface-muted/50" onClick={() => setShown((s) => s + STEP)}>
-                  Voir {Math.min(STEP, list.length - shown)} de plus ({list.length - shown} restants)
+                <button
+                  type="button"
+                  className="w-full border-t border-line px-4 py-3 text-sm font-medium text-accent hover:bg-surface-muted/50"
+                  onClick={() => setShown((s) => s + STEP)}
+                >
+                  Voir {Math.min(STEP, list.length - shown)} de plus ({list.length - shown}{' '}
+                  restants)
                 </button>
               )}
             </Panel>
