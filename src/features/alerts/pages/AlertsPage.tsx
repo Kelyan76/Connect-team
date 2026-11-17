@@ -1,4 +1,4 @@
-import { ArrowRight, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, CalendarPlus, SlidersHorizontal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTeamMembers } from '@/features/team/queries';
@@ -35,12 +35,20 @@ export default function AlertsPage() {
         title="Signaux faibles"
         description="Ce que vous êtes peut-être en train de rater. Un signal invite à un échange, jamais à une sanction."
         actions={
-          <Button asChild variant="ghost">
-            <Link to="/parametres">
-              <SlidersHorizontal aria-hidden />
-              Seuils
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="primary">
+              <Link to="/entretiens?planifier=1">
+                <CalendarPlus aria-hidden />
+                Planifier un 1 à 1
+              </Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link to="/parametres">
+                <SlidersHorizontal aria-hidden />
+                Seuils
+              </Link>
+            </Button>
+          </div>
         }
       />
       {alerts.error ? (

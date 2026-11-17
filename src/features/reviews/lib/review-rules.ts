@@ -44,6 +44,13 @@ export function reviewStage(r: ReviewLike): Stage {
   return r.collaborator_signed_at && r.manager_signed_at ? 'signe' : 'a_signer';
 }
 
+/** Prochain entretien planifié (aujourd'hui compris), le plus proche d'abord. */
+export function nextPlannedReview<T extends Pick<ReviewLike, 'status' | 'scheduled_at'>>(reviews: T[], todayIso: string): T | undefined {
+  return reviews
+    .filter((r) => r.status === 'planifie' && r.scheduled_at.slice(0, 10) >= todayIso)
+    .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at))[0];
+}
+
 /** Périodicité réglementaire : annuel tous les 12 mois, professionnel tous les 24 mois (art. L6315-1). */
 export const REGULATORY_MONTHS: Partial<Record<ReviewKind, number>> = { annuel: 12, professionnel: 24 };
 

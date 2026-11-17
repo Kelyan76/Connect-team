@@ -63,7 +63,7 @@ export function PageHeader({ title, breadcrumbs, description, actions, meta }: P
 /** Conteneur de page : largeur maximale et marges constantes ; place pour la barre mobile en bas. */
 export function Page({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('mx-auto w-full max-w-300 px-4 pb-28 pt-6 sm:px-6 md:pb-10 lg:px-10 lg:pt-8', className)}>
+    <div className={cn('mx-auto w-full max-w-300 px-4 pb-44 pt-6 sm:px-6 md:pb-10 lg:px-10 lg:pt-8', className)}>
       {children}
     </div>
   );

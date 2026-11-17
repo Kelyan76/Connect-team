@@ -18,6 +18,7 @@ import { KeyliaPrep } from '../components/KeyliaPrep';
 import { QuickPrep } from '../components/QuickPrep';
 import { OneToOneGuide } from '../components/OneToOneGuide';
 import { EchoRecorder } from '../components/EchoRecorder';
+import { GuideFold } from '../components/GuideFold';
 import { MinutesPanel } from '../components/MinutesPanel';
 import { PrepAssistant } from '../components/PrepAssistant';
 import { SideBySide } from '../components/SideBySide';
@@ -140,20 +141,24 @@ export default function ReviewPage() {
             <SideBySide review={r} questions={questions} answers={answers.data} viewer={viewer} />
           </TabsContent>
           <TabsContent value="compte-rendu" className="flex flex-col gap-6">
-            {isManager && r.kind === 'one_to_one' && <OneToOneGuide review={r} locked={!!r.manager_signed_at} />}
+            {isManager && r.kind === 'one_to_one' && (
+              <GuideFold>
+                <OneToOneGuide review={r} locked={!!r.manager_signed_at} />
+              </GuideFold>
+            )}
             {!isManager && r.priority && (
               <div className="rounded-lg border border-line bg-surface px-4 py-3 text-base">
                 <span className="font-medium">Priorité d’ici le prochain 1 à 1 : </span>
                 {r.priority}
               </div>
             )}
-            <MinutesPanel review={r} isManager={isManager} />
             {canRecord && (
               <div id="echo" className="scroll-mt-24">
                 <EchoRecorder review={r} />
               </div>
             )}
             <ActionPlan review={r} isManager={isManager} />
+            <MinutesPanel review={r} isManager={isManager} />
             <Signatures review={r} viewer={viewer} />
           </TabsContent>
         </Tabs>

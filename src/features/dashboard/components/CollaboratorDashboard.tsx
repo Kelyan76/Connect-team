@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { QuickActions } from '@/app/shell/QuickActions';
 import { Link } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { OBJECTIVE_STATUS } from '@/features/objectives/lib/status';
@@ -30,6 +31,7 @@ export function CollaboratorDashboard() {
     <Page>
       <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`${profile.job_title} · bonne journée !`} />
       <PulseCheckin />
+      <QuickActions />
       <PrepNudge />
       <DiscNudge />
       <EnableNotificationsCard />

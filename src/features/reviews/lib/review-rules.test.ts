@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canEditOwnAnswers, canSeeOtherSide, hasGap, nextRegulatoryDue, prepStatus, reviewStage, type ReviewLike } from './review-rules';
+import { canEditOwnAnswers, canSeeOtherSide, hasGap, nextPlannedReview, nextRegulatoryDue, prepStatus, reviewStage, type ReviewLike } from './review-rules';
 
 const base: ReviewLike = {
   kind: 'one_to_one',
@@ -54,5 +54,14 @@ describe('cycle de vie et échéances', () => {
     expect(hasGap('echelle', 4, 3)).toBe(false);
     expect(hasGap('choix', 'Formation', 'Aucun pour l’instant')).toBe(true);
     expect(hasGap('texte', 'a', 'b')).toBe(false);
+  });
+});
+
+describe('prochain entretien planifié', () => {
+  const r = (status: ReviewLike['status'], scheduled_at: string) => ({ status, scheduled_at });
+  it('ignore le passé, les annulés et les terminés ; prend le plus proche', () => {
+    const list = [r('planifie', '2026-11-10T10:00:00Z'), r('annule', '2026-11-18T10:00:00Z'), r('planifie', '2026-11-24T09:00:00Z'), r('planifie', '2026-11-17T15:00:00Z'), r('termine', '2026-11-17T08:00:00Z')];
+    expect(nextPlannedReview(list, '2026-11-17')?.scheduled_at).toBe('2026-11-17T15:00:00Z');
+    expect(nextPlannedReview([r('planifie', '2026-11-10T10:00:00Z')], '2026-11-17')).toBeUndefined();
   });
 });

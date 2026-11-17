@@ -1,13 +1,12 @@
-import { CalendarPlus, ClipboardList, MessageSquareText, NotebookPen, Radar, Target } from 'lucide-react';
+import { ClipboardList, MessageSquareText, Radar, Target } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { usePeriod } from '@/app/providers/period';
+import { QuickActions } from '@/app/shell/QuickActions';
 import { AlertList } from '@/features/alerts/components/AlertList';
 import { useAlerts } from '@/features/alerts/queries';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
-import { ObservationDialog } from '@/features/notebook/components/ObservationDialog';
 import { formatDecimal, formatPercent, pluralize } from '@/shared/lib/format';
-import { Button } from '@/shared/ui/button';
 import { SERIES, TrendChart } from '@/shared/ui/charts';
 import { Stat, StatGroup } from '@/shared/ui/data';
 import { ErrorState, Skeleton } from '@/shared/ui/feedback';
@@ -49,22 +48,11 @@ export function ManagerDashboard() {
     if (requested && VIEWS.includes(requested as View)) setView(requested as View);
   }, [requested]);
   const [detail, setDetail] = useState<KpiKind | null>(null);
-  const [noting, setNoting] = useState(false);
 
   return (
     <Page>
-      <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`Voici l’essentiel de votre équipe · ${period.label}`}>
-        <Button className="flex-1 border-white/30 bg-white/15 text-white shadow-none hover:bg-white/25 sm:flex-none" onClick={() => setNoting(true)}>
-          <NotebookPen aria-hidden />
-          Noter une observation
-        </Button>
-        <Button asChild className="flex-1 border-transparent bg-white text-accent hover:bg-white/90 sm:flex-none">
-          <Link to="/entretiens?planifier=1">
-            <CalendarPlus aria-hidden />
-            Planifier un 1 à 1
-          </Link>
-        </Button>
-      </HeroBanner>
+      <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`Voici l’essentiel de votre équipe · ${period.label}`} />
+      <QuickActions />
       <EnableNotificationsCard />
       {error ? (
         <ErrorState error={error} />
@@ -174,7 +162,6 @@ export function ManagerDashboard() {
           />
         </div>
       )}
-      <ObservationDialog open={noting} onOpenChange={setNoting} />
     </Page>
   );
 }

@@ -6,6 +6,7 @@ import { DemoBanner } from '@/features/auth/components/DemoBanner';
 import { useIdle } from '@/shared/hooks/use-idle';
 import { AppShell } from './AppShell';
 import { PageSkeleton } from './PageSkeleton';
+import { QuickAddButton } from './QuickAddButton';
 import { useSearchEntries } from './use-search-entries';
 
 const IDLE_LIMIT = 30 * 60 * 1000;
@@ -35,6 +36,7 @@ export function AuthenticatedLayout() {
           <Outlet />
         </div>
       </Suspense>
+      <QuickAddButton />
     </AppShell>
   );
 }
