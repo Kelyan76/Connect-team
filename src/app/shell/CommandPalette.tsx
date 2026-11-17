@@ -58,7 +58,11 @@ export function CommandPalette({ open, onOpenChange, role, entries }: CommandPal
               <CommandEmpty>Aucun résultat.</CommandEmpty>
               <CommandGroup heading="Aller à">
                 {pages.map((p) => (
-                  <CommandItem key={p.to} value={`page ${itemLabel(p, role)}`} onSelect={() => go(p.to)}>
+                  <CommandItem
+                    key={p.to}
+                    value={`page ${itemLabel(p, role)}`}
+                    onSelect={() => go(p.to)}
+                  >
                     <p.icon aria-hidden />
                     {itemLabel(p, role)}
                   </CommandItem>
@@ -77,7 +81,11 @@ export function CommandPalette({ open, onOpenChange, role, entries }: CommandPal
                       >
                         <e.icon aria-hidden />
                         <span className="truncate">{e.label}</span>
-                        {e.detail && <span className="ml-auto truncate text-xs text-fg-subtle">{e.detail}</span>}
+                        {e.detail && (
+                          <span className="ml-auto truncate text-xs text-fg-subtle">
+                            {e.detail}
+                          </span>
+                        )}
                       </CommandItem>
                     ))}
                 </CommandGroup>

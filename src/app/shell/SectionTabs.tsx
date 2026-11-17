@@ -10,7 +10,10 @@ export function SectionTabs({ role }: { role: Role }) {
   if (!section || section.tabs.length < 2) return null;
   return (
     <div className="mx-auto w-full max-w-300 px-4 pt-4 sm:px-6 lg:px-10 lg:pt-6">
-      <nav aria-label={section.label} className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1">
+      <nav
+        aria-label={section.label}
+        className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1"
+      >
         {section.tabs.map((t) => {
           const active = matchesPath(t.to, pathname);
           return (

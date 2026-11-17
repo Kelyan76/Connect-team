@@ -4,7 +4,14 @@ import { cn } from '@/shared/lib/cn';
 import { BrandMark } from '@/shared/ui/brand';
 import { SECTION_COLOR, type SectionTone } from './section-colors';
 import { Tooltip } from '@/shared/ui/menu';
-import { ETHICS_ITEM, itemLabel, matchesPath, sectionsForRole, SETTINGS_ITEM, type Role } from './nav';
+import {
+  ETHICS_ITEM,
+  itemLabel,
+  matchesPath,
+  sectionsForRole,
+  SETTINGS_ITEM,
+  type Role,
+} from './nav';
 
 interface SidebarProps {
   role: Role;
@@ -38,7 +45,13 @@ function Entry({ to, label, icon: Icon, active, collapsed, badge, tone = 'settin
         collapsed && 'justify-center px-0',
       )}
     >
-      <Icon className={cn('size-4 shrink-0 transition-transform group-hover:scale-110', !active && color.icon)} aria-hidden />
+      <Icon
+        className={cn(
+          'size-4 shrink-0 transition-transform group-hover:scale-110',
+          !active && color.icon,
+        )}
+        aria-hidden
+      />
       {collapsed ? (
         <span className="sr-only">{label}</span>
       ) : (
@@ -71,12 +84,7 @@ export function Sidebar({ role, collapsed, onToggle, teamName, badges = {} }: Si
       )}
       aria-label="Navigation principale"
     >
-      <div
-        className={cn(
-          'flex h-16 items-center gap-3 px-5',
-          collapsed && 'justify-center px-0',
-        )}
-      >
+      <div className={cn('flex h-16 items-center gap-3 px-5', collapsed && 'justify-center px-0')}>
         <BrandMark className="size-7" />
         {!collapsed && (
           <div className="flex min-w-0 flex-col leading-tight">

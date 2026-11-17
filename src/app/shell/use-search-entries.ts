@@ -17,12 +17,26 @@ export function useSearchEntries(isManager: boolean): PaletteEntry[] {
     const entries: PaletteEntry[] = [];
     if (isManager) {
       for (const p of team.members) {
-        entries.push({ id: `p-${p.id}`, group: 'Collaborateurs', label: fullName(p), detail: p.job_title, to: `/equipe/${p.id}`, icon: UserRound });
+        entries.push({
+          id: `p-${p.id}`,
+          group: 'Collaborateurs',
+          label: fullName(p),
+          detail: p.job_title,
+          to: `/equipe/${p.id}`,
+          icon: UserRound,
+        });
       }
     }
     for (const o of objectives.data ?? []) {
       const owner = o.owner_id ? team.byId.get(o.owner_id) : null;
-      entries.push({ id: `o-${o.id}`, group: 'Objectifs', label: o.title, detail: owner ? fullName(owner) : 'Équipe', to: '/objectifs', icon: Target });
+      entries.push({
+        id: `o-${o.id}`,
+        group: 'Objectifs',
+        label: o.title,
+        detail: owner ? fullName(owner) : 'Équipe',
+        to: '/objectifs',
+        icon: Target,
+      });
     }
     for (const r of (reviews.data ?? []).filter((x) => x.status === 'planifie')) {
       const who = team.byId.get(r.collaborator_id);

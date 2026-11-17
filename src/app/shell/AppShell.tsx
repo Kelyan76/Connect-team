@@ -33,7 +33,17 @@ interface AppShellProps {
   children: ReactNode;
 }
 
-export function AppShell({ role, user, teamName, onSignOut, searchEntries = [], notifications, badges, banner, children }: AppShellProps) {
+export function AppShell({
+  role,
+  user,
+  teamName,
+  onSignOut,
+  searchEntries = [],
+  notifications,
+  badges,
+  banner,
+  children,
+}: AppShellProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
@@ -57,7 +67,13 @@ export function AppShell({ role, user, teamName, onSignOut, searchEntries = [], 
       >
         Aller au contenu
       </a>
-      <Sidebar role={role} collapsed={collapsed} onToggle={toggle} teamName={teamName} badges={badges} />
+      <Sidebar
+        role={role}
+        collapsed={collapsed}
+        onToggle={toggle}
+        teamName={teamName}
+        badges={badges}
+      />
       <div className="relative isolate flex min-w-0 flex-1 flex-col">
         <PageHalo role={role} />
         {banner}
@@ -75,7 +91,12 @@ export function AppShell({ role, user, teamName, onSignOut, searchEntries = [], 
         </main>
       </div>
       <BottomNav role={role} />
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} role={role} entries={searchEntries} />
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        role={role}
+        entries={searchEntries}
+      />
     </div>
   );
 }

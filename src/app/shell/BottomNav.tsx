@@ -12,7 +12,10 @@ export function BottomNav({ role }: { role: Role }) {
       aria-label="Navigation principale"
       className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 shadow-up backdrop-blur md:hidden"
     >
-      <ul className="grid" style={{ gridTemplateColumns: `repeat(${sections.length}, minmax(0, 1fr))` }}>
+      <ul
+        className="grid"
+        style={{ gridTemplateColumns: `repeat(${sections.length}, minmax(0, 1fr))` }}
+      >
         {sections.map((s) => {
           const active = s.tabs.some((t) => matchesPath(t.to, pathname));
           const color = SECTION_COLOR[s.tone];
@@ -21,7 +24,10 @@ export function BottomNav({ role }: { role: Role }) {
               <Link
                 to={s.to}
                 aria-current={active ? 'page' : undefined}
-                className={cn('flex h-16 flex-col items-center justify-center gap-1 text-xs transition-colors', active ? cn('font-semibold', color.text) : 'text-fg-subtle')}
+                className={cn(
+                  'flex h-16 flex-col items-center justify-center gap-1 text-xs transition-colors',
+                  active ? cn('font-semibold', color.text) : 'text-fg-subtle',
+                )}
               >
                 <span
                   className={cn(
@@ -31,7 +37,9 @@ export function BottomNav({ role }: { role: Role }) {
                 >
                   <s.icon className="size-5" aria-hidden />
                 </span>
-                <span className="max-w-full truncate text-[11px] leading-none tracking-tight">{s.shortLabel}</span>
+                <span className="max-w-full truncate text-[11px] leading-none tracking-tight">
+                  {s.shortLabel}
+                </span>
               </Link>
             </li>
           );

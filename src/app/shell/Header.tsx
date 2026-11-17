@@ -35,7 +35,14 @@ interface HeaderProps {
 
 const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform);
 
-export function Header({ user, teamName, onOpenPalette, onSignOut, notifications, showSettings }: HeaderProps) {
+export function Header({
+  user,
+  teamName,
+  onOpenPalette,
+  onSignOut,
+  notifications,
+  showSettings,
+}: HeaderProps) {
   const { period, setPreset } = usePeriod();
 
   return (
@@ -73,7 +80,10 @@ export function Header({ user, teamName, onOpenPalette, onSignOut, notifications
         </button>
 
         <Select value={period.preset} onValueChange={(v) => setPreset(v as PeriodPreset)}>
-          <SelectTrigger className="hidden h-9 w-auto gap-2 rounded-full sm:flex" aria-label="Période d'analyse">
+          <SelectTrigger
+            className="hidden h-9 w-auto gap-2 rounded-full sm:flex"
+            aria-label="Période d'analyse"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="end">
@@ -93,7 +103,9 @@ export function Header({ user, teamName, onOpenPalette, onSignOut, notifications
             aria-label="Menu du profil"
           >
             <Avatar person={user} size="sm" />
-            <span className="hidden max-w-36 truncate text-sm font-medium lg:inline">{fullName(user)}</span>
+            <span className="hidden max-w-36 truncate text-sm font-medium lg:inline">
+              {fullName(user)}
+            </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64" align="end">
             <div className="flex flex-col px-2 py-2">
