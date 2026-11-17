@@ -306,6 +306,24 @@ describe('écritures limitées du collaborateur', () => {
   });
 });
 
+describe('résumé hebdomadaire de l’équipe (IA)', () => {
+  it('réservé au manager : il l’écrit et le relit, le collaborateur ne le voit pas', async () => {
+    const insertSql =
+      'insert into public.weekly_digests (team_id, week_start, content) select team_id, date_trunc(\'week\', current_date)::date, \'{"bien":"ok"}\'::jsonb from public.profiles where id = $1';
+    await expect(asUser(db, NADIA, (tx) => tx.query(insertSql, [NADIA]))).rejects.toThrow(
+      /row-level security/,
+    );
+    const seen = await asUser(db, CLAIRE, async (tx) => {
+      await tx.query(insertSql, [CLAIRE]);
+      return count(tx, 'select 1 from public.weekly_digests');
+    });
+    expect(seen).toBe(1);
+    expect(await asUser(db, NADIA, (tx) => count(tx, 'select 1 from public.weekly_digests'))).toBe(
+      0,
+    );
+  });
+});
+
 describe('outils du cours : DISC, carnet, délégation, décisions, préparation du 1 à 1', () => {
   it('le collaborateur voit son profil DISC et peut le corriger, pas celui des autres', async () => {
     expect(await asUser(db, NADIA, (tx) => count(tx, 'select 1 from public.disc_profiles'))).toBe(

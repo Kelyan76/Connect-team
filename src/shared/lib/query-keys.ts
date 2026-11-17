@@ -22,6 +22,7 @@ export const qk = {
   review: (id: string) => ['reviews', id] as const,
   answers: (reviewId: string) => ['answers', reviewId] as const,
   reviewActions: ['review-actions'] as const,
+  weeklyDigest: (week: string) => ['weekly-digest', week] as const,
   reviewRequests: ['review-requests'] as const,
   projects: ['projects'] as const,
   tasks: ['tasks'] as const,

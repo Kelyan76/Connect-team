@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { usePeriod } from '@/app/providers/period';
 import { QuickActions } from '@/app/shell/QuickActions';
+import { WeeklyDigestPanel } from '@/features/digest/components/WeeklyDigestPanel';
 import { AlertList } from '@/features/alerts/components/AlertList';
 import { useAlerts } from '@/features/alerts/queries';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
@@ -63,6 +64,9 @@ export function ManagerDashboard() {
         <AskAssistant />
       </HeroBanner>
       <QuickActions />
+      <div className="mb-6">
+        <WeeklyDigestPanel />
+      </div>
       <EnableNotificationsCard />
       {error ? (
         <ErrorState error={error} />

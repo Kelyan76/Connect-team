@@ -1234,6 +1234,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      weekly_digests: {
+        Row: {
+          team_id: string;
+          week_start: string;
+          content: Json;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          team_id: string;
+          week_start: string;
+          content: Json;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          team_id?: string;
+          week_start?: string;
+          content?: Json;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       workload_allocations: {
         Row: {
           id: string;
