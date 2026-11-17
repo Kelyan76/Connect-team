@@ -15,10 +15,17 @@ export default defineConfig({
     strictPort: true,
     // Echo (application de prise de parole) : même chemin qu'en production (réécriture Vercel), pas de CORS.
     proxy: {
-      '/api/echo': {
+      // Clé en expression régulière : sinon « /api/echo » capterait aussi « /api/echo-chat ».
+      '^/api/echo$': {
         target: 'https://think-task-flow.lovable.app',
         changeOrigin: true,
         rewrite: () => '/api/public/transcribe',
+      },
+      // Assistant IA (même application Echo) : feedbacks DESC, objectifs SMART, préparation, décisions.
+      '/api/echo-chat': {
+        target: 'https://think-task-flow.lovable.app',
+        changeOrigin: true,
+        rewrite: () => '/api/public/chat-transcript',
       },
     },
   },

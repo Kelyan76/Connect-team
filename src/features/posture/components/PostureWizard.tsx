@@ -7,7 +7,7 @@ import { usePulses } from '@/features/pulse/queries';
 import { useReviews } from '@/features/reviews/queries';
 import { useTasks } from '@/features/tasks/queries';
 import { useDiscProfiles } from '@/features/team/disc-queries';
-import type { DiscStyle } from '@/features/team/lib/disc';
+import { DISC, type DiscStyle } from '@/features/team/lib/disc';
 import { useTeamMembers } from '@/features/team/queries';
 import { cn } from '@/shared/lib/cn';
 import { todayIso } from '@/shared/lib/dates';
@@ -20,6 +20,9 @@ import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
 import { DIAGNOSES, formAdvice, NEXT_STEP, SCARF, SCARF_DOMAINS, scarfRisks, suggestDiagnosis, type Diagnosis, type Scarf, type ScarfImpact } from '../lib/posture';
 import { useSavePosture } from '../queries';
 import { SituationFacts } from './SituationFacts';
+import { askAiFor } from '@/features/ai/client';
+import { AiButton } from '@/features/ai/components/AiButton';
+import { decisionPrompt, parseDecision } from '@/features/ai/lib/ai';
 
 const IMPACT: { value: ScarfImpact; label: string }[] = [
   { value: -1, label: 'Menacé' },
@@ -82,6 +85,24 @@ export function PostureWizard({ initialPerson }: { initialPerson: string }) {
     setScarf({});
     setDecision('');
     setSaved(false);
+  };
+
+  const decideWithAi = async () => {
+    if (!chosen) return;
+    const style = disc ? DISC[disc.primary_style as DiscStyle] : undefined;
+    setDecision(
+      await askAiFor(
+        decisionPrompt({
+          firstName: facts?.p.first_name ?? '',
+          situation,
+          diagnosis: DIAGNOSES[chosen].label,
+          response: DIAGNOSES[chosen].response,
+          disc: style && disc ? `${disc.primary_style}, ${style.name} : ${style.do}` : undefined,
+          scarfRisks: risks.map((r) => r.label),
+        }),
+        parseDecision,
+      ),
+    );
   };
 
   const submit = async () => {
@@ -149,6 +170,7 @@ export function PostureWizard({ initialPerson }: { initialPerson: string }) {
         <Field label="Ce que je décide" hint="Une décision concrète, avec la prochaine étape et sa date.">
           <Textarea rows={2} maxLength={1000} value={decision} onChange={(e) => setDecision(e.target.value)} placeholder="Un 1 à 1 dès demain, centré sur lui, avant toute remarque sur les délais." />
         </Field>
+        <AiButton label="Proposer une décision avec l’IA" className="self-start" disabled={!person || !chosen || situation.trim().length < 10} run={decideWithAi} />
         <ul className="flex flex-col divide-y divide-line">
           {SCARF_DOMAINS.map((d) => (
             <li key={d} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">

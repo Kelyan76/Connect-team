@@ -13,6 +13,10 @@ import { Input, NativeSelect, Textarea } from '@/shared/ui/input';
 import { Checkbox } from '@/shared/ui/toggle';
 import { SmartCheck } from './SmartCheck';
 import { useCreateObjective } from '../queries';
+import { askAiFor } from '@/features/ai/client';
+import { AiButton } from '@/features/ai/components/AiButton';
+import { parseSmart, smartPrompt } from '@/features/ai/lib/ai';
+import { toast } from '@/shared/ui/toaster';
 
 // Contraintes alignées sur la base : longueurs, échéance ≥ début, cible ≠ départ.
 const schema = z
@@ -62,6 +66,17 @@ export function ObjectiveDialog({ open, onOpenChange, defaultOwner }: { open: bo
     if (open && defaultOwner) form.setValue('owner_id', defaultOwner);
   }, [open, defaultOwner, form]);
   const w = form.watch();
+  const smartWithAi = async () => {
+    const out = await askAiFor(
+      smartPrompt({ title: w.title ?? '', description: w.description ?? '', firstName: team.byId.get(w.owner_id ?? '')?.first_name, dueDate: w.due_date }),
+      parseSmart,
+    );
+    form.setValue('title', out.title, { shouldValidate: true });
+    if (out.description) form.setValue('description', out.description);
+    if (out.means) form.setValue('means', out.means);
+    if (out.keyResults.length) krs.replace(out.keyResults);
+    toast.success('Proposition SMART de l’IA : relisez les chiffres et l’échéance.');
+  };
 
   const onSubmit = form.handleSubmit(async (v) => {
     await create.mutateAsync({
@@ -100,6 +115,7 @@ export function ObjectiveDialog({ open, onOpenChange, defaultOwner }: { open: bo
           <Field label="Intitulé" error={e.title?.message}>
             <Input {...form.register('title')} placeholder="Publier l’application mobile 3.0 sur les deux stores" />
           </Field>
+          <AiButton label="Rendre SMART avec l’IA" className="self-start" disabled={(w.title ?? '').trim().length < 3} run={smartWithAi} />
           <Field label="Description" optional>
             <Textarea rows={2} {...form.register('description')} />
           </Field>

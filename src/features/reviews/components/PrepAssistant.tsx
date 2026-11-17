@@ -16,6 +16,8 @@ import { Panel } from '@/shared/ui/layout';
 import type { Review } from '../api';
 import { suggestTopics } from '../lib/assistant';
 import { useReviewActions, useReviews } from '../queries';
+import { useTeamMembers } from '@/features/team/queries';
+import { AiQuestions } from './AiQuestions';
 
 /** Aide à la préparation du manager : synthèse pré-remplie et sujets suggérés. */
 export function PrepAssistant({ review }: { review: Review }) {
@@ -26,6 +28,7 @@ export function PrepAssistant({ review }: { review: Review }) {
   const feedbacks = useFeedbacks();
   const actions = useReviewActions();
   const reviews = useReviews();
+  const team = useTeamMembers();
   const id = review.collaborator_id;
 
   const data = useMemo(() => {
@@ -79,6 +82,15 @@ export function PrepAssistant({ review }: { review: Review }) {
             </li>
           ))}
         </ul>
+        <AiQuestions
+          collaboratorId={id}
+          firstName={team.byId.get(id)?.first_name ?? 'le collaborateur'}
+          signals={[
+            ...suggestions.map((s) => `${s.title} (${s.reason})`),
+            ...input.lateTasks.slice(0, 3).map((t) => `Échéance manquée : ${t.title}`),
+            ...(input.recentWorkload.length ? [`Charge ressentie récente : ${input.recentWorkload.slice(-5).join(', ')} sur 5`] : []),
+          ]}
+        />
       </Panel>
       <Panel title="Synthèse automatique" description={previous ? `Depuis l’entretien du ${formatDate(previous.scheduled_at)}` : 'Premier entretien'}>
         <div className="flex flex-col gap-5">

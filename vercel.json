@@ -5,6 +5,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/echo", "destination": "https://think-task-flow.lovable.app/api/public/transcribe" },
+    { "source": "/api/echo-chat", "destination": "https://think-task-flow.lovable.app/api/public/chat-transcript" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

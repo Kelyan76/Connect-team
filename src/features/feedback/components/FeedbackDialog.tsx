@@ -13,6 +13,10 @@ import { NativeSelect, Textarea } from '@/shared/ui/input';
 import { Segmented, SegmentedItem, Switch } from '@/shared/ui/toggle';
 import { composeFeedback, DESC_STEPS, emptyDesc, FEEDBACK_TYPES, lintFeedback, missingSteps, type CourseFeedbackKind, type DescParts, type DescStep } from '../lib/desc';
 import { useCreateFeedback } from '../queries';
+import { askAiFor } from '@/features/ai/client';
+import { AiButton } from '@/features/ai/components/AiButton';
+import { descPrompt, parseDesc } from '@/features/ai/lib/ai';
+import { toast } from '@/shared/ui/toaster';
 
 interface Props {
   open: boolean;
@@ -32,6 +36,7 @@ export function FeedbackDialog({ open, onOpenChange, defaultPerson, defaultKind 
   const [parts, setParts] = useState<DescParts>(emptyDesc());
   const [shared, setShared] = useState(true);
   const [tried, setTried] = useState(false);
+  const [raw, setRaw] = useState('');
 
   useEffect(() => {
     if (!open) return;
@@ -41,6 +46,7 @@ export function FeedbackDialog({ open, onOpenChange, defaultPerson, defaultKind 
     setParts(emptyDesc());
     setShared(k !== 'recadrage');
     setTried(false);
+    setRaw('');
   }, [open, defaultPerson, defaultKind]);
 
   const type = FEEDBACK_TYPES[kind];
@@ -56,6 +62,21 @@ export function FeedbackDialog({ open, onOpenChange, defaultPerson, defaultKind 
     setShared(next !== 'recadrage');
   };
   const set = (step: DescStep, value: string) => setParts((p) => ({ ...p, [step]: value }));
+  const draftWithAi = async () => {
+    const style = disc ? DISC[disc.primary_style as DiscStyle] : undefined;
+    const prompt = descPrompt({
+      kindLabel: type.label,
+      goal: type.goal,
+      steps: type.steps,
+      firstName: team.byId.get(person)?.first_name ?? '',
+      disc: style && disc ? `${disc.primary_style}, ${style.name} : ${style.do}` : undefined,
+      raw,
+      parts,
+    });
+    const out = await askAiFor(prompt, (r) => parseDesc(r, type.steps));
+    setParts((p) => ({ ...p, ...out }));
+    toast.success('Proposition de l’IA : relisez et ajustez avant d’enregistrer.');
+  };
 
   const submit = async () => {
     setTried(true);
@@ -151,6 +172,18 @@ export function FeedbackDialog({ open, onOpenChange, defaultPerson, defaultKind 
               </div>
             </div>
           )}
+
+          <div className="flex flex-col gap-3 rounded border border-sec-reviews/20 bg-sec-reviews/5 p-3">
+            <Field label="Dites-le avec vos mots" hint="L’IA le transforme en DESC adapté à son profil. Vous relisez avant d’enregistrer." optional>
+              <Textarea rows={2} maxLength={600} value={raw} onChange={(e) => setRaw(e.target.value)} placeholder="Ex. : tu as encore raté la deadline du dossier client" />
+            </Field>
+            <AiButton
+              label="Rédiger en DESC avec l’IA"
+              className="self-start"
+              disabled={raw.trim().length < 3 && !parts.d.trim()}
+              run={draftWithAi}
+            />
+          </div>
 
           {type.steps.map((step) => {
             const meta = DESC_STEPS[step];
