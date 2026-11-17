@@ -9,7 +9,7 @@ export function SectionTabs({ role }: { role: Role }) {
   const section = sectionForPath(sectionsForRole(role), pathname);
   if (!section || section.tabs.length < 2) return null;
   return (
-    <div className="mx-auto w-full max-w-300 px-4 pt-4 sm:px-6 lg:px-10 lg:pt-6">
+    <div className="mx-auto w-full max-w-300 px-4 pt-4 sm:px-6 md:hidden">
       <nav
         aria-label={section.label}
         className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1"

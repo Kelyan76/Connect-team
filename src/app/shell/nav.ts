@@ -128,7 +128,10 @@ export const itemLabel = (item: NavItem, role: Role) =>
 // Le menu principal reste court : chaque section regroupe des pages voisines,
 // accessibles par des onglets en haut de page. Les adresses des pages ne changent pas.
 
+export type SectionId = 'home' | 'team' | 'reviews' | 'goals' | 'calendar';
+
 export interface NavSection {
+  id: SectionId;
   label: string;
   selfLabel?: string;
   /** Libellé court de la barre de navigation mobile. */
@@ -142,14 +145,16 @@ export interface NavSection {
 
 export const SECTIONS: NavSection[] = [
   {
+    id: 'home',
     label: 'Tableau de bord',
     selfLabel: 'Accueil',
     shortLabel: 'Accueil',
     tone: 'home',
     icon: LayoutDashboard,
-    tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }],
+    tabs: [{ to: '/', tabLabel: 'Tableau de bord' }, { to: '/alertes' }],
   },
   {
+    id: 'team',
     label: 'Équipe',
     selfLabel: 'Mon suivi',
     shortLabel: 'Équipe',
@@ -165,6 +170,7 @@ export const SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: 'reviews',
     label: '1 à 1 et feedback',
     selfLabel: 'Mes 1 à 1',
     shortLabel: '1 à 1',
@@ -173,23 +179,35 @@ export const SECTIONS: NavSection[] = [
     tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }, { to: '/posture' }],
   },
   {
+    id: 'goals',
     label: 'Objectifs',
     selfLabel: 'Mes objectifs',
     shortLabel: 'Objectifs',
     tone: 'goals',
     icon: Target,
-    tabs: [{ to: '/objectifs' }, { to: '/delegation' }, { to: '/taches' }, { to: '/calendrier' }],
+    tabs: [{ to: '/objectifs' }, { to: '/delegation' }, { to: '/taches' }],
+  },
+  {
+    id: 'calendar',
+    label: 'Calendrier',
+    selfLabel: 'Mes congés',
+    shortLabel: 'Calendrier',
+    selfShortLabel: 'Congés',
+    tone: 'planning',
+    icon: CalendarDays,
+    tabs: [{ to: '/calendrier' }],
   },
 ];
 
 export interface ResolvedSection {
+  id: SectionId;
   label: string;
   shortLabel: string;
   tone: SectionTone;
   icon: LucideIcon;
   /** Première page accessible : cible du lien de la section. */
   to: string;
-  tabs: { to: string; label: string }[];
+  tabs: { to: string; label: string; icon: LucideIcon }[];
 }
 
 const ALL_ITEMS = [...NAV.flatMap((g) => g.items), SETTINGS_ITEM, ETHICS_ITEM];
@@ -200,12 +218,13 @@ export function sectionsForRole(role: Role): ResolvedSection[] {
     const tabs = s.tabs.flatMap((t) => {
       const item = ALL_ITEMS.find((i) => i.to === t.to);
       if (!item || !item.roles.includes(role)) return [];
-      return [{ to: t.to, label: t.tabLabel ?? itemLabel(item, role) }];
+      return [{ to: t.to, label: t.tabLabel ?? itemLabel(item, role), icon: item.icon }];
     });
     if (tabs.length === 0) return [];
     const self = role === 'collaborateur';
     return [
       {
+        id: s.id,
         label: self && s.selfLabel ? s.selfLabel : s.label,
         shortLabel: self && s.selfShortLabel ? s.selfShortLabel : s.shortLabel,
         tone: s.tone,
@@ -223,3 +242,9 @@ export const matchesPath = (to: string, pathname: string) =>
 
 export const sectionForPath = (sections: ResolvedSection[], pathname: string) =>
   sections.find((s) => s.tabs.some((t) => matchesPath(t.to, pathname)));
+
+/** Barre du bas sur téléphone : 4 raccourcis selon le rôle, le reste dans « Menu ». */
+export const MOBILE_BAR: Record<Role, SectionId[]> = {
+  manager: ['home', 'team', 'reviews', 'calendar'],
+  collaborateur: ['home', 'reviews', 'goals', 'calendar'],
+};

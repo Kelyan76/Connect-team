@@ -69,7 +69,12 @@ export function MonthCalendar({ absences, byId, maxAbsent, onPick }: Props) {
           >
             <ChevronLeft aria-hidden />
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => setMonth(startOfMonth(new Date()))}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="hidden sm:inline-flex"
+            onClick={() => setMonth(startOfMonth(new Date()))}
+          >
             Aujourd’hui
           </Button>
           <Button

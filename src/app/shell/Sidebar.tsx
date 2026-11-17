@@ -38,7 +38,7 @@ function Entry({ to, label, icon: Icon, active, collapsed, badge, tone = 'settin
       to={to}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group flex h-10 items-center gap-3 rounded px-3 text-base transition-all duration-200',
+        'group flex h-9 items-center gap-3 rounded px-3 text-base transition-all duration-200',
         active
           ? cn(color.solid, 'font-medium shadow-md')
           : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-fg',
@@ -94,25 +94,40 @@ export function Sidebar({ role, collapsed, onToggle, teamName, badges = {} }: Si
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <ul className="flex flex-col gap-1">
-          {sections.map((s) => {
-            const badge = s.tabs.reduce((sum, t) => sum + (badges[t.to] ?? 0), 0);
-            return (
-              <li key={s.label}>
-                <Entry
-                  to={s.to}
-                  label={s.label}
-                  icon={s.icon}
-                  tone={s.tone}
-                  active={s.tabs.some((t) => matchesPath(t.to, pathname))}
-                  collapsed={collapsed}
-                  badge={badge || undefined}
-                />
-              </li>
-            );
-          })}
-        </ul>
+      <nav className="flex-1 overflow-y-auto px-3 py-3">
+        {/* Toutes les pages visibles d'un coup d'œil, classées par section (pas de sous-menu à chercher). */}
+        <div className="flex flex-col gap-4">
+          {sections.map((s) => (
+            <section key={s.id} aria-label={s.label} className="flex flex-col gap-1">
+              {collapsed ? (
+                <span aria-hidden className="mx-auto mb-1 h-px w-6 bg-sidebar-hover" />
+              ) : (
+                <h2 className="flex items-center gap-2 px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-sidebar-muted">
+                  <span
+                    className={cn('size-1.5 rounded-full', SECTION_COLOR[s.tone].solid)}
+                    aria-hidden
+                  />
+                  {s.label}
+                </h2>
+              )}
+              <ul className="flex flex-col gap-0.5">
+                {s.tabs.map((t) => (
+                  <li key={t.to}>
+                    <Entry
+                      to={t.to}
+                      label={t.label}
+                      icon={t.icon}
+                      tone={s.tone}
+                      active={matchesPath(t.to, pathname)}
+                      collapsed={collapsed}
+                      badge={badges[t.to] || undefined}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
       </nav>
 
       <div className="flex flex-col gap-1 border-t border-sidebar-hover px-3 py-3">
