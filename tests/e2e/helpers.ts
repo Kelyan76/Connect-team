@@ -13,8 +13,12 @@ export async function login(page: Page, email: string, firstName: string) {
   await page.getByLabel('Adresse e-mail').fill(email);
   await page.getByLabel('Mot de passe').fill(PASSWORD);
   await page.getByRole('button', { name: 'Se connecter' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Connexion' })).toHaveCount(0, { timeout: 90_000 });
-  await expect(page.getByRole('button', { name: 'Menu du profil' })).toContainText(firstName, { timeout: 60_000 });
+  await expect(page.getByRole('heading', { level: 1, name: 'Connexion' })).toHaveCount(0, {
+    timeout: 90_000,
+  });
+  await expect(page.getByRole('button', { name: 'Menu du profil' })).toContainText(firstName, {
+    timeout: 60_000,
+  });
 }
 
 /** Déconnexion par le menu du profil (la base embarquée reste en mémoire). */

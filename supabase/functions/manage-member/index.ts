@@ -20,7 +20,10 @@ function secretKey(): string {
 }
 
 // La session de l'appelant est vérifiée ici (verify_jwt désactivé, compatible avec les clés de signature asymétriques).
-async function callerId(admin: ReturnType<typeof createClient>, req: Request): Promise<string | null> {
+async function callerId(
+  admin: ReturnType<typeof createClient>,
+  req: Request,
+): Promise<string | null> {
   const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
   if (!token) return null;
   const { data } = await admin.auth.getUser(token);
@@ -28,7 +31,10 @@ async function callerId(admin: ReturnType<typeof createClient>, req: Request): P
 }
 
 const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, 'Content-Type': 'application/json' },
+  });
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -36,20 +42,34 @@ Deno.serve(async (req) => {
   const admin = createClient(url, secretKey(), { auth: { persistSession: false } });
   const uid = await callerId(admin, req);
   if (!uid) return json(401, { error: 'Session expirée. Reconnectez-vous.' });
-  const { data: me } = await admin.from('profiles').select('id, team_id, role, is_active').eq('id', uid).single();
-  if (!me || me.role !== 'manager' || !me.is_active) return json(403, { error: 'Seul un manager peut effectuer cette action.' });
+  const { data: me } = await admin
+    .from('profiles')
+    .select('id, team_id, role, is_active')
+    .eq('id', uid)
+    .single();
+  if (!me || me.role !== 'manager' || !me.is_active)
+    return json(403, { error: 'Seul un manager peut effectuer cette action.' });
 
   const body = await req.json().catch(() => ({}));
   const userId = String(body.user_id ?? '');
   const action = String(body.action ?? '');
-  if (userId === me.id) return json(400, { error: 'Vous ne pouvez pas désactiver votre propre compte.' });
-  if (action !== 'desactiver' && action !== 'reactiver') return json(400, { error: 'Action inconnue.' });
+  if (userId === me.id)
+    return json(400, { error: 'Vous ne pouvez pas désactiver votre propre compte.' });
+  if (action !== 'desactiver' && action !== 'reactiver')
+    return json(400, { error: 'Action inconnue.' });
 
-  const { data: target } = await admin.from('profiles').select('id').eq('id', userId).eq('team_id', me.team_id).single();
+  const { data: target } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .eq('team_id', me.team_id)
+    .single();
   if (!target) return json(404, { error: 'Collaborateur introuvable.' });
 
   const active = action === 'reactiver';
-  const { error: banError } = await admin.auth.admin.updateUserById(userId, { ban_duration: active ? 'none' : '876000h' });
+  const { error: banError } = await admin.auth.admin.updateUserById(userId, {
+    ban_duration: active ? 'none' : '876000h',
+  });
   if (banError) return json(400, { error: 'Le compte n’a pas pu être modifié.' });
   await admin.from('profiles').update({ is_active: active }).eq('id', userId);
   return json(200, { ok: true });

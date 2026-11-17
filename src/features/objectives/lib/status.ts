@@ -48,7 +48,11 @@ export function elapsedRatio(obj: ObjectiveLike, today: string): number {
  * - avance ≥ 10 points → en avance ; écart ≤ 10 points → dans les temps
  * - retard de 10 à 25 points → à risque ; au-delà → en retard
  */
-export function objectiveStatus(obj: ObjectiveLike, progress: number, today: string): ObjectiveStatus {
+export function objectiveStatus(
+  obj: ObjectiveLike,
+  progress: number,
+  today: string,
+): ObjectiveStatus {
   if (progress >= 1) return 'en_avance';
   if (today > obj.due_date) return 'en_retard';
   const gap = progress - elapsedRatio(obj, today);

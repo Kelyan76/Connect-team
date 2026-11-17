@@ -2,6 +2,7 @@ import { Archive, Check, ChevronDown, X } from 'lucide-react';
 import { useState } from 'react';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import type { Person } from '@/features/team/api';
+import { useSquads } from '@/features/team/squads';
 import { cn } from '@/shared/lib/cn';
 import { formatDate, formatPercent, fullName } from '@/shared/lib/format';
 import { Avatar } from '@/shared/ui/avatar';
@@ -12,9 +13,22 @@ import { ProgressBar } from '@/shared/ui/data';
 import { Input } from '@/shared/ui/input';
 import type { KeyResult } from '../api';
 import { formatKrValue, keyResultProgress, OBJECTIVE_STATUS } from '../lib/status';
-import { useArchiveObjective, useProposeValue, useReviewValue, type ObjectiveView } from '../queries';
+import {
+  useArchiveObjective,
+  useProposeValue,
+  useReviewValue,
+  type ObjectiveView,
+} from '../queries';
 
-function KeyResultRow({ kr, canUpdate, isManager }: { kr: KeyResult; canUpdate: boolean; isManager: boolean }) {
+function KeyResultRow({
+  kr,
+  canUpdate,
+  isManager,
+}: {
+  kr: KeyResult;
+  canUpdate: boolean;
+  isManager: boolean;
+}) {
   const propose = useProposeValue(isManager);
   const review = useReviewValue();
   const [draft, setDraft] = useState<string | null>(null);
@@ -30,7 +44,8 @@ function KeyResultRow({ kr, canUpdate, isManager }: { kr: KeyResult; canUpdate: 
       <div className="flex min-w-0 flex-col">
         <span className="text-base">{kr.title}</span>
         <span className="tabular text-xs text-fg-subtle">
-          Départ {formatKrValue(kr.start_value, kr.unit)} · cible {formatKrValue(kr.target_value, kr.unit)}
+          Départ {formatKrValue(kr.start_value, kr.unit)} · cible{' '}
+          {formatKrValue(kr.target_value, kr.unit)}
         </span>
       </div>
       <div className="flex items-center gap-3">
@@ -41,14 +56,24 @@ function KeyResultRow({ kr, canUpdate, isManager }: { kr: KeyResult; canUpdate: 
         {kr.pending_value !== null ? (
           <>
             <span className="tabular text-sm text-warning">
-              {formatKrValue(kr.current_value, kr.unit)} → {formatKrValue(kr.pending_value, kr.unit)}
+              {formatKrValue(kr.current_value, kr.unit)} →{' '}
+              {formatKrValue(kr.pending_value, kr.unit)}
             </span>
             {isManager ? (
               <>
-                <Button size="icon-sm" aria-label="Valider la mise à jour" onClick={() => review.mutate({ id: kr.id, accept: true })}>
+                <Button
+                  size="icon-sm"
+                  aria-label="Valider la mise à jour"
+                  onClick={() => review.mutate({ id: kr.id, accept: true })}
+                >
                   <Check aria-hidden />
                 </Button>
-                <Button size="icon-sm" variant="ghost" aria-label="Refuser la mise à jour" onClick={() => review.mutate({ id: kr.id, accept: false })}>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label="Refuser la mise à jour"
+                  onClick={() => review.mutate({ id: kr.id, accept: false })}
+                >
                   <X aria-hidden />
                 </Button>
               </>
@@ -64,7 +89,14 @@ function KeyResultRow({ kr, canUpdate, isManager }: { kr: KeyResult; canUpdate: 
               submit();
             }}
           >
-            <Input aria-label={`Nouvelle valeur pour ${kr.title}`} autoFocus inputMode="decimal" className="tabular w-24 text-right" value={draft} onChange={(e) => setDraft(e.target.value)} />
+            <Input
+              aria-label={`Nouvelle valeur pour ${kr.title}`}
+              autoFocus
+              inputMode="decimal"
+              className="tabular w-24 text-right"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+            />
             <Button size="sm" type="submit" variant="primary" disabled={propose.isPending}>
               OK
             </Button>
@@ -74,9 +106,14 @@ function KeyResultRow({ kr, canUpdate, isManager }: { kr: KeyResult; canUpdate: 
           </form>
         ) : (
           <>
-            <span className="tabular text-sm font-medium">{formatKrValue(kr.current_value, kr.unit)}</span>
+            <span className="tabular text-sm font-medium">
+              {formatKrValue(kr.current_value, kr.unit)}
+            </span>
             {canUpdate && (
-              <Button size="sm" onClick={() => setDraft(String(kr.current_value).replace('.', ','))}>
+              <Button
+                size="sm"
+                onClick={() => setDraft(String(kr.current_value).replace('.', ','))}
+              >
                 Mettre à jour
               </Button>
             )}
@@ -91,13 +128,26 @@ function KeyResultRow({ kr, canUpdate, isManager }: { kr: KeyResult; canUpdate: 
  * Objectif replié par défaut : titre, statut, responsable et avancement tiennent sur une carte courte.
  * Un toucher déplie la description et les résultats clés (mise à jour, validation, archivage).
  */
-export function ObjectiveCard({ objective: o, owner }: { objective: ObjectiveView; owner?: Person }) {
+export function ObjectiveCard({
+  objective: o,
+  owner,
+}: {
+  objective: ObjectiveView;
+  owner?: Person;
+}) {
   const { profile, isManager } = useCurrentUser();
   const archive = useArchiveObjective();
   const [confirm, setConfirm] = useState(false);
   const [open, setOpen] = useState(false);
   const meta = OBJECTIVE_STATUS[o.status];
-  const canUpdate = isManager || (o.scope === 'individuel' && o.owner_id === profile.id);
+  const squads = useSquads();
+  const squadName = o.squad_id ? squads.data?.find((s) => s.id === o.squad_id)?.name : undefined;
+  const teamLabel = squadName ? `Objectif de l’équipe ${squadName}` : 'Objectif d’équipe';
+  // Le responsable, ou les membres de l'équipe visée, proposent l'avancement ; le manager valide.
+  const canUpdate =
+    isManager ||
+    (o.scope === 'individuel' && o.owner_id === profile.id) ||
+    (!!o.squad_id && o.squad_id === profile.squad_id);
 
   return (
     <article className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm">
@@ -117,7 +167,7 @@ export function ObjectiveCard({ objective: o, owner }: { objective: ObjectiveVie
                   {fullName(owner)}
                 </span>
               ) : (
-                <span>Objectif d’équipe</span>
+                <span>{teamLabel}</span>
               )}
               <span aria-hidden>·</span>
               <span>{formatDate(o.due_date)}</span>
@@ -125,16 +175,23 @@ export function ObjectiveCard({ objective: o, owner }: { objective: ObjectiveVie
           </span>
           <span className="flex shrink-0 items-center gap-2">
             <Badge tone={meta.tone}>{meta.label}</Badge>
-            <ChevronDown className={cn('size-4 text-fg-subtle transition-transform', open && 'rotate-180')} aria-hidden />
+            <ChevronDown
+              className={cn('size-4 text-fg-subtle transition-transform', open && 'rotate-180')}
+              aria-hidden
+            />
           </span>
         </span>
         <span className="flex items-center gap-3">
           <ProgressBar value={o.progress} tone={meta.tone} label="Avancement global" />
-          <span className="tabular w-10 shrink-0 text-right text-sm font-semibold">{formatPercent(o.progress)}</span>
+          <span className="tabular w-10 shrink-0 text-right text-sm font-semibold">
+            {formatPercent(o.progress)}
+          </span>
         </span>
         {o.pending > 0 && isManager && (
           <span>
-            <Badge tone="warning">{o.pending} mise{o.pending > 1 ? 's' : ''} à jour à valider</Badge>
+            <Badge tone="warning">
+              {o.pending} mise{o.pending > 1 ? 's' : ''} à jour à valider
+            </Badge>
           </span>
         )}
       </button>
@@ -144,20 +201,29 @@ export function ObjectiveCard({ objective: o, owner }: { objective: ObjectiveVie
           {(o.description || isManager) && (
             <div className="flex items-start justify-between gap-3 px-5 pt-4">
               <div className="flex min-w-0 flex-col gap-1">
-                {o.description && <p className="max-w-prose text-sm text-fg-muted">{o.description}</p>}
+                {o.description && (
+                  <p className="max-w-prose text-sm text-fg-muted">{o.description}</p>
+                )}
                 <span className="text-xs text-fg-subtle">
-                  {o.scope === 'equipe' ? 'Objectif d’équipe' : 'Objectif individuel'} · du {formatDate(o.start_date)} au{' '}
-                  {formatDate(o.due_date)}
+                  {o.scope === 'equipe' ? teamLabel : 'Objectif individuel'} · du{' '}
+                  {formatDate(o.start_date)} au {formatDate(o.due_date)}
                 </span>
               </div>
               {isManager && (
-                <Button size="icon-sm" variant="ghost" aria-label="Archiver l’objectif" onClick={() => setConfirm(true)}>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label="Archiver l’objectif"
+                  onClick={() => setConfirm(true)}
+                >
                   <Archive aria-hidden />
                 </Button>
               )}
             </div>
           )}
-          <p className="px-5 pt-4 text-xs font-medium uppercase tracking-wide text-fg-subtle">Résultats clés</p>
+          <p className="px-5 pt-4 text-xs font-medium uppercase tracking-wide text-fg-subtle">
+            Résultats clés
+          </p>
           <ul className="divide-y divide-line">
             {o.keyResults.map((kr) => (
               <KeyResultRow key={kr.id} kr={kr} canUpdate={canUpdate} isManager={isManager} />

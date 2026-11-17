@@ -7,8 +7,13 @@ test('préparation en deux temps, clôture et signature d’un entretien', async
   // 1. La collaboratrice prépare sa partie.
   await login(page, ACCOUNTS.nadia, 'Nadia');
   await go(page, NADIA_REVIEW);
-  await expect(page.getByRole('tab', { name: 'Ma préparation' })).toHaveAttribute('data-state', 'active');
-  await page.getByLabel('Quelles sont vos réussites depuis notre dernier échange ?').fill('Réception de la cellule Plasturgie sans réserve.');
+  await expect(page.getByRole('tab', { name: 'Ma préparation' })).toHaveAttribute(
+    'data-state',
+    'active',
+  );
+  await page
+    .getByLabel('Quelles sont vos réussites depuis notre dernier échange ?')
+    .fill('Réception de la cellule Plasturgie sans réserve.');
   await page.getByLabel('Quelles difficultés ou quels blocages rencontrez-vous ?').click();
   await page.getByRole('radio', { name: '5' }).first().click();
   await expect(page.getByText(/2 réponses sur 5/)).toBeVisible();

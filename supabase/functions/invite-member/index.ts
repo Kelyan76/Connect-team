@@ -20,7 +20,10 @@ function secretKey(): string {
 }
 
 // La session de l'appelant est vérifiée ici (verify_jwt désactivé, compatible avec les clés de signature asymétriques).
-async function callerId(admin: ReturnType<typeof createClient>, req: Request): Promise<string | null> {
+async function callerId(
+  admin: ReturnType<typeof createClient>,
+  req: Request,
+): Promise<string | null> {
   const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
   if (!token) return null;
   const { data } = await admin.auth.getUser(token);
@@ -28,7 +31,10 @@ async function callerId(admin: ReturnType<typeof createClient>, req: Request): P
 }
 
 const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, 'Content-Type': 'application/json' },
+  });
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -36,16 +42,28 @@ Deno.serve(async (req) => {
   const admin = createClient(url, secretKey(), { auth: { persistSession: false } });
   const uid = await callerId(admin, req);
   if (!uid) return json(401, { error: 'Session expirée. Reconnectez-vous.' });
-  const { data: me } = await admin.from('profiles').select('id, team_id, role, is_active').eq('id', uid).single();
-  if (!me || me.role !== 'manager' || !me.is_active) return json(403, { error: 'Seul un manager peut effectuer cette action.' });
+  const { data: me } = await admin
+    .from('profiles')
+    .select('id, team_id, role, is_active')
+    .eq('id', uid)
+    .single();
+  if (!me || me.role !== 'manager' || !me.is_active)
+    return json(403, { error: 'Seul un manager peut effectuer cette action.' });
 
   const body = await req.json().catch(() => ({}));
-  const email = String(body.email ?? '').trim().toLowerCase();
+  const email = String(body.email ?? '')
+    .trim()
+    .toLowerCase();
   const first_name = String(body.first_name ?? '').trim();
   const last_name = String(body.last_name ?? '').trim();
   const job_title = String(body.job_title ?? '').trim();
   const hired_on = body.hired_on ? String(body.hired_on) : null;
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !first_name || !last_name || job_title.length < 2) {
+  if (
+    !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ||
+    !first_name ||
+    !last_name ||
+    job_title.length < 2
+  ) {
     return json(400, { error: 'Informations incomplètes ou invalides.' });
   }
 
@@ -56,7 +74,11 @@ Deno.serve(async (req) => {
   });
   if (error || !invited.user) {
     const exists = /already|registered|exists/i.test(error?.message ?? '');
-    return json(exists ? 409 : 400, { error: exists ? 'Un compte existe déjà avec cette adresse e-mail.' : 'L’invitation n’a pas pu être envoyée.' });
+    return json(exists ? 409 : 400, {
+      error: exists
+        ? 'Un compte existe déjà avec cette adresse e-mail.'
+        : 'L’invitation n’a pas pu être envoyée.',
+    });
   }
 
   const { error: profileError } = await admin.from('profiles').insert({

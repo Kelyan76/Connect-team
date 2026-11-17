@@ -21,8 +21,14 @@ beforeAll(async () => {
   manager = client();
   julien = client();
   nadia = client();
-  await manager.auth.signInWithPassword({ email: 'camille.lefevre@nebuleo.example', password: PASSWORD });
-  await julien.auth.signInWithPassword({ email: 'hugo.lambert@nebuleo.example', password: PASSWORD });
+  await manager.auth.signInWithPassword({
+    email: 'camille.lefevre@nebuleo.example',
+    password: PASSWORD,
+  });
+  await julien.auth.signInWithPassword({
+    email: 'hugo.lambert@nebuleo.example',
+    password: PASSWORD,
+  });
   await nadia.auth.signInWithPassword({ email: 'ines.moreau@nebuleo.example', password: PASSWORD });
   julienId = (await julien.auth.getUser()).data.user?.id ?? '';
 }, 120_000);
@@ -34,9 +40,32 @@ describe('pouls du jour', () => {
   });
 
   it('le collaborateur saisit puis corrige son pouls du jour (une seule ligne)', async () => {
-    expect((await julien.from('daily_pulses').upsert({ collaborator_id: julienId, mood: 2, energy: 3, note: 'test' }, { onConflict: 'collaborator_id,day' })).error).toBeNull();
-    expect((await julien.from('daily_pulses').upsert({ collaborator_id: julienId, mood: 4, energy: 4, note: '' }, { onConflict: 'collaborator_id,day' })).error).toBeNull();
-    const { data } = await manager.from('daily_pulses').select('mood, day').eq('collaborator_id', julienId).order('day', { ascending: false }).limit(1);
+    expect(
+      (
+        await julien
+          .from('daily_pulses')
+          .upsert(
+            { collaborator_id: julienId, mood: 2, energy: 3, note: 'test' },
+            { onConflict: 'collaborator_id,day' },
+          )
+      ).error,
+    ).toBeNull();
+    expect(
+      (
+        await julien
+          .from('daily_pulses')
+          .upsert(
+            { collaborator_id: julienId, mood: 4, energy: 4, note: '' },
+            { onConflict: 'collaborator_id,day' },
+          )
+      ).error,
+    ).toBeNull();
+    const { data } = await manager
+      .from('daily_pulses')
+      .select('mood, day')
+      .eq('collaborator_id', julienId)
+      .order('day', { ascending: false })
+      .limit(1);
     expect(data?.[0]?.mood).toBe(4);
   });
 
@@ -47,7 +76,16 @@ describe('pouls du jour', () => {
   });
 
   it('impossible de saisir pour un autre jour ou un autre collaborateur', async () => {
-    expect((await nadia.from('daily_pulses').insert({ collaborator_id: julienId, mood: 5, energy: 5 })).error).not.toBeNull();
-    expect((await julien.from('daily_pulses').insert({ collaborator_id: julienId, day: '2020-01-06', mood: 5, energy: 5 })).error).not.toBeNull();
+    expect(
+      (await nadia.from('daily_pulses').insert({ collaborator_id: julienId, mood: 5, energy: 5 }))
+        .error,
+    ).not.toBeNull();
+    expect(
+      (
+        await julien
+          .from('daily_pulses')
+          .insert({ collaborator_id: julienId, day: '2020-01-06', mood: 5, energy: 5 })
+      ).error,
+    ).not.toBeNull();
   });
 });

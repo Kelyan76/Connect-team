@@ -3,6 +3,7 @@ export const qk = {
   profile: (id: string) => ['profile', id] as const,
   team: ['team'] as const,
   people: ['people'] as const,
+  squads: ['squads'] as const,
   managerNotes: (personId: string) => ['manager-notes', personId] as const,
   settings: ['settings'] as const,
   logins: ['logins'] as const,

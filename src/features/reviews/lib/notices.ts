@@ -24,7 +24,7 @@ export interface RequestLike {
 }
 
 export type ReviewNoticeKind =
-  'planifie' | 'acceptee' | 'refusee' | 'a_signer' | 'preparee' | 'signee';
+  'planifie' | 'acceptee' | 'refusee' | 'a_signer' | 'preparee' | 'signee' | 'bientot';
 
 export interface ReviewNotice {
   id: string;
@@ -119,4 +119,18 @@ export function reviewNotices(
     }
   }
   return out.sort((a, b) => b.at.localeCompare(a.at));
+}
+
+/** 1 à 1 qui commencent bientôt (dans les 2 heures, ou commencés depuis moins de 10 minutes). */
+export function upcomingSoon<
+  T extends Pick<ReviewLike, 'id' | 'status' | 'scheduled_at' | 'collaborator_id'>,
+>(reviews: T[], nowMs: number): (T & { minutes: number })[] {
+  return reviews
+    .filter((r) => r.status === 'planifie')
+    .map((r) => ({
+      ...r,
+      minutes: Math.round((new Date(r.scheduled_at).getTime() - nowMs) / 60000),
+    }))
+    .filter((r) => r.minutes > -10 && r.minutes <= 120)
+    .sort((a, b) => a.minutes - b.minutes);
 }

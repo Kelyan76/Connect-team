@@ -11,8 +11,17 @@ export const useDiscProfiles = () => useTable(qk.discProfiles, 'disc_profiles', 
 
 export const useSaveDisc = () =>
   useWrite(
-    async (d: { collaborator_id: string; primary_style: DiscStyle; secondary_style: DiscStyle | null; source: 'auto_evaluation' | 'echange'; note: string }) =>
-      check(await supabase.from('disc_profiles').upsert(d, { onConflict: 'collaborator_id' }), 'Profil DISC'),
+    async (d: {
+      collaborator_id: string;
+      primary_style: DiscStyle;
+      secondary_style: DiscStyle | null;
+      source: 'auto_evaluation' | 'echange';
+      note: string;
+    }) =>
+      check(
+        await supabase.from('disc_profiles').upsert(d, { onConflict: 'collaborator_id' }),
+        'Profil DISC',
+      ),
     [qk.discProfiles],
     'Profil DISC enregistré',
   );

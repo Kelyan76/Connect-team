@@ -9,8 +9,9 @@ import { todayIso } from '@/shared/lib/dates';
 import { Button } from '@/shared/ui/button';
 import { Dialog, DialogContent } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
-import { Input } from '@/shared/ui/input';
+import { Input, NativeSelect } from '@/shared/ui/input';
 import { useInviteMember } from '../queries';
+import { useSquads } from '../squads';
 
 // Mêmes contraintes que la table profiles (longueurs, format de l'e-mail).
 const schema = z.object({
@@ -19,16 +20,31 @@ const schema = z.object({
   email: z.string().trim().email('Adresse e-mail invalide.'),
   job_title: z.string().trim().min(2, 'Poste requis.').max(80),
   hired_on: z.string().min(1, 'Date requise.'),
+  squad_id: z.string(),
 });
 type Values = z.infer<typeof schema>;
 
-export function InviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+export function InviteDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
   const invite = useInviteMember();
+  const squads = useSquads();
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState<string | null>(null);
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { first_name: '', last_name: '', email: '', job_title: '', hired_on: todayIso() },
+    defaultValues: {
+      first_name: '',
+      last_name: '',
+      email: '',
+      job_title: '',
+      hired_on: todayIso(),
+      squad_id: '',
+    },
   });
   const e = form.formState.errors;
 
@@ -44,7 +60,7 @@ export function InviteDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const onSubmit = form.handleSubmit(async (values) => {
     setError(null);
     try {
-      await invite.mutateAsync(values);
+      await invite.mutateAsync({ ...values, squad_id: values.squad_id || null });
       setSent(values.email);
     } catch (err) {
       setError(toUserMessage(err));
@@ -64,7 +80,12 @@ export function InviteDialog({ open, onOpenChange }: { open: boolean; onOpenChan
           ) : (
             <>
               <Button onClick={() => close(false)}>Annuler</Button>
-              <Button variant="primary" type="submit" form="invite-form" disabled={invite.isPending}>
+              <Button
+                variant="primary"
+                type="submit"
+                form="invite-form"
+                disabled={invite.isPending}
+              >
                 Envoyer l’invitation
               </Button>
             </>
@@ -108,6 +129,20 @@ export function InviteDialog({ open, onOpenChange }: { open: boolean; onOpenChan
                 <Input type="date" {...form.register('hired_on')} />
               </Field>
             </div>
+            <Field
+              label="Équipe"
+              hint="Back-end, Mobile, Qualité… : créez vos équipes depuis Collaborateurs › Équipes."
+              optional
+            >
+              <NativeSelect {...form.register('squad_id')}>
+                <option value="">Aucune pour l’instant</option>
+                {(squads.data ?? []).map((sq) => (
+                  <option key={sq.id} value={sq.id}>
+                    {sq.name}
+                  </option>
+                ))}
+              </NativeSelect>
+            </Field>
           </form>
         )}
       </DialogContent>

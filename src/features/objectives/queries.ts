@@ -86,12 +86,19 @@ export function useProposeValue(asManager: boolean) {
       await qc.cancelQueries({ queryKey: qk.keyResults });
       const previous = qc.getQueryData<api.KeyResult[]>(qk.keyResults);
       qc.setQueryData<api.KeyResult[]>(qk.keyResults, (list) =>
-        list?.map((k) => (k.id !== id ? k : asManager ? { ...k, current_value: value, pending_value: null } : { ...k, pending_value: value })),
+        list?.map((k) =>
+          k.id !== id
+            ? k
+            : asManager
+              ? { ...k, current_value: value, pending_value: null }
+              : { ...k, pending_value: value },
+        ),
       );
       return { previous };
     },
     onError: (_e, _v, ctx) => qc.setQueryData(qk.keyResults, ctx?.previous),
-    onSuccess: () => toast.success(asManager ? 'Avancement mis à jour' : 'Avancement transmis pour validation'),
+    onSuccess: () =>
+      toast.success(asManager ? 'Avancement mis à jour' : 'Avancement transmis pour validation'),
     onSettled: invalidate,
   });
 }

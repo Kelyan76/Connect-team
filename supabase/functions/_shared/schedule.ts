@@ -23,8 +23,20 @@ export function parisClock(now: Date): ParisClock {
       .formatToParts(now)
       .map((p) => [p.type, p.value]),
   );
-  const weekdays: Record<string, number> = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
-  return { date: `${parts.year}-${parts.month}-${parts.day}`, hour: Number(parts.hour), weekday: weekdays[parts.weekday] ?? 7 };
+  const weekdays: Record<string, number> = {
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+    Sun: 7,
+  };
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    hour: Number(parts.hour),
+    weekday: weekdays[parts.weekday] ?? 7,
+  };
 }
 
 export interface Prefs {
@@ -55,12 +67,24 @@ export const inSendingWindow = (c: ParisClock) => c.weekday <= 5 && c.hour >= 7 
  * pas encore de pouls aujourd'hui, pas déjà rappelé aujourd'hui.
  */
 export function shouldRemindPulse(p: Prefs, c: ParisClock, hasPulseToday: boolean): boolean {
-  return inSendingWindow(c) && p.pulse_reminder && c.hour >= p.pulse_hour && !hasPulseToday && p.last_pulse_reminder !== c.date;
+  return (
+    inSendingWindow(c) &&
+    p.pulse_reminder &&
+    c.hour >= p.pulse_hour &&
+    !hasPulseToday &&
+    p.last_pulse_reminder !== c.date
+  );
 }
 
 /** Récap du lundi pour le manager, à son heure, une seule fois. */
 export function shouldSendRecap(p: Prefs, c: ParisClock): boolean {
-  return inSendingWindow(c) && c.weekday === 1 && p.weekly_recap && c.hour >= p.pulse_hour && p.last_recap !== c.date;
+  return (
+    inSendingWindow(c) &&
+    c.weekday === 1 &&
+    p.weekly_recap &&
+    c.hour >= p.pulse_hour &&
+    p.last_recap !== c.date
+  );
 }
 
 export interface RecapStats {
@@ -79,10 +103,14 @@ export function recapMessage(s: RecapStats): { title: string; body: string } {
   if (s.lowMood.length) parts.push(`moral bas : ${s.lowMood.join(', ')}`);
   if (s.overloaded.length) parts.push(`surcharge : ${s.overloaded.join(', ')}`);
   if (s.requests) parts.push(plural(s.requests, 'demande de one-to-one', 'demandes de one-to-one'));
-  if (s.reviewsThisWeek) parts.push(plural(s.reviewsThisWeek, 'entretien cette semaine', 'entretiens cette semaine'));
+  if (s.reviewsThisWeek)
+    parts.push(plural(s.reviewsThisWeek, 'entretien cette semaine', 'entretiens cette semaine'));
   if (s.lateTasks) parts.push(plural(s.lateTasks, 'tâche en retard', 'tâches en retard'));
   const body = parts.length ? parts.join(' · ') : 'Rien d’urgent : bonne semaine !';
-  return { title: 'Votre équipe cette semaine', body: body.charAt(0).toUpperCase() + body.slice(1) };
+  return {
+    title: 'Votre équipe cette semaine',
+    body: body.charAt(0).toUpperCase() + body.slice(1),
+  };
 }
 
 interface PulseRow {
@@ -93,7 +121,10 @@ interface PulseRow {
 }
 
 /** Personnes à surveiller d'après leurs 3 derniers pouls (mêmes seuils que l'application). */
-export function pulseWatchlist(pulses: PulseRow[], names: Map<string, string>): { lowMood: string[]; overloaded: string[] } {
+export function pulseWatchlist(
+  pulses: PulseRow[],
+  names: Map<string, string>,
+): { lowMood: string[]; overloaded: string[] } {
   const lowMood: string[] = [];
   const overloaded: string[] = [];
   for (const [id, name] of names) {
@@ -105,14 +136,21 @@ export function pulseWatchlist(pulses: PulseRow[], names: Map<string, string>): 
     const mood = last3.reduce((s, p) => s + p.mood, 0) / last3.length;
     const loads = last3.map((p) => p.workload).filter((w): w is number => w !== null);
     if (mood <= 2) lowMood.push(name);
-    if (loads.length >= 2 && loads.reduce((s, w) => s + w, 0) / loads.length >= 4.3) overloaded.push(name);
+    if (loads.length >= 2 && loads.reduce((s, w) => s + w, 0) / loads.length >= 4.3)
+      overloaded.push(name);
   }
   return { lowMood, overloaded };
 }
 
 /** Rappel des entretiens du jour, à l'heure choisie, une fois par jour. */
 export function shouldRemindReviews(p: Prefs, c: ParisClock, reviewsToday: number): boolean {
-  return inSendingWindow(c) && p.review_alerts && reviewsToday > 0 && c.hour >= p.pulse_hour && p.last_review_reminder !== c.date;
+  return (
+    inSendingWindow(c) &&
+    p.review_alerts &&
+    reviewsToday > 0 &&
+    c.hour >= p.pulse_hour &&
+    p.last_review_reminder !== c.date
+  );
 }
 
 export interface TodayReview {
@@ -125,11 +163,19 @@ export interface TodayReview {
 }
 
 /** « Entretien aujourd'hui à 14:00 avec Nadia Haddad » ; plusieurs : liste courte par heure. */
-export function reviewDayMessage(list: TodayReview[]): { title: string; body: string; url: string } {
+export function reviewDayMessage(list: TodayReview[]): {
+  title: string;
+  body: string;
+  url: string;
+} {
   const sorted = [...list].sort((a, b) => a.time.localeCompare(b.time));
   if (sorted.length === 1) {
     const r = sorted[0];
-    return { title: `Entretien aujourd’hui à ${r.time}`, body: `${r.kind} avec ${r.with}. Pensez à le préparer.`, url: `/entretiens/${r.id}` };
+    return {
+      title: `Entretien aujourd’hui à ${r.time}`,
+      body: `${r.kind} avec ${r.with}. Pensez à le préparer.`,
+      url: `/entretiens/${r.id}`,
+    };
   }
   return {
     title: `${sorted.length} entretiens aujourd’hui`,
@@ -140,5 +186,55 @@ export function reviewDayMessage(list: TodayReview[]): { title: string; body: st
 
 /** Heure de Paris d'un horodatage, « 09:30 ». */
 export function parisTime(iso: string): string {
-  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+  return new Intl.DateTimeFormat('fr-FR', {
+    timeZone: 'Europe/Paris',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(iso));
+}
+
+// ─── Rappels juste avant les 1 à 1 (appel toutes les 15 minutes) ─────────
+
+/** Fenêtre « dans environ 1 heure » : entre 45 et 60 minutes, pour qu'un appel toutes les 15 min prévienne une seule fois. */
+export function startsInAboutAnHour(scheduledAt: string, now: Date): boolean {
+  const minutes = (new Date(scheduledAt).getTime() - now.getTime()) / 60000;
+  return minutes > 45 && minutes <= 60;
+}
+
+/** Créneau du rappel de la veille : 17 h, heure de Paris (premier quart d'heure). */
+export function isEveReminderSlot(now: Date): boolean {
+  const minutes = Number(
+    new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', minute: '2-digit' }).format(now),
+  );
+  return parisClock(now).hour === 17 && minutes < 15;
+}
+
+/** Vrai si l'entretien a lieu demain (date de Paris). */
+export function isTomorrow(scheduledAt: string, now: Date): boolean {
+  const tomorrow = new Date(now.getTime() + 24 * 3600 * 1000);
+  return parisClock(new Date(scheduledAt)).date === parisClock(tomorrow).date;
+}
+
+export interface SoonReview {
+  time: string;
+  with: string;
+  location: string;
+  /** Collaborateur qui n'a pas encore préparé : on le lui rappelle. */
+  needsPrep: boolean;
+}
+
+export function soonMessage(r: SoonReview): { title: string; body: string } {
+  return {
+    title: `1 à 1 dans 1 heure avec ${r.with}`,
+    body: `À ${r.time}${r.location ? ` · ${r.location}` : ''}.${r.needsPrep ? ' Il vous reste le temps de le préparer (2 minutes).' : ''}`,
+  };
+}
+
+export function eveMessage(r: SoonReview): { title: string; body: string } {
+  return {
+    title: `Demain à ${r.time} : 1 à 1 avec ${r.with}`,
+    body: r.needsPrep
+      ? 'Préparez-le en 2 minutes : vos sujets, ce qui va, ce qui coince.'
+      : 'Votre préparation est prête : à demain !',
+  };
 }

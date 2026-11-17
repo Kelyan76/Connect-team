@@ -48,7 +48,8 @@ export function DemoAccountsPanel() {
   });
 
   useEffect(() => {
-    if (hash === '#comptes-demo' && rows.length > 0) ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (hash === '#comptes-demo' && rows.length > 0)
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [hash, rows.length]);
 
   if (rows.length === 0) return null;
@@ -86,7 +87,10 @@ export function DemoAccountsPanel() {
                 <span className="truncate text-base font-medium">{fullName(person)}</span>
                 <span className="flex min-w-0 items-center gap-1 text-xs text-fg-subtle">
                   <span className="truncate">{person.email}</span>
-                  <CopyButton value={person.email} label={`Copier l’adresse de ${fullName(person)}`} />
+                  <CopyButton
+                    value={person.email}
+                    label={`Copier l’adresse de ${fullName(person)}`}
+                  />
                 </span>
               </span>
               <Button
@@ -95,7 +99,11 @@ export function DemoAccountsPanel() {
                 disabled={busy !== null}
                 onClick={() => void connect(person.email, fullName(person), pwd)}
               >
-                {busy === person.email ? <Loader2 className="animate-spin" aria-hidden /> : <LogIn aria-hidden />}
+                {busy === person.email ? (
+                  <Loader2 className="animate-spin" aria-hidden />
+                ) : (
+                  <LogIn aria-hidden />
+                )}
                 <span className="hidden sm:inline">Se connecter</span>
                 <span className="sm:hidden">Tester</span>
               </Button>

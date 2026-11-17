@@ -10,7 +10,10 @@ const cors = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, 'Content-Type': 'application/json' },
+  });
 
 function secretKey(): string {
   try {
@@ -25,9 +28,16 @@ function secretKey(): string {
 
 const DEMO_EMAIL_DOMAIN = 'cadence-demo.example';
 const slug = (s: string) =>
-  s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  s
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 const randomChars = (alphabet: string, n: number) =>
-  Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => alphabet[b % alphabet.length]).join('');
+  Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => alphabet[b % alphabet.length]).join(
+    '',
+  );
 const strongPassword = (p: string) =>
   p.length >= 10 && /[A-Z]/.test(p) && /[a-z]/.test(p) && /\d/.test(p) && /[^A-Za-z0-9]/.test(p);
 
@@ -48,7 +58,10 @@ Deno.serve(async (req) => {
   if (!expected) return json(503, { error: 'Les inscriptions sont fermées pour le moment.' });
 
   const body = await req.json().catch(() => ({}));
-  const s = (k: string, max: number) => String(body[k] ?? '').trim().slice(0, max);
+  const s = (k: string, max: number) =>
+    String(body[k] ?? '')
+      .trim()
+      .slice(0, max);
   const v = {
     code: s('code', 100),
     first_name: s('first_name', 60),
@@ -61,13 +74,20 @@ Deno.serve(async (req) => {
   };
   if (!sameCode(v.code, expected)) return json(403, { error: 'Code d’accès incorrect.' });
   if (
-    !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email) || !v.first_name || !v.last_name ||
-    v.job_title.length < 2 || v.company.length < 2 || v.team_name.length < 2 || !strongPassword(v.password)
+    !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email) ||
+    !v.first_name ||
+    !v.last_name ||
+    v.job_title.length < 2 ||
+    v.company.length < 2 ||
+    v.team_name.length < 2 ||
+    !strongPassword(v.password)
   ) {
     return json(400, { error: 'Informations incomplètes ou invalides.' });
   }
 
-  const admin = createClient(Deno.env.get('SUPABASE_URL') ?? '', secretKey(), { auth: { persistSession: false } });
+  const admin = createClient(Deno.env.get('SUPABASE_URL') ?? '', secretKey(), {
+    auth: { persistSession: false },
+  });
   const created: string[] = [];
   const rollback = async () => {
     for (const id of created) await admin.auth.admin.deleteUser(id);
@@ -81,7 +101,11 @@ Deno.serve(async (req) => {
   });
   if (meError || !me.user) {
     const exists = /already|registered|exists/i.test(meError?.message ?? '');
-    return json(exists ? 409 : 400, { error: exists ? 'Un compte existe déjà avec cette adresse e-mail.' : 'Le compte n’a pas pu être créé.' });
+    return json(exists ? 409 : 400, {
+      error: exists
+        ? 'Un compte existe déjà avec cette adresse e-mail.'
+        : 'Le compte n’a pas pu être créé.',
+    });
   }
   created.push(me.user.id);
 

@@ -22,13 +22,30 @@ let julien: SupabaseClient<Database>;
 beforeAll(async () => {
   manager = client();
   julien = client();
-  expect((await manager.auth.signInWithPassword({ email: 'camille.lefevre@nebuleo.example', password: PASSWORD })).error).toBeNull();
-  expect((await julien.auth.signInWithPassword({ email: 'hugo.lambert@nebuleo.example', password: PASSWORD })).error).toBeNull();
+  expect(
+    (
+      await manager.auth.signInWithPassword({
+        email: 'camille.lefevre@nebuleo.example',
+        password: PASSWORD,
+      })
+    ).error,
+  ).toBeNull();
+  expect(
+    (
+      await julien.auth.signInWithPassword({
+        email: 'hugo.lambert@nebuleo.example',
+        password: PASSWORD,
+      })
+    ).error,
+  ).toBeNull();
 }, 120_000);
 
 describe('authentification', () => {
   it('refuse un mauvais mot de passe', async () => {
-    const { error } = await client().auth.signInWithPassword({ email: 'hugo.lambert@nebuleo.example', password: 'mauvais' });
+    const { error } = await client().auth.signInWithPassword({
+      email: 'hugo.lambert@nebuleo.example',
+      password: 'mauvais',
+    });
     expect(error?.message).toMatch(/invalid login credentials/i);
   });
 
@@ -45,32 +62,82 @@ describe('authentification', () => {
 
 describe('lecture et écriture via PostgREST', () => {
   it('filtre, trie et limite', async () => {
-    const { data, error } = await manager.from('tasks').select('id,title,due_date').eq('status', 'a_faire').order('due_date').limit(3);
+    const { data, error } = await manager
+      .from('tasks')
+      .select('id,title,due_date')
+      .eq('status', 'a_faire')
+      .order('due_date')
+      .limit(3);
     expect(error).toBeNull();
     expect(data).toHaveLength(3);
     expect((data?.[0]?.due_date ?? '') <= (data?.[1]?.due_date ?? '')).toBe(true);
   });
 
   it('met à jour une tâche (manager) et renvoie la ligne', async () => {
-    const task = (await manager.from('tasks').select('id').eq('status', 'a_faire').limit(1).single()).data;
-    const { data, error } = await manager.from('tasks').update({ status: 'en_cours', position: 99 }).eq('id', task?.id ?? '').select().single();
+    const task = (
+      await manager.from('tasks').select('id').eq('status', 'a_faire').limit(1).single()
+    ).data;
+    const { data, error } = await manager
+      .from('tasks')
+      .update({ status: 'en_cours', position: 99 })
+      .eq('id', task?.id ?? '')
+      .select()
+      .single();
     expect(error).toBeNull();
     expect(data?.status).toBe('en_cours');
   });
 
   it('insère puis supprime un feedback', async () => {
     const julienId = (await julien.auth.getUser()).data.user?.id ?? '';
-    const { data, error } = await manager.from('feedbacks').insert({ collaborator_id: julienId, kind: 'point_fort', body: 'Test d’intégration', is_shared: false }).select('id').single();
+    const { data, error } = await manager
+      .from('feedbacks')
+      .insert({
+        collaborator_id: julienId,
+        kind: 'point_fort',
+        body: 'Test d’intégration',
+        is_shared: false,
+      })
+      .select('id')
+      .single();
     expect(error).toBeNull();
-    expect((await manager.from('feedbacks').delete().eq('id', data?.id ?? '')).error).toBeNull();
+    expect(
+      (
+        await manager
+          .from('feedbacks')
+          .delete()
+          .eq('id', data?.id ?? '')
+      ).error,
+    ).toBeNull();
   });
 
   it('upsert sur clé composite (météo)', async () => {
     const id = (await julien.auth.getUser()).data.user?.id ?? '';
     const week = '2026-01-05';
-    expect((await julien.from('weather_entries').upsert({ collaborator_id: id, week_start: week, mood: 3, workload: 3, comment: '' }, { onConflict: 'collaborator_id,week_start' })).error).toBeNull();
-    expect((await julien.from('weather_entries').upsert({ collaborator_id: id, week_start: week, mood: 5, workload: 2, comment: '' }, { onConflict: 'collaborator_id,week_start' })).error).toBeNull();
-    const { data } = await julien.from('weather_entries').select('mood').eq('week_start', week).single();
+    expect(
+      (
+        await julien
+          .from('weather_entries')
+          .upsert(
+            { collaborator_id: id, week_start: week, mood: 3, workload: 3, comment: '' },
+            { onConflict: 'collaborator_id,week_start' },
+          )
+      ).error,
+    ).toBeNull();
+    expect(
+      (
+        await julien
+          .from('weather_entries')
+          .upsert(
+            { collaborator_id: id, week_start: week, mood: 5, workload: 2, comment: '' },
+            { onConflict: 'collaborator_id,week_start' },
+          )
+      ).error,
+    ).toBeNull();
+    const { data } = await julien
+      .from('weather_entries')
+      .select('mood')
+      .eq('week_start', week)
+      .single();
     expect(data?.mood).toBe(5);
   });
 
@@ -80,7 +147,9 @@ describe('lecture et écriture via PostgREST', () => {
   });
 
   it('refuse une écriture interdite avec un message exploitable', async () => {
-    const { error } = await julien.from('manager_notes').insert({ collaborator_id: 'x', body: 'non' });
+    const { error } = await julien
+      .from('manager_notes')
+      .insert({ collaborator_id: 'x', body: 'non' });
     expect(error).not.toBeNull();
   });
 
@@ -93,17 +162,29 @@ describe('lecture et écriture via PostgREST', () => {
 describe('Edge Functions locales', () => {
   it('le manager invite un collaborateur, qui reçoit un e-mail', async () => {
     const { error } = await manager.functions.invoke('invite-member', {
-      body: { email: 'lea.martin@nebuleo.example', first_name: 'Léa', last_name: 'Martin', job_title: 'Dessinatrice projeteuse', hired_on: '2026-11-16' },
+      body: {
+        email: 'lea.martin@nebuleo.example',
+        first_name: 'Léa',
+        last_name: 'Martin',
+        job_title: 'Dessinatrice projeteuse',
+        hired_on: '2026-11-16',
+      },
     });
     expect(error).toBeNull();
     expect(mailbox.list()[0]?.subject).toMatch(/activez votre compte/);
-    expect(mailbox.list()[0]?.html).toContain("Bienvenue dans votre équipe");
-    const { data } = await manager.from('profiles').select('first_name').eq('email', 'lea.martin@nebuleo.example').single();
+    expect(mailbox.list()[0]?.html).toContain('Bienvenue dans votre équipe');
+    const { data } = await manager
+      .from('profiles')
+      .select('first_name')
+      .eq('email', 'lea.martin@nebuleo.example')
+      .single();
     expect(data?.first_name).toBe('Léa');
   });
 
   it('un collaborateur ne peut pas inviter', async () => {
-    const { error } = await julien.functions.invoke('invite-member', { body: { email: 'x@y.fr', first_name: 'X', last_name: 'Y', job_title: 'Test' } });
+    const { error } = await julien.functions.invoke('invite-member', {
+      body: { email: 'x@y.fr', first_name: 'X', last_name: 'Y', job_title: 'Test' },
+    });
     expect(error).not.toBeNull();
   });
 });

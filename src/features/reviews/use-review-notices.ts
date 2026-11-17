@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { useTeamMembers } from '@/features/team/queries';
 import { isoAddDays, todayIso } from '@/shared/lib/dates';
 import { formatDate, formatTime, fullName } from '@/shared/lib/format';
 import { toast } from '@/shared/ui/toaster';
-import { reviewNotices, type ReviewNotice } from './lib/notices';
+import { reviewNotices, upcomingSoon, type ReviewNotice } from './lib/notices';
 import { useReviewRequests, useReviews } from './queries';
 
 export interface ReviewNoticeItem {
@@ -32,15 +32,35 @@ export function useReviewNotices(): {
   const reviews = useReviews();
   const requests = useReviewRequests();
   const team = useTeamMembers();
+  // Horloge à la minute : « dans 40 min » reste juste sans recharger.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(t);
+  }, []);
 
   return useMemo(() => {
-    const notices = reviewNotices(
-      reviews.data ?? [],
-      requests.data ?? [],
-      isManager ? 'manager' : 'collaborateur',
-      profile.id,
-      isoAddDays(todayIso(), -WINDOW_DAYS),
-    );
+    const soon = upcomingSoon(
+      (reviews.data ?? []).filter((r) => isManager || r.collaborator_id === profile.id),
+      now,
+    ).map((r): ReviewNotice => ({
+      id: `bientot-${r.id}`,
+      kind: 'bientot',
+      personId: r.collaborator_id,
+      reviewId: r.id,
+      at: r.scheduled_at,
+      scheduledAt: r.scheduled_at,
+    }));
+    const notices = [
+      ...soon,
+      ...reviewNotices(
+        reviews.data ?? [],
+        requests.data ?? [],
+        isManager ? 'manager' : 'collaborateur',
+        profile.id,
+        isoAddDays(todayIso(), -WINDOW_DAYS),
+      ),
+    ];
     const name = (id: string) => {
       const p = team.byId.get(id);
       return p ? fullName(p) : 'Un collaborateur';
@@ -48,6 +68,23 @@ export function useReviewNotices(): {
     const to = (n: ReviewNotice) => (n.reviewId ? `/entretiens/${n.reviewId}` : '/entretiens');
     const items = notices.map((n): ReviewNoticeItem => {
       switch (n.kind) {
+        case 'bientot': {
+          const minutes = Math.round((new Date(n.at).getTime() - now) / 60000);
+          const other = isManager
+            ? name(n.personId)
+            : (team.byId.get(reviews.data?.find((r) => r.id === n.reviewId)?.manager_id ?? '')
+                ?.first_name ?? 'votre manager');
+          return {
+            id: n.id,
+            severity: 'danger',
+            title: `1 à 1 à ${formatTime(n.at)} avec ${other}`,
+            detail:
+              minutes > 0
+                ? `Dans ${minutes} min · ouvrir l’entretien`
+                : 'C’est maintenant · ouvrir l’entretien',
+            to: to(n),
+          };
+        }
         case 'planifie':
           return {
             id: n.id,
@@ -102,10 +139,13 @@ export function useReviewNotices(): {
     });
     const recent = isoAddDays(todayIso(), -BELL_DAYS);
     const bell = items.filter(
-      (_, i) => notices[i].kind === 'a_signer' || notices[i].at.slice(0, 10) >= recent,
+      (_, i) =>
+        notices[i].kind === 'a_signer' ||
+        notices[i].kind === 'bientot' ||
+        notices[i].at.slice(0, 10) >= recent,
     );
     return { notices, items, bell };
-  }, [reviews.data, requests.data, isManager, profile.id, team.byId]);
+  }, [reviews.data, requests.data, isManager, profile.id, team.byId, now]);
 }
 
 const storageKey = (userId: string) => `connect-team:1a1-vus:${userId}`;

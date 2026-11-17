@@ -21,23 +21,43 @@ export interface ObjectiveInput {
 }
 
 export async function createObjective({ objective, keyResults }: ObjectiveInput): Promise<void> {
-  const created = unwrap(await supabase.from('objectives').insert(objective).select('id').single(), 'Création objectif');
+  const created = unwrap(
+    await supabase.from('objectives').insert(objective).select('id').single(),
+    'Création objectif',
+  );
   if (keyResults.length) {
     check(
-      await supabase.from('key_results').insert(keyResults.map((k, i) => ({ ...k, objective_id: created.id, position: i }))),
+      await supabase
+        .from('key_results')
+        .insert(keyResults.map((k, i) => ({ ...k, objective_id: created.id, position: i }))),
       'Résultats clés',
     );
   }
 }
 
-export async function updateObjective(id: string, patch: TablesUpdate<'objectives'>): Promise<void> {
+export async function updateObjective(
+  id: string,
+  patch: TablesUpdate<'objectives'>,
+): Promise<void> {
   check(await supabase.from('objectives').update(patch).eq('id', id), 'Mise à jour objectif');
 }
 
 export async function proposeValue(keyResultId: string, value: number): Promise<void> {
-  check(await supabase.rpc('propose_key_result_value', { p_key_result_id: keyResultId, p_value: value }), 'Avancement');
+  check(
+    await supabase.rpc('propose_key_result_value', {
+      p_key_result_id: keyResultId,
+      p_value: value,
+    }),
+    'Avancement',
+  );
 }
 
 export async function reviewValue(keyResultId: string, accept: boolean): Promise<void> {
-  check(await supabase.rpc('review_key_result_value', { p_key_result_id: keyResultId, p_accept: accept }), 'Validation');
+  check(
+    await supabase.rpc('review_key_result_value', {
+      p_key_result_id: keyResultId,
+      p_accept: accept,
+    }),
+    'Validation',
+  );
 }

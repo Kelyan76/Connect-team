@@ -5,10 +5,14 @@ const obj = { start_date: '2026-07-01', due_date: '2026-12-31' };
 
 describe('avancement des résultats clés', () => {
   it('calcule un avancement croissant', () => {
-    expect(keyResultProgress({ start_value: 0, target_value: 40, current_value: 10 })).toBeCloseTo(0.25);
+    expect(keyResultProgress({ start_value: 0, target_value: 40, current_value: 10 })).toBeCloseTo(
+      0.25,
+    );
   });
   it('gère une cible inférieure au départ (réduction)', () => {
-    expect(keyResultProgress({ start_value: 18, target_value: 12, current_value: 15 })).toBeCloseTo(0.5);
+    expect(keyResultProgress({ start_value: 18, target_value: 12, current_value: 15 })).toBeCloseTo(
+      0.5,
+    );
   });
   it('borne entre 0 et 1', () => {
     expect(keyResultProgress({ start_value: 0, target_value: 10, current_value: 14 })).toBe(1);

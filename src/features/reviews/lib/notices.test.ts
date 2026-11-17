@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { reviewNotices, type RequestLike, type ReviewLike } from './notices';
+import { reviewNotices, upcomingSoon, type RequestLike, type ReviewLike } from './notices';
 
 const r = (over: Partial<ReviewLike>): ReviewLike => ({
   id: 'r1',
@@ -81,5 +81,21 @@ describe('notifications du 1 à 1', () => {
         since,
       ),
     ).toEqual([]);
+  });
+});
+
+describe('1 à 1 imminents', () => {
+  it('dans les 2 heures, ou commencés depuis moins de 10 minutes', () => {
+    const now = new Date('2026-11-20T08:00:00Z').getTime();
+    const list = [
+      r({ id: 'a', scheduled_at: '2026-11-20T09:00:00Z' }),
+      r({ id: 'b', scheduled_at: '2026-11-20T11:00:00Z' }),
+      r({ id: 'c', scheduled_at: '2026-11-20T07:55:00Z' }),
+      r({ id: 'd', status: 'annule', scheduled_at: '2026-11-20T08:30:00Z' }),
+    ];
+    expect(upcomingSoon(list, now).map((x) => [x.id, x.minutes])).toEqual([
+      ['c', -5],
+      ['a', 60],
+    ]);
   });
 });

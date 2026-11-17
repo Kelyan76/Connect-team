@@ -557,6 +557,7 @@ export type Database = {
           updated_at: string;
           means: string;
           agreed: boolean;
+          squad_id: string | null;
         };
         Insert: {
           id?: string;
@@ -573,6 +574,7 @@ export type Database = {
           updated_at?: string;
           means?: string;
           agreed?: boolean;
+          squad_id?: string | null;
         };
         Update: {
           id?: string;
@@ -589,6 +591,7 @@ export type Database = {
           updated_at?: string;
           means?: string;
           agreed?: boolean;
+          squad_id?: string | null;
         };
         Relationships: [];
       };
@@ -681,6 +684,7 @@ export type Database = {
           ui_theme: string;
           ui_text_size: string;
           ui_density: string;
+          squad_id: string | null;
         };
         Insert: {
           id: string;
@@ -698,6 +702,7 @@ export type Database = {
           ui_theme?: string;
           ui_text_size?: string;
           ui_density?: string;
+          squad_id?: string | null;
         };
         Update: {
           id?: string;
@@ -715,6 +720,7 @@ export type Database = {
           ui_theme?: string;
           ui_text_size?: string;
           ui_density?: string;
+          squad_id?: string | null;
         };
         Relationships: [];
       };
@@ -1056,6 +1062,27 @@ export type Database = {
           team_id?: string;
           name?: string;
           category?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      squads: {
+        Row: {
+          id: string;
+          team_id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id?: string;
+          name: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          name?: string;
           created_at?: string;
         };
         Relationships: [];

@@ -13,7 +13,12 @@ import { EmptyState, TableSkeleton } from '@/shared/ui/feedback';
 import { Panel } from '@/shared/ui/layout';
 import { Table, TBody, Td, Th, THead, Tr } from '@/shared/ui/table';
 
-const STAGE_LABEL = { preparation: 'Planifié', a_signer: 'À signer', signe: 'Signé', annule: 'Annulé' } as const;
+const STAGE_LABEL = {
+  preparation: 'Planifié',
+  a_signer: 'À signer',
+  signe: 'Signé',
+  annule: 'Annulé',
+} as const;
 
 export function PersonObjectives({ personId }: { personId: string }) {
   const objectives = useObjectives();
@@ -23,17 +28,26 @@ export function PersonObjectives({ personId }: { personId: string }) {
       {!mine ? (
         <TableSkeleton rows={3} columns={3} />
       ) : mine.length === 0 ? (
-        <EmptyState title="Aucun objectif individuel" description="Fixez un objectif depuis la page Objectifs." />
+        <EmptyState
+          title="Aucun objectif individuel"
+          description="Fixez un objectif depuis la page Objectifs."
+        />
       ) : (
         <ul className="divide-y divide-line">
           {mine.map((o) => (
             <li key={o.id} className="flex flex-col gap-2 px-4 py-3">
               <div className="flex items-start justify-between gap-3">
                 <span className="text-base font-medium">{o.title}</span>
-                <Badge tone={OBJECTIVE_STATUS[o.status].tone}>{OBJECTIVE_STATUS[o.status].label}</Badge>
+                <Badge tone={OBJECTIVE_STATUS[o.status].tone}>
+                  {OBJECTIVE_STATUS[o.status].label}
+                </Badge>
               </div>
               <div className="flex items-center gap-3">
-                <ProgressBar value={o.progress} tone={OBJECTIVE_STATUS[o.status].tone} label="Avancement" />
+                <ProgressBar
+                  value={o.progress}
+                  tone={OBJECTIVE_STATUS[o.status].tone}
+                  label="Avancement"
+                />
                 <span className="tabular w-10 text-right text-sm">{formatPercent(o.progress)}</span>
               </div>
               <span className="text-xs text-fg-subtle">Échéance le {formatDate(o.due_date)}</span>
@@ -49,7 +63,10 @@ export function PersonSkills({ personId }: { personId: string }) {
   const skills = useSkills();
   const levels = useSkillLevels();
   const rows = (skills.data ?? [])
-    .map((s) => ({ skill: s, level: levels.data?.find((l) => l.skill_id === s.id && l.collaborator_id === personId) }))
+    .map((s) => ({
+      skill: s,
+      level: levels.data?.find((l) => l.skill_id === s.id && l.collaborator_id === personId),
+    }))
     .filter((r) => r.level);
   return (
     <Panel flush>
@@ -72,7 +89,9 @@ export function PersonSkills({ personId }: { personId: string }) {
                 <Td className="text-fg-muted">{skill.category}</Td>
                 <Td numeric>{level?.self_level ?? '—'}</Td>
                 <Td>
-                  {effectiveLevel(level) ? `${effectiveLevel(level)} · ${LEVEL_LABEL[effectiveLevel(level)]}` : '—'}
+                  {effectiveLevel(level)
+                    ? `${effectiveLevel(level)} · ${LEVEL_LABEL[effectiveLevel(level)]}`
+                    : '—'}
                   {level && !level.validated_at && (
                     <Badge tone="warning" className="ml-2">
                       À valider
@@ -97,7 +116,10 @@ export function PersonReviews({ personId }: { personId: string }) {
       {!mine ? (
         <TableSkeleton rows={4} columns={3} />
       ) : mine.length === 0 ? (
-        <EmptyState title="Aucun entretien" description="L’historique des entretiens apparaîtra ici." />
+        <EmptyState
+          title="Aucun entretien"
+          description="L’historique des entretiens apparaîtra ici."
+        />
       ) : (
         <Table>
           <THead>
@@ -110,11 +132,23 @@ export function PersonReviews({ personId }: { personId: string }) {
           </THead>
           <TBody>
             {mine.map((r) => (
-              <Tr key={r.id} className="cursor-pointer" onClick={() => navigate(`/entretiens/${r.id}`)}>
+              <Tr
+                key={r.id}
+                className="cursor-pointer"
+                onClick={() => navigate(`/entretiens/${r.id}`)}
+              >
                 <Td numeric>{formatDate(r.scheduled_at)}</Td>
                 <Td className="whitespace-nowrap">{KIND_LABEL[r.kind]}</Td>
                 <Td>
-                  <Badge tone={reviewStage(r) === 'signe' ? 'success' : reviewStage(r) === 'a_signer' ? 'warning' : 'neutral'}>
+                  <Badge
+                    tone={
+                      reviewStage(r) === 'signe'
+                        ? 'success'
+                        : reviewStage(r) === 'a_signer'
+                          ? 'warning'
+                          : 'neutral'
+                    }
+                  >
                     {STAGE_LABEL[reviewStage(r)]}
                   </Badge>
                 </Td>
@@ -136,15 +170,30 @@ export function PersonFeedbacks({ personId }: { personId: string }) {
       {!mine ? (
         <TableSkeleton rows={3} columns={2} />
       ) : mine.length === 0 ? (
-        <EmptyState title="Aucun feedback" description="Les feedbacks alimentent automatiquement la préparation des entretiens." />
+        <EmptyState
+          title="Aucun feedback"
+          description="Les feedbacks alimentent automatiquement la préparation des entretiens."
+        />
       ) : (
         <ul className="divide-y divide-line">
           {mine.map((f) => (
             <li key={f.id} className="flex flex-col gap-1 px-4 py-3">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge tone={f.kind === 'axe_progres' ? 'warning' : f.kind === 'reconnaissance' ? 'success' : 'accent'}>{FEEDBACK_KIND[f.kind]}</Badge>
+                <Badge
+                  tone={
+                    f.kind === 'axe_progres'
+                      ? 'warning'
+                      : f.kind === 'reconnaissance'
+                        ? 'success'
+                        : 'accent'
+                  }
+                >
+                  {FEEDBACK_KIND[f.kind]}
+                </Badge>
                 <span className="text-xs text-fg-subtle">{formatDate(f.created_at)}</span>
-                <span className="text-xs text-fg-subtle">· {f.is_shared ? 'Partagé' : 'Privé'}</span>
+                <span className="text-xs text-fg-subtle">
+                  · {f.is_shared ? 'Partagé' : 'Privé'}
+                </span>
               </div>
               <p className="text-base">{f.body}</p>
             </li>

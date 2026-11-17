@@ -20,13 +20,26 @@ export async function updatePerson(id: string, patch: TablesUpdate<'profiles'>):
 
 export async function listNotes(collaboratorId: string): Promise<ManagerNote[]> {
   return unwrap(
-    await supabase.from('manager_notes').select('*').eq('collaborator_id', collaboratorId).order('created_at', { ascending: false }),
+    await supabase
+      .from('manager_notes')
+      .select('*')
+      .eq('collaborator_id', collaboratorId)
+      .order('created_at', { ascending: false }),
     'Notes privées',
   );
 }
 
-export async function addNote(collaboratorId: string, authorId: string, body: string): Promise<void> {
-  check(await supabase.from('manager_notes').insert({ collaborator_id: collaboratorId, author_id: authorId, body }), 'Note privée');
+export async function addNote(
+  collaboratorId: string,
+  authorId: string,
+  body: string,
+): Promise<void> {
+  check(
+    await supabase
+      .from('manager_notes')
+      .insert({ collaborator_id: collaboratorId, author_id: authorId, body }),
+    'Note privée',
+  );
 }
 
 export async function deleteNote(id: string): Promise<void> {
@@ -42,21 +55,41 @@ export interface InviteInput {
 }
 
 /** Edge Function invite-member : crée le compte et envoie l'invitation par e-mail. */
-export async function inviteMember(input: InviteInput): Promise<void> {
-  const { data, error } = await supabase.functions.invoke<{ id?: string; error?: string }>('invite-member', { body: input });
+export async function inviteMember({
+  squad_id,
+  ...input
+}: InviteInput & { squad_id?: string | null }): Promise<void> {
+  const { data, error } = await supabase.functions.invoke<{ id?: string; error?: string }>(
+    'invite-member',
+    { body: input },
+  );
   if (error) {
     const context = (error as { context?: Response }).context;
-    const payload = context ? ((await context.json().catch(() => null)) as { error?: string } | null) : null;
+    const payload = context
+      ? ((await context.json().catch(() => null)) as { error?: string } | null)
+      : null;
     throw new AppError(payload?.error ?? toUserMessage(error));
   }
   if (data?.error) throw new AppError(data.error);
+  // Équipe choisie à l'invitation : attribuée sur la fiche qui vient d'être créée.
+  if (squad_id && data?.id)
+    check(await supabase.from('profiles').update({ squad_id }).eq('id', data.id), 'Équipe');
 }
 
 export async function setMemberActive(userId: string, active: boolean): Promise<void> {
-  const { error } = await supabase.functions.invoke('manage-member', { body: { user_id: userId, action: active ? 'reactiver' : 'desactiver' } });
+  const { error } = await supabase.functions.invoke('manage-member', {
+    body: { user_id: userId, action: active ? 'reactiver' : 'desactiver' },
+  });
   if (error) throw new AppError(toUserMessage(error), error);
 }
 
 export async function listLogins(): Promise<Tables<'login_events'>[]> {
-  return unwrap(await supabase.from('login_events').select('*').order('created_at', { ascending: false }).limit(200), 'Journal');
+  return unwrap(
+    await supabase
+      .from('login_events')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200),
+    'Journal',
+  );
 }

@@ -7,7 +7,19 @@ export type DiscStyle = 'D' | 'I' | 'S' | 'C';
 
 export const DISC_STYLES: DiscStyle[] = ['D', 'I', 'S', 'C'];
 
-export const DISC: Record<DiscStyle, { name: string; short: string; traits: string; do: string; avoid: string; oneToOne: string; tone: string; soft: string }> = {
+export const DISC: Record<
+  DiscStyle,
+  {
+    name: string;
+    short: string;
+    traits: string;
+    do: string;
+    avoid: string;
+    oneToOne: string;
+    tone: string;
+    soft: string;
+  }
+> = {
   D: {
     name: 'Dominant',
     short: 'Direct, orienté résultats',
@@ -56,4 +68,6 @@ export const DISC_SOURCE: Record<'auto_evaluation' | 'echange', string> = {
 };
 
 export const discLabel = (primary: DiscStyle, secondary: DiscStyle | null) =>
-  secondary ? `${primary}${secondary} · ${DISC[primary].name}, ${DISC[secondary].name.toLowerCase()}` : `${primary} · ${DISC[primary].name}`;
+  secondary
+    ? `${primary}${secondary} · ${DISC[primary].name}, ${DISC[secondary].name.toLowerCase()}`
+    : `${primary} · ${DISC[primary].name}`;

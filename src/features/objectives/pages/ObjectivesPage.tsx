@@ -43,7 +43,10 @@ export default function ObjectivesPage() {
   return (
     <Page>
       <PageHeader
-        breadcrumbs={[{ label: isManager ? 'Équipe' : 'Mon espace' }, { label: isManager ? 'Objectifs' : 'Mes objectifs' }]}
+        breadcrumbs={[
+          { label: isManager ? 'Équipe' : 'Mon espace' },
+          { label: isManager ? 'Objectifs' : 'Mes objectifs' },
+        ]}
         title={isManager ? 'Objectifs' : 'Mes objectifs'}
         description={
           isManager
@@ -69,7 +72,12 @@ export default function ObjectivesPage() {
         </Segmented>
         <CollapsibleFilters active={(owner ? 1 : 0) + (status ? 1 : 0)}>
           {isManager && (
-            <NativeSelect aria-label="Filtrer par collaborateur" className="sm:w-56" value={owner} onChange={(e) => setOwner(e.target.value)}>
+            <NativeSelect
+              aria-label="Filtrer par collaborateur"
+              className="sm:w-56"
+              value={owner}
+              onChange={(e) => setOwner(e.target.value)}
+            >
               <option value="">Tous les collaborateurs</option>
               {team.active.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -78,7 +86,12 @@ export default function ObjectivesPage() {
               ))}
             </NativeSelect>
           )}
-          <NativeSelect aria-label="Filtrer par statut" className="sm:w-44" value={status} onChange={(e) => setStatus(e.target.value)}>
+          <NativeSelect
+            aria-label="Filtrer par statut"
+            className="sm:w-44"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
             <option value="">Tous les statuts</option>
             {(Object.keys(OBJECTIVE_STATUS) as ObjectiveStatus[]).map((s) => (
               <option key={s} value={s}>
@@ -90,7 +103,8 @@ export default function ObjectivesPage() {
       </Toolbar>
       {objectives.data && list.length > 0 && (
         <p className="pb-3 text-sm text-fg-subtle">
-          {list.length} objectif{list.length > 1 ? 's' : ''} · touchez un objectif pour voir ses résultats clés
+          {list.length} objectif{list.length > 1 ? 's' : ''} · touchez un objectif pour voir ses
+          résultats clés
         </p>
       )}
       {objectives.error ? (
@@ -104,18 +118,32 @@ export default function ObjectivesPage() {
         <div className="rounded-lg border border-line bg-surface">
           <EmptyState
             title="Aucun objectif ne correspond"
-            description={isManager ? 'Modifiez les filtres ou créez un objectif avec ses résultats clés.' : 'Aucun objectif ne vous est encore assigné.'}
-            action={isManager ? <Button onClick={() => setCreating(true)}>Nouvel objectif</Button> : undefined}
+            description={
+              isManager
+                ? 'Modifiez les filtres ou créez un objectif avec ses résultats clés.'
+                : 'Aucun objectif ne vous est encore assigné.'
+            }
+            action={
+              isManager ? (
+                <Button onClick={() => setCreating(true)}>Nouvel objectif</Button>
+              ) : undefined
+            }
           />
         </div>
       ) : (
         <div className="stagger flex flex-col gap-3">
           {list.map((o) => (
-            <ObjectiveCard key={o.id} objective={o} owner={o.owner_id ? team.byId.get(o.owner_id) : undefined} />
+            <ObjectiveCard
+              key={o.id}
+              objective={o}
+              owner={o.owner_id ? team.byId.get(o.owner_id) : undefined}
+            />
           ))}
         </div>
       )}
-      {isManager && <ObjectiveDialog open={creating} onOpenChange={setCreating} defaultOwner={presetOwner} />}
+      {isManager && (
+        <ObjectiveDialog open={creating} onOpenChange={setCreating} defaultOwner={presetOwner} />
+      )}
     </Page>
   );
 }

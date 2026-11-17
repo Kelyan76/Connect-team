@@ -46,9 +46,15 @@ async function shoot(page: Page, role: string, routes: [string, string][]) {
     for (const [size, viewport] of Object.entries(SIZES)) {
       await page.setViewportSize(viewport);
       for (const theme of ['clair', 'sombre'] as const) {
-        await page.evaluate((t) => document.documentElement.classList.toggle('dark', t === 'sombre'), theme);
+        await page.evaluate(
+          (t) => document.documentElement.classList.toggle('dark', t === 'sombre'),
+          theme,
+        );
         await page.waitForTimeout(150);
-        await page.screenshot({ path: `screenshots/${role}/${name}-${size}-${theme}.png`, fullPage: false });
+        await page.screenshot({
+          path: `screenshots/${role}/${name}-${size}-${theme}.png`,
+          fullPage: false,
+        });
       }
     }
     await page.setViewportSize(SIZES.desktop);

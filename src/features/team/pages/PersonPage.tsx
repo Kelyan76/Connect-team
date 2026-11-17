@@ -1,4 +1,12 @@
-import { CalendarPlus, Compass, FileDown, NotebookPen, PenLine, UserX, UserCheck } from 'lucide-react';
+import {
+  CalendarPlus,
+  Compass,
+  FileDown,
+  NotebookPen,
+  PenLine,
+  UserX,
+  UserCheck,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { FeedbackDialog } from '@/features/feedback/components/FeedbackDialog';
@@ -15,8 +23,14 @@ import { DescriptionList, Page, PageHeader, Panel } from '@/shared/ui/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { JourneyView } from '@/features/journey/components/JourneyView';
 import { DiscCard } from '../components/DiscCard';
+import { SquadPicker } from '../components/SquadPicker';
 import { PersonOverview } from '../components/PersonOverview';
-import { PersonFeedbacks, PersonObjectives, PersonReviews, PersonSkills } from '../components/PersonSections';
+import {
+  PersonFeedbacks,
+  PersonObjectives,
+  PersonReviews,
+  PersonSkills,
+} from '../components/PersonSections';
 import { useSetActive, useTeamMembers } from '../queries';
 
 export default function PersonPage() {
@@ -41,7 +55,15 @@ export default function PersonPage() {
   if (!person || person.role !== 'collaborateur') {
     return (
       <Page>
-        <EmptyState title="Fiche introuvable" description="Ce collaborateur n’existe pas ou ne fait pas partie de votre équipe." action={<Link to="/equipe" className="text-sm text-accent hover:underline">Retour à l’équipe</Link>} />
+        <EmptyState
+          title="Fiche introuvable"
+          description="Ce collaborateur n’existe pas ou ne fait pas partie de votre équipe."
+          action={
+            <Link to="/equipe" className="text-sm text-accent hover:underline">
+              Retour à l’équipe
+            </Link>
+          }
+        />
       </Page>
     );
   }
@@ -58,7 +80,11 @@ export default function PersonPage() {
   return (
     <Page>
       <PageHeader
-        breadcrumbs={[{ label: 'Équipe' }, { label: 'Collaborateurs', to: '/equipe' }, { label: fullName(person) }]}
+        breadcrumbs={[
+          { label: 'Équipe' },
+          { label: 'Collaborateurs', to: '/equipe' },
+          { label: fullName(person) },
+        ]}
         title={
           <span className="flex items-center gap-3">
             <Avatar person={person} size="lg" />
@@ -69,6 +95,7 @@ export default function PersonPage() {
             {!person.is_active && <Badge>Désactivé</Badge>}
           </span>
         }
+        meta={<SquadPicker person={person} />}
         actions={
           <>
             <Button onClick={() => setNoting(true)}>
@@ -89,7 +116,11 @@ export default function PersonPage() {
               {person.is_active ? <UserX aria-hidden /> : <UserCheck aria-hidden />}
               {person.is_active ? 'Désactiver' : 'Réactiver'}
             </Button>
-            <Button className="hidden sm:inline-flex" onClick={() => void exportPdf()} disabled={exporting}>
+            <Button
+              className="hidden sm:inline-flex"
+              onClick={() => void exportPdf()}
+              disabled={exporting}
+            >
               <FileDown aria-hidden />
               {exporting ? 'Génération…' : 'Fiche PDF'}
             </Button>
@@ -156,7 +187,11 @@ export default function PersonPage() {
       <ConfirmDialog
         open={confirm}
         onOpenChange={setConfirm}
-        title={person.is_active ? `Désactiver le compte de ${fullName(person)} ?` : `Réactiver le compte de ${fullName(person)} ?`}
+        title={
+          person.is_active
+            ? `Désactiver le compte de ${fullName(person)} ?`
+            : `Réactiver le compte de ${fullName(person)} ?`
+        }
         description={
           person.is_active
             ? 'Il ne pourra plus se connecter. Son historique (entretiens, objectifs, feedbacks) est conservé.'
@@ -165,7 +200,12 @@ export default function PersonPage() {
         confirmLabel={person.is_active ? 'Désactiver' : 'Réactiver'}
         destructive={person.is_active}
         pending={setActive.isPending}
-        onConfirm={() => setActive.mutate({ id: person.id, active: !person.is_active }, { onSettled: () => setConfirm(false) })}
+        onConfirm={() =>
+          setActive.mutate(
+            { id: person.id, active: !person.is_active },
+            { onSettled: () => setConfirm(false) },
+          )
+        }
       />
     </Page>
   );

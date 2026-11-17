@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_PREFS,
+  eveMessage,
+  isEveReminderSlot,
+  isTomorrow,
+  soonMessage,
+  startsInAboutAnHour,
   parisClock,
   pulseWatchlist,
   recapMessage,
@@ -13,8 +18,16 @@ import {
 /** Logique d'envoi des rappels (Edge Function send-reminders). */
 describe('horloge de Paris', () => {
   it('convertit UTC en heure de Paris, été comme hiver', () => {
-    expect(parisClock(new Date('2026-11-09T08:00:00Z'))).toEqual({ date: '2026-11-09', hour: 9, weekday: 1 });
-    expect(parisClock(new Date('2026-07-06T07:00:00Z'))).toEqual({ date: '2026-07-06', hour: 9, weekday: 1 });
+    expect(parisClock(new Date('2026-11-09T08:00:00Z'))).toEqual({
+      date: '2026-11-09',
+      hour: 9,
+      weekday: 1,
+    });
+    expect(parisClock(new Date('2026-07-06T07:00:00Z'))).toEqual({
+      date: '2026-07-06',
+      hour: 9,
+      weekday: 1,
+    });
     expect(parisClock(new Date('2026-11-08T23:30:00Z')).date).toBe('2026-11-09');
   });
 });
@@ -24,13 +37,19 @@ describe('rappel du pouls', () => {
   it('part à l’heure choisie, une fois par jour, seulement sans pouls', () => {
     expect(shouldRemindPulse(DEFAULT_PREFS, monday9, false)).toBe(true);
     expect(shouldRemindPulse(DEFAULT_PREFS, monday9, true)).toBe(false);
-    expect(shouldRemindPulse({ ...DEFAULT_PREFS, last_pulse_reminder: '2026-11-09' }, monday9, false)).toBe(false);
+    expect(
+      shouldRemindPulse({ ...DEFAULT_PREFS, last_pulse_reminder: '2026-11-09' }, monday9, false),
+    ).toBe(false);
     expect(shouldRemindPulse({ ...DEFAULT_PREFS, pulse_hour: 10 }, monday9, false)).toBe(false);
-    expect(shouldRemindPulse({ ...DEFAULT_PREFS, pulse_reminder: false }, monday9, false)).toBe(false);
+    expect(shouldRemindPulse({ ...DEFAULT_PREFS, pulse_reminder: false }, monday9, false)).toBe(
+      false,
+    );
   });
   it('rattrape un passage manqué dans la matinée, jamais le week-end', () => {
     expect(shouldRemindPulse(DEFAULT_PREFS, { ...monday9, hour: 11 }, false)).toBe(true);
-    expect(shouldRemindPulse(DEFAULT_PREFS, { date: '2026-11-08', hour: 9, weekday: 7 }, false)).toBe(false);
+    expect(
+      shouldRemindPulse(DEFAULT_PREFS, { date: '2026-11-08', hour: 9, weekday: 7 }, false),
+    ).toBe(false);
   });
 });
 
@@ -38,10 +57,18 @@ describe('récap du lundi', () => {
   it('le lundi uniquement, une fois', () => {
     expect(shouldSendRecap(DEFAULT_PREFS, { date: '2026-11-09', hour: 9, weekday: 1 })).toBe(true);
     expect(shouldSendRecap(DEFAULT_PREFS, { date: '2026-11-10', hour: 9, weekday: 2 })).toBe(false);
-    expect(shouldSendRecap({ ...DEFAULT_PREFS, last_recap: '2026-11-09' }, { date: '2026-11-09', hour: 10, weekday: 1 })).toBe(false);
+    expect(
+      shouldSendRecap(
+        { ...DEFAULT_PREFS, last_recap: '2026-11-09' },
+        { date: '2026-11-09', hour: 10, weekday: 1 },
+      ),
+    ).toBe(false);
   });
   it('résume les points d’attention', () => {
-    const names = new Map([['j', 'Julien'], ['n', 'Nadia']]);
+    const names = new Map([
+      ['j', 'Julien'],
+      ['n', 'Nadia'],
+    ]);
     const watch = pulseWatchlist(
       [
         { collaborator_id: 'j', day: '2026-11-06', mood: 1, workload: 5 },
@@ -55,7 +82,10 @@ describe('récap du lundi', () => {
     expect(recapMessage({ requests: 2, lateTasks: 1, reviewsThisWeek: 0, ...watch }).body).toBe(
       'Moral bas : Julien · surcharge : Julien, Nadia · 2 demandes de one-to-one · 1 tâche en retard',
     );
-    expect(recapMessage({ requests: 0, lateTasks: 0, reviewsThisWeek: 0, lowMood: [], overloaded: [] }).body).toBe('Rien d’urgent : bonne semaine !');
+    expect(
+      recapMessage({ requests: 0, lateTasks: 0, reviewsThisWeek: 0, lowMood: [], overloaded: [] })
+        .body,
+    ).toBe('Rien d’urgent : bonne semaine !');
   });
 });
 
@@ -64,11 +94,15 @@ describe('entretiens du jour', () => {
   it('rappelle une fois, seulement s’il y a un entretien', () => {
     expect(shouldRemindReviews(DEFAULT_PREFS, monday9, 1)).toBe(true);
     expect(shouldRemindReviews(DEFAULT_PREFS, monday9, 0)).toBe(false);
-    expect(shouldRemindReviews({ ...DEFAULT_PREFS, last_review_reminder: '2026-11-09' }, monday9, 2)).toBe(false);
+    expect(
+      shouldRemindReviews({ ...DEFAULT_PREFS, last_review_reminder: '2026-11-09' }, monday9, 2),
+    ).toBe(false);
     expect(shouldRemindReviews({ ...DEFAULT_PREFS, review_alerts: false }, monday9, 1)).toBe(false);
   });
   it('compose le message (un ou plusieurs entretiens)', () => {
-    expect(reviewDayMessage([{ id: 'r1', time: '14:00', with: 'Nadia Haddad', kind: 'One-to-one' }])).toEqual({
+    expect(
+      reviewDayMessage([{ id: 'r1', time: '14:00', with: 'Nadia Haddad', kind: 'One-to-one' }]),
+    ).toEqual({
       title: 'Entretien aujourd’hui à 14:00',
       body: 'One-to-one avec Nadia Haddad. Pensez à le préparer.',
       url: '/entretiens/r1',
@@ -79,5 +113,30 @@ describe('entretiens du jour', () => {
     ]);
     expect(many.title).toBe('2 entretiens aujourd’hui');
     expect(many.body).toBe('10:30 Nadia Haddad · 16:00 Julien Mercier');
+  });
+});
+
+describe('rappels juste avant les 1 à 1', () => {
+  const now = new Date('2026-11-17T12:00:00Z'); // 13 h à Paris
+  it('prévient une seule fois, entre 45 et 60 minutes avant', () => {
+    expect(startsInAboutAnHour('2026-11-17T12:50:00Z', now)).toBe(true);
+    expect(startsInAboutAnHour('2026-11-17T13:00:00Z', now)).toBe(true);
+    expect(startsInAboutAnHour('2026-11-17T12:40:00Z', now)).toBe(false);
+    expect(startsInAboutAnHour('2026-11-17T13:05:00Z', now)).toBe(false);
+  });
+  it('la veille à 17 h (heure de Paris), pour les entretiens du lendemain', () => {
+    expect(isEveReminderSlot(new Date('2026-11-17T16:05:00Z'))).toBe(true);
+    expect(isEveReminderSlot(new Date('2026-11-17T16:20:00Z'))).toBe(false);
+    expect(isTomorrow('2026-11-18T09:00:00Z', now)).toBe(true);
+    expect(isTomorrow('2026-11-17T15:00:00Z', now)).toBe(false);
+  });
+  it('messages', () => {
+    expect(
+      soonMessage({ time: '14:00', with: 'Hugo Lambert', location: 'Salle Orion', needsPrep: true })
+        .body,
+    ).toContain('préparer');
+    expect(
+      eveMessage({ time: '10:00', with: 'Camille Lefèvre', location: '', needsPrep: false }).title,
+    ).toBe('Demain à 10:00 : 1 à 1 avec Camille Lefèvre');
   });
 });

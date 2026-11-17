@@ -20,7 +20,11 @@ export function useTeamMembers() {
 }
 
 export function useNotes(collaboratorId: string, enabled: boolean) {
-  return useQuery({ queryKey: qk.managerNotes(collaboratorId), queryFn: () => api.listNotes(collaboratorId), enabled });
+  return useQuery({
+    queryKey: qk.managerNotes(collaboratorId),
+    queryFn: () => api.listNotes(collaboratorId),
+    enabled,
+  });
 }
 
 export function useAddNote(collaboratorId: string, authorId: string) {
@@ -60,7 +64,8 @@ export function useInviteMember() {
 export function useSetActive() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, active }: { id: string; active: boolean }) => api.setMemberActive(id, active),
+    mutationFn: ({ id, active }: { id: string; active: boolean }) =>
+      api.setMemberActive(id, active),
     onSuccess: (_d, v) => {
       toast.success(v.active ? 'Compte réactivé' : 'Compte désactivé');
       return qc.invalidateQueries({ queryKey: qk.people });
@@ -71,7 +76,8 @@ export function useSetActive() {
 export function useUpdatePerson() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: Parameters<typeof api.updatePerson>[1] }) => api.updatePerson(id, patch),
+    mutationFn: ({ id, patch }: { id: string; patch: Parameters<typeof api.updatePerson>[1] }) =>
+      api.updatePerson(id, patch),
     onSuccess: () => {
       toast.success('Fiche mise à jour');
       return qc.invalidateQueries({ queryKey: qk.people });

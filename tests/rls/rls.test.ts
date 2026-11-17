@@ -306,6 +306,65 @@ describe('écritures limitées du collaborateur', () => {
   });
 });
 
+describe('équipes au sein de l’équipe', () => {
+  // Change d'utilisateur dans la même transaction (les données créées juste avant restent visibles).
+  const become = async (tx: Transaction, id: string) => {
+    await tx.exec('reset role');
+    await tx.exec('set local role authenticated');
+    await tx.query('select set_config($1, $2, true)', [
+      'request.jwt.claims',
+      JSON.stringify({ sub: id, role: 'authenticated' }),
+    ]);
+  };
+
+  it('seul le manager crée une équipe', async () => {
+    await expect(
+      asUser(db, NADIA, (tx) => tx.query("insert into public.squads (name) values ('Pirates')")),
+    ).rejects.toThrow(/row-level security/);
+  });
+
+  it('équipe attribuée, objectif commun : ses membres proposent l’avancement, pas les autres', async () => {
+    const result = await asUser(db, CLAIRE, async (tx) => {
+      const squad = (
+        await tx.query<{ id: string }>(
+          "insert into public.squads (name) values ('Back-end') returning id",
+        )
+      ).rows[0].id;
+      await tx.query('update public.profiles set squad_id = $1 where id = $2', [squad, NADIA]);
+      const objective = (
+        await tx.query<{ id: string }>(
+          "insert into public.objectives (team_id, title, scope, squad_id, start_date, due_date) select team_id, 'Objectif Back-end', 'equipe', $1, current_date, current_date + 30 from public.profiles where id = $2 returning id",
+          [squad, CLAIRE],
+        )
+      ).rows[0].id;
+      const kr = (
+        await tx.query<{ id: string }>(
+          "insert into public.key_results (objective_id, title, unit, start_value, target_value, current_value) values ($1, 'Incidents', 'nb', 10, 2, 10) returning id",
+          [objective],
+        )
+      ).rows[0].id;
+      await become(tx, NADIA);
+      const seen = await count(tx, 'select 1 from public.squads');
+      await tx.query('select public.propose_key_result_value($1, 6)', [kr]);
+      const pending = (
+        await tx.query<{ pending_value: number }>(
+          'select pending_value from public.key_results where id = $1',
+          [kr],
+        )
+      ).rows[0].pending_value;
+      await become(tx, KARIM);
+      const other = await tx.query('select public.propose_key_result_value($1, 5)', [kr]).then(
+        () => 'accepté',
+        (e: Error) => e.message,
+      );
+      return { seen, pending: Number(pending), other };
+    });
+    expect(result.seen).toBe(1);
+    expect(result.pending).toBe(6);
+    expect(result.other).toMatch(/responsable/);
+  });
+});
+
 describe('suppression d’un 1 à 1', () => {
   it('le collaborateur ne peut pas supprimer, le manager oui (réponses et actions supprimées avec)', async () => {
     const id = await asUser(

@@ -104,7 +104,9 @@ export function scoreDisc(answers: DiscStyle[]): DiscResult {
     scores[s] += 1;
     last[s] = i;
   });
-  const ranked = (Object.keys(scores) as DiscStyle[]).sort((a, b) => scores[b] - scores[a] || last[b] - last[a]);
+  const ranked = (Object.keys(scores) as DiscStyle[]).sort(
+    (a, b) => scores[b] - scores[a] || last[b] - last[a],
+  );
   const [primary, second] = ranked;
   return { primary, secondary: scores[second] >= 2 ? second : null, scores };
 }

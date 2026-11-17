@@ -8,7 +8,9 @@ test('connexion manager puis collaborateur : navigation adaptée au rôle', asyn
   await page.getByLabel('Adresse e-mail').fill(ACCOUNTS.manager);
   await page.getByLabel('Mot de passe').fill('mauvais-mot-de-passe');
   await page.getByRole('button', { name: 'Se connecter' }).click();
-  await expect(page.getByRole('alert')).toContainText('Adresse e-mail ou mot de passe incorrect', { timeout: 90_000 });
+  await expect(page.getByRole('alert')).toContainText('Adresse e-mail ou mot de passe incorrect', {
+    timeout: 90_000,
+  });
 
   await login(page, ACCOUNTS.manager, 'Camille');
   const nav = page.getByRole('complementary', { name: 'Navigation principale' });
@@ -52,7 +54,9 @@ test('mot de passe oublié : lien reçu dans la boîte de démonstration', async
   await page.goto('/mot-de-passe-oublie');
   await page.getByLabel('Adresse e-mail').fill(ACCOUNTS.julien);
   await page.getByRole('button', { name: 'Envoyer le lien' }).click();
-  await page.getByRole('link', { name: 'Ouvrir la boîte mail de démonstration' }).click({ timeout: 90_000 });
+  await page
+    .getByRole('link', { name: 'Ouvrir la boîte mail de démonstration' })
+    .click({ timeout: 90_000 });
   await page.getByRole('link', { name: 'Ouvrir le lien' }).first().click();
   await expect(page.getByRole('heading', { name: 'Choisissez votre mot de passe' })).toBeVisible();
   await page.getByLabel('Nouveau mot de passe').fill('court');
@@ -62,5 +66,7 @@ test('mot de passe oublié : lien reçu dans la boîte de démonstration', async
   await page.getByLabel('Nouveau mot de passe').fill(`${PASSWORD}x`);
   await page.getByLabel('Confirmation').fill(`${PASSWORD}x`);
   await page.getByRole('button', { name: 'Enregistrer et continuer' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Bonjour Julien' })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole('heading', { level: 1, name: 'Bonjour Julien' })).toBeVisible({
+    timeout: 60_000,
+  });
 });
