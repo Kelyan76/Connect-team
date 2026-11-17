@@ -2,6 +2,7 @@ import { Plus, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { openAssistant } from '@/features/ai/open-assistant';
+import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { ObservationDialog } from '@/features/notebook/components/ObservationDialog';
 import { cn } from '@/shared/lib/cn';
 import {
@@ -21,6 +22,7 @@ import { SECTION_COLOR } from './section-colors';
 export function QuickAddButton() {
   const { pathname } = useLocation();
   const actions = useQuickActions();
+  const { isManager } = useCurrentUser();
   const [noting, setNoting] = useState(false);
   if (pathname === '/' || pathname === '/bienvenue') return null;
 
@@ -41,17 +43,19 @@ export function QuickAddButton() {
           className="w-[min(18rem,calc(100vw-2rem))]"
         >
           <DropdownMenuLabel>Actions rapides</DropdownMenuLabel>
-          <DropdownMenuItem className="h-auto gap-3 py-2" onSelect={openAssistant}>
-            <span className="flex size-8 shrink-0 items-center justify-center rounded bg-sec-reviews/10 [&_svg]:!text-sec-reviews">
-              <Sparkles aria-hidden />
-            </span>
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate text-base">Demander à l’assistant</span>
-              <span className="truncate text-xs text-fg-subtle">
-                IA : conseils, rédaction, actions
+          {isManager && (
+            <DropdownMenuItem className="h-auto gap-3 py-2" onSelect={openAssistant}>
+              <span className="flex size-8 shrink-0 items-center justify-center rounded bg-sec-reviews/10 [&_svg]:!text-sec-reviews">
+                <Sparkles aria-hidden />
               </span>
-            </span>
-          </DropdownMenuItem>
+              <span className="flex min-w-0 flex-col">
+                <span className="truncate text-base">Demander à l’assistant</span>
+                <span className="truncate text-xs text-fg-subtle">
+                  IA : conseils, rédaction, actions
+                </span>
+              </span>
+            </DropdownMenuItem>
+          )}
           {actions.map((a) => {
             const body = (
               <>

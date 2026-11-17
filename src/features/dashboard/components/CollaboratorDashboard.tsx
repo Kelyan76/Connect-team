@@ -12,7 +12,6 @@ import { Page, Panel } from '@/shared/ui/layout';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
 import { EnableNotificationsCard } from '@/features/notifications/components/EnableNotificationsCard';
 import { PulseCheckin } from '@/features/pulse/components/PulseCheckin';
-import { AskAssistant } from './AskAssistant';
 import { HeroBanner } from './HeroBanner';
 import { MyActions } from './MyActions';
 import { MyWeekTasks } from './MyWeekTasks';
@@ -33,9 +32,7 @@ export function CollaboratorDashboard() {
       <HeroBanner
         title={`Bonjour ${profile.first_name}`}
         subtitle={`${profile.job_title} · bonne journée !`}
-      >
-        <AskAssistant />
-      </HeroBanner>
+      />
       <PulseCheckin />
       <QuickActions />
       <PrepNudge />

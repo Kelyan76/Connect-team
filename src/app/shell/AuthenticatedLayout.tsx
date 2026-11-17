@@ -34,7 +34,8 @@ export function AuthenticatedLayout() {
       onSignOut={() => void signOut()}
       searchEntries={entries}
       notifications={<NotificationsMenu />}
-      assistant={<AssistantButton />}
+      // Assistant IA réservé au manager : maîtrise du quota gratuit d'Echo.
+      assistant={isManager ? <AssistantButton /> : undefined}
       banner={<DemoBanner viewerName={`${profile.first_name} ${profile.last_name}`} />}
     >
       <Suspense fallback={<PageSkeleton />}>
