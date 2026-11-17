@@ -1,5 +1,5 @@
 import { FileDown, Mic, Trash2, Video } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { downloadReviewReport } from '@/features/reports/download';
@@ -16,7 +16,6 @@ import { ActionPlan } from '../components/ActionPlan';
 import { AnswerForm } from '../components/AnswerForm';
 import { CollaboratorTopics } from '../components/CollaboratorTopics';
 import { ManagerPrep } from '../components/ManagerPrep';
-import { VideoCall } from '../components/VideoCall';
 import { QuickPrep } from '../components/QuickPrep';
 import { OneToOneGuide } from '../components/OneToOneGuide';
 import { EchoRecorder } from '../components/EchoRecorder';
@@ -34,6 +33,9 @@ import {
   reviewStage,
 } from '../lib/review-rules';
 import { useAnswers, useDeleteReview, useReview } from '../queries';
+
+// Visio (LiveKit) chargée seulement quand on clique sur « Visio ».
+const VideoCall = lazy(() => import('../components/VideoCall'));
 
 export default function ReviewPage() {
   const { id = '' } = useParams();
@@ -170,7 +172,11 @@ export default function ReviewPage() {
           ) : undefined
         }
       />
-      {inCall && canCall && <VideoCall reviewId={r.id} onClose={leaveCall} />}
+      {inCall && canCall && (
+        <Suspense fallback={<Skeleton className="mb-6 h-[60vh] rounded-lg" />}>
+          <VideoCall reviewId={r.id} onClose={leaveCall} />
+        </Suspense>
+      )}
       <div
         className={
           showAside ? 'grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]' : 'flex flex-col gap-6'

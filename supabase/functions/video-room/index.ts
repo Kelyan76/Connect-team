@@ -1,8 +1,8 @@
-// Edge Function (Deno) : visio intégrée d'un 1 à 1, servie par Daily (https://daily.co, offre gratuite).
-// • { review_id } → { url, token } : salle privée propre à l'entretien et jeton nominatif.
-//   Seuls le manager et le collaborateur de l'entretien obtiennent un jeton ; le manager est « propriétaire ».
+// Edge Function (Deno) : visio intégrée d'un 1 à 1, servie par LiveKit Cloud (offre gratuite, sans carte).
+// • { review_id } → { url, token } : salle propre à l'entretien (créée automatiquement à la connexion)
+//   et jeton nominatif signé ici. Seuls le manager et le collaborateur de l'entretien en obtiennent un.
 // • L'autre participant est prévenu sur ses appareils (« … vous attend en visio »).
-// Secret requis : DAILY_API_KEY (Supabase › Edge Functions › Secrets). Sans lui, la visio est indisponible.
+// Secrets requis (Supabase › Edge Functions › Secrets) : LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { pushReady, secretKey, sendToUsers } from '../_shared/push.ts';
 
@@ -16,25 +16,56 @@ const json = (status: number, body: unknown) =>
     headers: { ...cors, 'Content-Type': 'application/json' },
   });
 
-const DAILY = 'https://api.daily.co/v1';
+const b64url = (data: string | ArrayBuffer) => {
+  const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : new Uint8Array(data);
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+
+/** Jeton d'accès LiveKit : JWT HS256 signé avec la clé secrète du projet (format officiel LiveKit). */
+async function livekitToken(
+  apiKey: string,
+  apiSecret: string,
+  claims: Record<string, unknown>,
+): Promise<string> {
+  const header = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = b64url(JSON.stringify({ iss: apiKey, ...claims }));
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(apiSecret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(`${header}.${payload}`),
+  );
+  return `${header}.${payload}.${b64url(signature)}`;
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
-  const apiKey = Deno.env.get('DAILY_API_KEY') ?? '';
-  if (!apiKey) return json(503, { error: 'La visio n’est pas encore configurée.' });
+  const url = Deno.env.get('LIVEKIT_URL') ?? '';
+  const apiKey = Deno.env.get('LIVEKIT_API_KEY') ?? '';
+  const apiSecret = Deno.env.get('LIVEKIT_API_SECRET') ?? '';
+  if (!url || !apiKey || !apiSecret)
+    return json(503, { error: 'La visio n’est pas encore configurée.' });
 
   const admin = createClient(Deno.env.get('SUPABASE_URL') ?? '', secretKey(), {
     auth: { persistSession: false },
   });
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
-  const { data: auth } = await admin.auth.getUser(token);
+  const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
+  const { data: auth } = await admin.auth.getUser(bearer);
   const uid = auth.user?.id;
   if (!uid) return json(401, { error: 'Session expirée. Reconnectez-vous.' });
 
   const body = await req.json().catch(() => ({}));
   const { data: review } = await admin
     .from('reviews')
-    .select('id, manager_id, collaborator_id, scheduled_at, duration_minutes, status')
+    .select('id, manager_id, collaborator_id, status')
     .eq('id', String(body.review_id ?? ''))
     .single();
   if (!review || (review.manager_id !== uid && review.collaborator_id !== uid))
@@ -46,57 +77,21 @@ Deno.serve(async (req) => {
     .select('first_name, last_name')
     .eq('id', uid)
     .single();
-  const daily = (path: string, init?: RequestInit) =>
-    fetch(`${DAILY}${path}`, {
-      ...init,
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    });
-
-  // Salle valable jusqu'à 3 h après la fin prévue (et au moins 2 h à partir de maintenant).
-  const end = new Date(review.scheduled_at).getTime() + (review.duration_minutes + 180) * 60_000;
-  const exp = Math.floor(Math.max(end, Date.now() + 2 * 3600_000) / 1000);
-  const name = `ct-${review.id}`;
-  const properties = {
-    exp,
-    lang: 'fr',
-    enable_prejoin_ui: true,
-    enable_chat: true,
-    max_participants: 4,
-  };
-
-  // Récupère la salle (et prolonge sa validité) ou la crée.
-  let room = await daily(`/rooms/${name}`);
-  if (room.ok)
-    room = await daily(`/rooms/${name}`, { method: 'POST', body: JSON.stringify({ properties }) });
-  else
-    room = await daily('/rooms', {
-      method: 'POST',
-      body: JSON.stringify({ name, privacy: 'private', properties }),
-    });
-  if (!room.ok) {
-    console.error('daily room', room.status, await room.text());
-    return json(502, { error: 'La salle de visio n’a pas pu être créée. Réessayez.' });
-  }
-  const { url } = (await room.json()) as { url: string };
-
-  const meeting = await daily('/meeting-tokens', {
-    method: 'POST',
-    body: JSON.stringify({
-      properties: {
-        room_name: name,
-        user_name: me ? `${me.first_name} ${me.last_name}` : 'Participant',
-        user_id: uid.slice(0, 36),
-        is_owner: review.manager_id === uid,
-        exp,
-        lang: 'fr',
-      },
-    }),
+  const now = Math.floor(Date.now() / 1000);
+  const token = await livekitToken(apiKey, apiSecret, {
+    sub: uid,
+    name: me ? `${me.first_name} ${me.last_name}` : 'Participant',
+    nbf: now - 10,
+    exp: now + 4 * 3600,
+    video: {
+      room: `ct-${review.id}`,
+      roomJoin: true,
+      canPublish: true,
+      canSubscribe: true,
+      canPublishData: true,
+      roomAdmin: review.manager_id === uid,
+    },
   });
-  if (!meeting.ok) {
-    console.error('daily token', meeting.status, await meeting.text());
-    return json(502, { error: 'Accès à la visio impossible. Réessayez.' });
-  }
-  const { token: meetingToken } = (await meeting.json()) as { token: string };
 
   // Prévient l'autre participant (sans bloquer).
   if (pushReady() && body.notify !== false) {
@@ -109,5 +104,5 @@ Deno.serve(async (req) => {
     }).catch(() => 0);
   }
 
-  return json(200, { url, token: meetingToken });
+  return json(200, { url, token });
 });
