@@ -64,6 +64,7 @@ const routes: RouteObject[] = [
       { path: '/calendrier', element: page(() => import('@/features/absences/pages/AbsencesPage')) },
       { path: '/absences', element: <Navigate to="/calendrier" replace /> },
       { path: '/delegation', element: page(() => import('@/features/delegation/pages/DelegationPage')) },
+      { path: '/bienvenue', element: page(() => import('@/features/onboarding/pages/OnboardingPage')) },
       { path: '/mon-style', element: page(() => import('@/features/team/pages/DiscTestPage')) },
       { path: '/parcours', element: page(() => import('@/features/journey/pages/JourneyPage')) },
       { path: '/ethique', element: page(() => import('@/features/ethics/pages/EthicsPage')) },

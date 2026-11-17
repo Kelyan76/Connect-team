@@ -4,6 +4,7 @@ import { NotificationsMenu } from '@/features/alerts/components/NotificationsMen
 import { useAuth, useCurrentUser } from '@/features/auth/AuthProvider';
 import { AssistantButton } from '@/features/ai/components/AssistantButton';
 import { DemoBanner } from '@/features/auth/components/DemoBanner';
+import { OnboardingGate } from '@/features/onboarding/components/OnboardingGate';
 import { DailyPulseDialog } from '@/features/pulse/components/DailyPulseDialog';
 import { useIdle } from '@/shared/hooks/use-idle';
 import { AppShell } from './AppShell';
@@ -44,6 +45,7 @@ export function AuthenticatedLayout() {
       </Suspense>
       <QuickAddButton />
       <DailyPulseDialog />
+      <OnboardingGate />
     </AppShell>
   );
 }

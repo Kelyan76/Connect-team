@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { todayIso } from '@/shared/lib/dates';
 import { Button } from '@/shared/ui/button';
@@ -36,16 +37,19 @@ export function DailyPulseDialog() {
   const workday = day !== 0 && day !== 6;
   const done = (pulses.data ?? []).some((p) => p.collaborator_id === profile.id && p.day === today);
   const shown = useRef(false);
+  // Pas pendant le parcours de bienvenue : le pouls sera proposé juste après.
+  const onboarding = useLocation().pathname === '/bienvenue';
 
   useEffect(() => {
-    if (isManager || !workday || !pulses.data || done || shown.current || readSeen(k)) return;
+    if (isManager || onboarding || !workday || !pulses.data || done || shown.current || readSeen(k))
+      return;
     shown.current = true;
     const t = window.setTimeout(() => {
       setOpen(true);
       markSeen(k);
     }, 700);
     return () => window.clearTimeout(t);
-  }, [isManager, workday, pulses.data, done, k]);
+  }, [isManager, onboarding, workday, pulses.data, done, k]);
 
   // Pouls enregistré : on laisse voir la série une seconde, puis on referme.
   useEffect(() => {

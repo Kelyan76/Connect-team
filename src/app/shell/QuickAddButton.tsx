@@ -22,7 +22,7 @@ export function QuickAddButton() {
   const { pathname } = useLocation();
   const actions = useQuickActions();
   const [noting, setNoting] = useState(false);
-  if (pathname === '/') return null;
+  if (pathname === '/' || pathname === '/bienvenue') return null;
 
   return (
     <>
