@@ -94,7 +94,7 @@ export function Sidebar({ role, collapsed, onToggle, teamName, badges = {} }: Si
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-3">
+      <nav className="sidebar-scroll flex-1 overflow-y-auto px-3 py-3">
         {/* Toutes les pages visibles d'un coup d'œil, classées par section (pas de sous-menu à chercher). */}
         <div className="flex flex-col gap-4">
           {sections.map((s) => (
