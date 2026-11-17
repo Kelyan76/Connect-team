@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { NotificationsMenu } from '@/features/alerts/components/NotificationsMenu';
 import { useAuth, useCurrentUser } from '@/features/auth/AuthProvider';
 import { DemoBanner } from '@/features/auth/components/DemoBanner';
+import { DailyPulseDialog } from '@/features/pulse/components/DailyPulseDialog';
 import { useIdle } from '@/shared/hooks/use-idle';
 import { AppShell } from './AppShell';
 import { PageSkeleton } from './PageSkeleton';
@@ -18,7 +19,10 @@ export function AuthenticatedLayout() {
   const { pathname } = useLocation();
 
   // Déconnexion automatique après 30 minutes d'inactivité.
-  useIdle(IDLE_LIMIT, () => void signOut('Vous avez été déconnecté après 30 minutes d’inactivité.'));
+  useIdle(
+    IDLE_LIMIT,
+    () => void signOut('Vous avez été déconnecté après 30 minutes d’inactivité.'),
+  );
 
   return (
     <AppShell
@@ -37,6 +41,7 @@ export function AuthenticatedLayout() {
         </div>
       </Suspense>
       <QuickAddButton />
+      <DailyPulseDialog />
     </AppShell>
   );
 }
