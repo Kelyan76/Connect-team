@@ -1,12 +1,13 @@
-import { FileDown, Mic } from 'lucide-react';
+import { FileDown, Mic, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { downloadReviewReport } from '@/features/reports/download';
 import { useTeamMembers } from '@/features/team/queries';
 import { formatDate, formatTime, fullName } from '@/shared/lib/format';
 import { StatusDot } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
+import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { EmptyState, ErrorState, Skeleton } from '@/shared/ui/feedback';
 import { Page, PageHeader } from '@/shared/ui/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
@@ -14,7 +15,7 @@ import { reviewQuestions } from '../api';
 import { ActionPlan } from '../components/ActionPlan';
 import { AnswerForm } from '../components/AnswerForm';
 import { CollaboratorTopics } from '../components/CollaboratorTopics';
-import { KeyliaPrep } from '../components/KeyliaPrep';
+import { ManagerPrep } from '../components/ManagerPrep';
 import { QuickPrep } from '../components/QuickPrep';
 import { OneToOneGuide } from '../components/OneToOneGuide';
 import { EchoRecorder } from '../components/EchoRecorder';
@@ -23,8 +24,15 @@ import { MinutesPanel } from '../components/MinutesPanel';
 import { PrepAssistant } from '../components/PrepAssistant';
 import { SideBySide } from '../components/SideBySide';
 import { Signatures } from '../components/Signatures';
-import { canEditOwnAnswers, canSeeOtherSide, KIND_LABEL, PREP_META, prepStatus, reviewStage } from '../lib/review-rules';
-import { useAnswers, useReview } from '../queries';
+import {
+  canEditOwnAnswers,
+  canSeeOtherSide,
+  KIND_LABEL,
+  PREP_META,
+  prepStatus,
+  reviewStage,
+} from '../lib/review-rules';
+import { useAnswers, useDeleteReview, useReview } from '../queries';
 
 export default function ReviewPage() {
   const { id = '' } = useParams();
@@ -34,6 +42,9 @@ export default function ReviewPage() {
   const team = useTeamMembers();
   const [exporting, setExporting] = useState(false);
   const [tab, setTab] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const remove = useDeleteReview();
+  const navigate = useNavigate();
 
   if (review.error) {
     return (
@@ -56,16 +67,28 @@ export default function ReviewPage() {
 
   const r = review.data;
   const viewer = isManager ? 'manager' : 'collaborateur';
-  const person = team.byId.get(r.collaborator_id) ?? (r.collaborator_id === profile.id ? profile : undefined);
+  const person =
+    team.byId.get(r.collaborator_id) ?? (r.collaborator_id === profile.id ? profile : undefined);
   const questions = reviewQuestions(r);
   const stage = reviewStage(r);
   const prep = PREP_META[prepStatus(r)];
   const sideBySide = canSeeOtherSide(viewer, r);
-  const defaultTab = stage === 'preparation' && !sideBySide ? 'preparation' : stage === 'preparation' ? 'cote-a-cote' : 'compte-rendu';
+  const defaultTab =
+    stage === 'preparation' && !sideBySide
+      ? 'preparation'
+      : stage === 'preparation'
+        ? 'cote-a-cote'
+        : 'compte-rendu';
   const canRecord = isManager && r.kind === 'one_to_one' && !r.manager_signed_at;
+  const currentTab = tab ?? defaultTab;
+  // Manager en préparation : tout est dans les 3 étapes, pas de colonne à droite.
+  const showAside = !(isManager && stage === 'preparation' && currentTab === 'preparation');
   const openEcho = () => {
     setTab('compte-rendu');
-    window.setTimeout(() => document.getElementById('echo')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    window.setTimeout(
+      () => document.getElementById('echo')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      50,
+    );
   };
 
   const exportPdf = async () => {
@@ -80,7 +103,10 @@ export default function ReviewPage() {
   if (questions.length === 0 && stage === 'preparation') {
     return (
       <Page>
-        <EmptyState title="Trame vide" description="Cet entretien n’a pas de questions. Complétez la trame puis replanifiez-le." />
+        <EmptyState
+          title="Trame vide"
+          description="Cet entretien n’a pas de questions. Complétez la trame puis replanifiez-le."
+        />
       </Page>
     );
   }
@@ -104,7 +130,7 @@ export default function ReviewPage() {
           </div>
         }
         actions={
-          canRecord || stage !== 'preparation' ? (
+          isManager || stage !== 'preparation' ? (
             <div className="flex flex-wrap gap-2">
               {canRecord && (
                 <Button variant="primary" onClick={openEcho}>
@@ -118,23 +144,60 @@ export default function ReviewPage() {
                   {exporting ? 'Génération…' : 'Export PDF'}
                 </Button>
               )}
+              {isManager && (
+                <Button
+                  variant="ghost"
+                  className="text-danger hover:text-danger"
+                  onClick={() => setDeleting(true)}
+                >
+                  <Trash2 aria-hidden />
+                  Supprimer
+                </Button>
+              )}
             </div>
           ) : undefined
         }
       />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <Tabs value={tab ?? defaultTab} onValueChange={setTab} className="min-w-0">
+      <div
+        className={
+          showAside ? 'grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]' : 'flex flex-col gap-6'
+        }
+      >
+        <Tabs value={currentTab} onValueChange={setTab} className="min-w-0">
           <TabsList>
-            {stage === 'preparation' && <TabsTrigger value="preparation">Ma préparation</TabsTrigger>}
+            {stage === 'preparation' && (
+              <TabsTrigger value="preparation">
+                {isManager ? 'Préparer' : 'Ma préparation'}
+              </TabsTrigger>
+            )}
             <TabsTrigger value="cote-a-cote">Vue côte à côte</TabsTrigger>
             <TabsTrigger value="compte-rendu">Compte-rendu</TabsTrigger>
           </TabsList>
           {stage === 'preparation' && (
             <TabsContent value="preparation" className="flex flex-col gap-6">
               {!isManager && r.kind === 'one_to_one' && (
-                <QuickPrep review={r} answers={answers.data} managerName={team.byId.get(r.manager_id)?.first_name ?? 'votre manager'} />
+                <QuickPrep
+                  review={r}
+                  answers={answers.data}
+                  managerName={team.byId.get(r.manager_id)?.first_name ?? 'votre manager'}
+                />
               )}
-              <AnswerForm review={r} questions={questions} answers={answers.data} author={viewer} editable={canEditOwnAnswers(viewer, r)} />
+              {isManager ? (
+                <ManagerPrep
+                  review={r}
+                  questions={questions}
+                  answers={answers.data}
+                  firstName={person?.first_name ?? 'le collaborateur'}
+                />
+              ) : (
+                <AnswerForm
+                  review={r}
+                  questions={questions}
+                  answers={answers.data}
+                  author={viewer}
+                  editable={canEditOwnAnswers(viewer, r)}
+                />
+              )}
             </TabsContent>
           )}
           <TabsContent value="cote-a-cote">
@@ -162,22 +225,43 @@ export default function ReviewPage() {
             <Signatures review={r} viewer={viewer} />
           </TabsContent>
         </Tabs>
-        <aside className="flex min-w-0 flex-col gap-6">
-          {isManager ? (
-            <>
-              {r.kind === 'one_to_one' && stage === 'preparation' && (
-                <>
-                  <CollaboratorTopics review={r} answers={answers.data} firstName={person?.first_name ?? 'Le collaborateur'} />
-                  <KeyliaPrep review={r} />
-                </>
-              )}
-              <PrepAssistant review={r} />
-            </>
-          ) : (
-            <ActionPlan review={r} isManager={false} previousOnly />
-          )}
-        </aside>
+        {showAside && (
+          <aside className="flex min-w-0 flex-col gap-6">
+            {isManager ? (
+              <>
+                {r.kind === 'one_to_one' && stage === 'preparation' && (
+                  <CollaboratorTopics
+                    review={r}
+                    answers={answers.data}
+                    firstName={person?.first_name ?? 'Le collaborateur'}
+                  />
+                )}
+                <PrepAssistant review={r} />
+              </>
+            ) : (
+              <ActionPlan review={r} isManager={false} previousOnly />
+            )}
+          </aside>
+        )}
       </div>
+      {isManager && (
+        <ConfirmDialog
+          open={deleting}
+          onOpenChange={setDeleting}
+          title="Supprimer ce 1 à 1 ?"
+          description={`L’entretien${person ? ` avec ${person.first_name}` : ''}, ses réponses, sa préparation et son plan d’action seront définitivement supprimés.`}
+          confirmLabel="Supprimer"
+          pending={remove.isPending}
+          onConfirm={() =>
+            remove.mutate(r.id, {
+              onSuccess: () => {
+                setDeleting(false);
+                navigate('/entretiens', { replace: true });
+              },
+            })
+          }
+        />
+      )}
     </Page>
   );
 }

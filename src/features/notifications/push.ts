@@ -103,6 +103,14 @@ export function notifyReviewRequest(requestId: string): void {
     .catch(() => undefined);
 }
 
+/** Parcours 1 à 1 : planification, décision sur une demande, préparation, signature (sans bloquer). */
+export function notifyReviewEvent(
+  type: 'review_scheduled' | 'review_request_decided' | 'review_prepared' | 'review_signed',
+  ids: { review_id?: string; request_id?: string },
+): void {
+  void supabase.functions.invoke('push-notify', { body: { type, ...ids } }).catch(() => undefined);
+}
+
 /** Congés : prévient le manager d'une demande, ou le collaborateur de la décision (sans bloquer). */
 export function notifyAbsence(
   type: 'absence_request' | 'absence_decision',

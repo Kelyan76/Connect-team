@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { canEditOwnAnswers, canSeeOtherSide, hasGap, nextPlannedReview, nextRegulatoryDue, prepStatus, reviewStage, type ReviewLike } from './review-rules';
+import {
+  canEditOwnAnswers,
+  canSeeOtherSide,
+  hasGap,
+  nextPlannedReview,
+  nextRegulatoryDue,
+  prepStatus,
+  reviewStage,
+  type ReviewLike,
+} from './review-rules';
 
 const base: ReviewLike = {
   kind: 'one_to_one',
@@ -17,7 +26,9 @@ describe('statut de préparation', () => {
     expect(prepStatus(base)).toBe('a_preparer');
     expect(prepStatus({ ...base, collaborator_prepared_at: T })).toBe('prepare_collaborateur');
     expect(prepStatus({ ...base, manager_prepared_at: T })).toBe('prepare_manager');
-    expect(prepStatus({ ...base, collaborator_prepared_at: T, manager_prepared_at: T })).toBe('pret');
+    expect(prepStatus({ ...base, collaborator_prepared_at: T, manager_prepared_at: T })).toBe(
+      'pret',
+    );
   });
 });
 
@@ -29,12 +40,22 @@ describe('visibilité croisée des préparations', () => {
   });
   it('le collaborateur voit le manager seulement quand les deux sont prêts', () => {
     expect(canSeeOtherSide('collaborateur', { ...base, collaborator_prepared_at: T })).toBe(false);
-    expect(canSeeOtherSide('collaborateur', { ...base, collaborator_prepared_at: T, manager_prepared_at: T })).toBe(true);
+    expect(
+      canSeeOtherSide('collaborateur', {
+        ...base,
+        collaborator_prepared_at: T,
+        manager_prepared_at: T,
+      }),
+    ).toBe(true);
   });
   it('le collaborateur ne modifie plus ses réponses après validation', () => {
     expect(canEditOwnAnswers('collaborateur', base)).toBe(true);
-    expect(canEditOwnAnswers('collaborateur', { ...base, collaborator_prepared_at: T })).toBe(false);
-    expect(canEditOwnAnswers('manager', { ...base, status: 'termine', manager_signed_at: T })).toBe(false);
+    expect(canEditOwnAnswers('collaborateur', { ...base, collaborator_prepared_at: T })).toBe(
+      false,
+    );
+    expect(canEditOwnAnswers('manager', { ...base, status: 'termine', manager_signed_at: T })).toBe(
+      false,
+    );
   });
 });
 
@@ -42,7 +63,9 @@ describe('cycle de vie et échéances', () => {
   it('distingue préparation, signature et clôture', () => {
     expect(reviewStage(base)).toBe('preparation');
     expect(reviewStage({ ...base, status: 'termine', manager_signed_at: T })).toBe('a_signer');
-    expect(reviewStage({ ...base, status: 'termine', manager_signed_at: T, collaborator_signed_at: T })).toBe('signe');
+    expect(
+      reviewStage({ ...base, status: 'termine', manager_signed_at: T, collaborator_signed_at: T }),
+    ).toBe('signe');
   });
   it('calcule l’échéance réglementaire', () => {
     expect(nextRegulatoryDue('annuel', '2025-11-20T09:00:00Z', null)).toBe('2026-11-20');
@@ -60,8 +83,16 @@ describe('cycle de vie et échéances', () => {
 describe('prochain entretien planifié', () => {
   const r = (status: ReviewLike['status'], scheduled_at: string) => ({ status, scheduled_at });
   it('ignore le passé, les annulés et les terminés ; prend le plus proche', () => {
-    const list = [r('planifie', '2026-11-10T10:00:00Z'), r('annule', '2026-11-18T10:00:00Z'), r('planifie', '2026-11-24T09:00:00Z'), r('planifie', '2026-11-17T15:00:00Z'), r('termine', '2026-11-17T08:00:00Z')];
+    const list = [
+      r('planifie', '2026-11-10T10:00:00Z'),
+      r('annule', '2026-11-18T10:00:00Z'),
+      r('planifie', '2026-11-24T09:00:00Z'),
+      r('planifie', '2026-11-17T15:00:00Z'),
+      r('termine', '2026-11-17T08:00:00Z'),
+    ];
     expect(nextPlannedReview(list, '2026-11-17')?.scheduled_at).toBe('2026-11-17T15:00:00Z');
-    expect(nextPlannedReview([r('planifie', '2026-11-10T10:00:00Z')], '2026-11-17')).toBeUndefined();
+    expect(
+      nextPlannedReview([r('planifie', '2026-11-10T10:00:00Z')], '2026-11-17'),
+    ).toBeUndefined();
   });
 });

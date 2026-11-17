@@ -306,6 +306,31 @@ describe('écritures limitées du collaborateur', () => {
   });
 });
 
+describe('suppression d’un 1 à 1', () => {
+  it('le collaborateur ne peut pas supprimer, le manager oui (réponses et actions supprimées avec)', async () => {
+    const id = await asUser(
+      db,
+      NADIA,
+      async (tx) =>
+        (
+          await tx.query<{ id: string }>(
+            'select id from public.reviews where collaborator_id = $1 limit 1',
+            [NADIA],
+          )
+        ).rows[0].id,
+    );
+    const byCollab = await asUser(db, NADIA, (tx) =>
+      tx.query('delete from public.reviews where id = $1', [id]).then((r) => r.affectedRows),
+    );
+    expect(byCollab).toBe(0);
+    const left = await asUser(db, CLAIRE, async (tx) => {
+      await tx.query('delete from public.reviews where id = $1', [id]);
+      return count(tx, 'select 1 from public.review_answers where review_id = $1', [id]);
+    });
+    expect(left).toBe(0);
+  });
+});
+
 describe('résumé hebdomadaire de l’équipe (IA)', () => {
   it('réservé au manager : il l’écrit et le relit, le collaborateur ne le voit pas', async () => {
     const insertSql =

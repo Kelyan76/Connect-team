@@ -2,6 +2,7 @@ import { Bell } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAbsenceToasts } from '@/features/absences/use-absence-notices';
+import { useReviewToasts } from '@/features/reviews/use-review-notices';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { useReviewRequests } from '@/features/reviews/queries';
 import { useTeamMembers } from '@/features/team/queries';
@@ -51,6 +52,7 @@ export function NotificationsMenu() {
   const onNew = useRef(() => setRing((n) => n + 1)).current;
   useNewRequestNotifier(isManager, onNew);
   useAbsenceToasts(onNew);
+  useReviewToasts(onNew);
 
   return (
     <Popover>

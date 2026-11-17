@@ -32,7 +32,13 @@ export function MinutesPanel({ review, isManager }: { review: Review; isManager:
   return (
     <Panel
       title="Notes et synthèse"
-      description={locked ? undefined : savedAt ? `Enregistré à ${formatTime(savedAt)}` : 'Enregistrement automatique à la sortie du champ'}
+      description={
+        locked
+          ? undefined
+          : savedAt
+            ? `Enregistré à ${formatTime(savedAt)}`
+            : 'Enregistrement automatique à la sortie du champ'
+      }
       actions={
         isManager && stage === 'preparation' ? (
           <Button size="sm" variant="primary" onClick={() => setConfirm(true)}>
@@ -54,7 +60,10 @@ export function MinutesPanel({ review, isManager }: { review: Review; isManager:
             placeholder={locked ? 'Aucune note.' : 'Points abordés, décisions, engagements…'}
           />
         </Field>
-        <Field label="Synthèse partagée" hint="Reprise dans le compte-rendu signé et dans l’export PDF.">
+        <Field
+          label="Synthèse partagée"
+          hint="Reprise dans le compte-rendu signé et dans l’export PDF."
+        >
           <Textarea
             rows={3}
             maxLength={8000}
@@ -75,7 +84,12 @@ export function MinutesPanel({ review, isManager }: { review: Review; isManager:
         pending={close.isPending}
         onConfirm={() =>
           close.mutate(
-            { status: 'termine', completed_at: new Date().toISOString(), live_notes: notes, summary },
+            {
+              status: 'termine',
+              completed_at: new Date().toISOString(),
+              live_notes: notes,
+              summary,
+            },
             { onSettled: () => setConfirm(false) },
           )
         }

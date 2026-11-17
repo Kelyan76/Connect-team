@@ -21,8 +21,11 @@ export function AnswerForm({ review, questions, answers, author, editable }: Pro
   const save = useSaveAnswer(review.id, author);
   const submit = useSubmitPreparation(review.id);
   const [confirm, setConfirm] = useState(false);
-  const mine = new Map(answers.filter((a) => a.author === author).map((a) => [a.question_key, a.value as AnswerValue]));
-  const preparedAt = author === 'manager' ? review.manager_prepared_at : review.collaborator_prepared_at;
+  const mine = new Map(
+    answers.filter((a) => a.author === author).map((a) => [a.question_key, a.value as AnswerValue]),
+  );
+  const preparedAt =
+    author === 'manager' ? review.manager_prepared_at : review.collaborator_prepared_at;
   const answered = questions.filter((q) => {
     const v = mine.get(q.key);
     return v !== undefined && v !== null && v !== '';
@@ -34,7 +37,9 @@ export function AnswerForm({ review, questions, answers, author, editable }: Pro
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3">
         <div className="flex flex-col">
           <span className="text-base font-medium">
-            {preparedAt ? 'Préparation validée' : `${answered} réponse${answered > 1 ? 's' : ''} sur ${questions.length}`}
+            {preparedAt
+              ? 'Préparation validée'
+              : `${answered} réponse${answered > 1 ? 's' : ''} sur ${questions.length}`}
           </span>
           <span className="text-xs text-fg-subtle">
             {preparedAt
@@ -54,7 +59,9 @@ export function AnswerForm({ review, questions, answers, author, editable }: Pro
 
       {sections.map((section) => (
         <section key={section} className="rounded-lg border border-line bg-surface">
-          {section && <h2 className="border-b border-line px-4 py-3 text-base font-semibold">{section}</h2>}
+          {section && (
+            <h2 className="border-b border-line px-4 py-3 text-base font-semibold">{section}</h2>
+          )}
           <div className="flex flex-col divide-y divide-line">
             {questions
               .filter((q) => q.section === section)

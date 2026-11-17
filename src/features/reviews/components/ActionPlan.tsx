@@ -13,7 +13,15 @@ import type { Review, ReviewAction } from '../api';
 import { useAddAction, useReviewActions, useReviews, useSetActionStatus } from '../queries';
 
 /** Plan d'action de l'entretien, et suivi automatique des actions des entretiens précédents. */
-export function ActionPlan({ review, isManager, previousOnly = false }: { review: Review; isManager: boolean; previousOnly?: boolean }) {
+export function ActionPlan({
+  review,
+  isManager,
+  previousOnly = false,
+}: {
+  review: Review;
+  isManager: boolean;
+  previousOnly?: boolean;
+}) {
   const { profile } = useCurrentUser();
   const actions = useReviewActions();
   const reviews = useReviews();
@@ -25,10 +33,16 @@ export function ActionPlan({ review, isManager, previousOnly = false }: { review
   const [due, setDue] = useState('');
 
   const earlier = new Set(
-    (reviews.data ?? []).filter((r) => r.collaborator_id === review.collaborator_id && r.scheduled_at < review.scheduled_at).map((r) => r.id),
+    (reviews.data ?? [])
+      .filter(
+        (r) => r.collaborator_id === review.collaborator_id && r.scheduled_at < review.scheduled_at,
+      )
+      .map((r) => r.id),
   );
   const current = (actions.data ?? []).filter((a) => a.review_id === review.id);
-  const carried = (actions.data ?? []).filter((a) => earlier.has(a.review_id) && a.status !== 'fait');
+  const carried = (actions.data ?? []).filter(
+    (a) => earlier.has(a.review_id) && a.status !== 'fait',
+  );
   const name = (id: string) => {
     const p = team.byId.get(id);
     return p ? fullName(p) : id === profile.id ? fullName(profile) : '—';
@@ -43,7 +57,10 @@ export function ActionPlan({ review, isManager, previousOnly = false }: { review
         <span className="text-xs text-fg-subtle">
           {name(a.owner_id)}
           {a.due_date && (
-            <span className={a.status !== 'fait' && a.due_date < today ? 'text-danger' : undefined}> · échéance {formatDate(a.due_date)}</span>
+            <span className={a.status !== 'fait' && a.due_date < today ? 'text-danger' : undefined}>
+              {' '}
+              · échéance {formatDate(a.due_date)}
+            </span>
           )}
         </span>
       </div>
@@ -64,9 +81,16 @@ export function ActionPlan({ review, isManager, previousOnly = false }: { review
   );
 
   const carriedPanel = (
-    <Panel title="Engagements du dernier 1 à 1" description="On commence par eux : objectif fixé, résultat obtenu, écart, ajustement" flush>
+    <Panel
+      title="Engagements du dernier 1 à 1"
+      description="On commence par eux : objectif fixé, résultat obtenu, écart, ajustement"
+      flush
+    >
       {carried.length === 0 ? (
-        <EmptyState title="Rien en suspens" description="Toutes les actions des entretiens précédents sont terminées." />
+        <EmptyState
+          title="Rien en suspens"
+          description="Toutes les actions des entretiens précédents sont terminées."
+        />
       ) : (
         <ul className="divide-y divide-line">{carried.map(row)}</ul>
       )}
@@ -76,9 +100,16 @@ export function ActionPlan({ review, isManager, previousOnly = false }: { review
 
   return (
     <>
-      <Panel title="Engagements réciproques" description="Ce que chacun s’engage à faire : le collaborateur et vous" flush>
+      <Panel
+        title="Engagements réciproques"
+        description="Ce que chacun s’engage à faire : le collaborateur et vous"
+        flush
+      >
         {current.length === 0 && !isManager ? (
-          <EmptyState title="Aucun engagement" description="Un 1 à 1 ne se termine pas par une conversation, mais par un engagement." />
+          <EmptyState
+            title="Aucun engagement"
+            description="Un 1 à 1 ne se termine pas par une conversation, mais par un engagement."
+          />
         ) : (
           <ul className="divide-y divide-line">{current.map(row)}</ul>
         )}
@@ -89,17 +120,45 @@ export function ActionPlan({ review, isManager, previousOnly = false }: { review
               e.preventDefault();
               if (title.trim().length < 3) return;
               add.mutate(
-                { review_id: review.id, title: title.trim(), owner_id: owner, due_date: due || null },
-                { onSuccess: () => { setTitle(''); setDue(''); } },
+                {
+                  review_id: review.id,
+                  title: title.trim(),
+                  owner_id: owner,
+                  due_date: due || null,
+                },
+                {
+                  onSuccess: () => {
+                    setTitle('');
+                    setDue('');
+                  },
+                },
               );
             }}
           >
-            <Input aria-label="Nouvelle action" className="min-w-60 flex-1" placeholder="Nouvelle action" value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)} />
-            <NativeSelect aria-label="Responsable" className="w-48" value={owner} onChange={(e) => setOwner(e.target.value)}>
+            <Input
+              aria-label="Nouvelle action"
+              className="min-w-60 flex-1"
+              placeholder="Nouvelle action"
+              value={title}
+              maxLength={200}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <NativeSelect
+              aria-label="Responsable"
+              className="w-48"
+              value={owner}
+              onChange={(e) => setOwner(e.target.value)}
+            >
               <option value={review.collaborator_id}>{name(review.collaborator_id)}</option>
               <option value={profile.id}>{fullName(profile)}</option>
             </NativeSelect>
-            <Input aria-label="Échéance" type="date" className="w-40" value={due} onChange={(e) => setDue(e.target.value)} />
+            <Input
+              aria-label="Échéance"
+              type="date"
+              className="w-40"
+              value={due}
+              onChange={(e) => setDue(e.target.value)}
+            />
             <Button type="submit" disabled={title.trim().length < 3 || add.isPending}>
               <Plus aria-hidden />
               Ajouter

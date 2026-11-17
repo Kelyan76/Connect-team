@@ -12,7 +12,13 @@ import { Dialog, DialogContent } from '@/shared/ui/dialog';
 import { Field } from '@/shared/ui/field';
 import { Input, NativeSelect } from '@/shared/ui/input';
 import { KIND_LABEL, type ReviewKind } from '../lib/review-rules';
-import { useDecideRequest, useScheduleReview, useTemplateQuestions, useTemplates } from '../queries';
+import {
+  useDecideRequest,
+  useScheduleReview,
+  useTemplateQuestions,
+  useTemplates,
+} from '../queries';
+import { notifyReviewEvent } from '@/features/notifications/push';
 
 const schema = z.object({
   collaborator_id: z.string().min(1, 'Choisissez un collaborateur.'),
@@ -32,7 +38,13 @@ interface Props {
   requestId?: string;
 }
 
-export function ScheduleDialog({ open, onOpenChange, defaultCollaborator, defaultDate, requestId }: Props) {
+export function ScheduleDialog({
+  open,
+  onOpenChange,
+  defaultCollaborator,
+  defaultDate,
+  requestId,
+}: Props) {
   const navigate = useNavigate();
   const { profile } = useCurrentUser();
   const team = useTeamMembers();
@@ -42,19 +54,32 @@ export function ScheduleDialog({ open, onOpenChange, defaultCollaborator, defaul
   const decide = useDecideRequest();
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { collaborator_id: '', kind: 'one_to_one', date: isoAddDays(todayIso(), 7), time: '10:00', duration_minutes: 45, location: `Bureau de ${profile.first_name}` },
+    defaultValues: {
+      collaborator_id: '',
+      kind: 'one_to_one',
+      date: isoAddDays(todayIso(), 7),
+      time: '10:00',
+      duration_minutes: 45,
+      location: `Bureau de ${profile.first_name}`,
+    },
   });
 
   useEffect(() => {
     if (open) {
-      form.reset({ ...form.getValues(), collaborator_id: defaultCollaborator ?? '', date: defaultDate ?? isoAddDays(todayIso(), 7) });
+      form.reset({
+        ...form.getValues(),
+        collaborator_id: defaultCollaborator ?? '',
+        date: defaultDate ?? isoAddDays(todayIso(), 7),
+      });
     }
     // Réinitialisation à l'ouverture uniquement.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, defaultCollaborator, defaultDate]);
 
   const kind = form.watch('kind');
-  const template = templates.data?.find((t) => t.kind === kind && t.is_default) ?? templates.data?.find((t) => t.kind === kind);
+  const template =
+    templates.data?.find((t) => t.kind === kind && t.is_default) ??
+    templates.data?.find((t) => t.kind === kind);
   const templateQuestions = (questions.data ?? []).filter((q) => q.template_id === template?.id);
 
   const onSubmit = form.handleSubmit(async (v) => {
@@ -70,7 +95,9 @@ export function ScheduleDialog({ open, onOpenChange, defaultCollaborator, defaul
       },
       questions: templateQuestions,
     });
+    // Demande acceptée : le collaborateur est prévenu par la décision ; sinon, par la planification.
     if (requestId) await decide.mutateAsync({ id: requestId, status: 'validee', reviewId: id });
+    else notifyReviewEvent('review_scheduled', { review_id: id });
     onOpenChange(false);
     navigate(`/entretiens/${id}`);
   });
@@ -84,7 +111,12 @@ export function ScheduleDialog({ open, onOpenChange, defaultCollaborator, defaul
         footer={
           <>
             <Button onClick={() => onOpenChange(false)}>Annuler</Button>
-            <Button type="submit" form="schedule-form" variant="primary" disabled={schedule.isPending}>
+            <Button
+              type="submit"
+              form="schedule-form"
+              variant="primary"
+              disabled={schedule.isPending}
+            >
               Planifier
             </Button>
           </>
@@ -101,7 +133,14 @@ export function ScheduleDialog({ open, onOpenChange, defaultCollaborator, defaul
               ))}
             </NativeSelect>
           </Field>
-          <Field label="Type d’entretien" hint={template ? `Trame : ${template.name} (${templateQuestions.length} questions)` : 'Aucune trame pour ce type.'}>
+          <Field
+            label="Type d’entretien"
+            hint={
+              template
+                ? `Trame : ${template.name} (${templateQuestions.length} questions)`
+                : 'Aucune trame pour ce type.'
+            }
+          >
             <NativeSelect {...form.register('kind')}>
               {(Object.keys(KIND_LABEL) as ReviewKind[]).map((k) => (
                 <option key={k} value={k}>
@@ -118,7 +157,13 @@ export function ScheduleDialog({ open, onOpenChange, defaultCollaborator, defaul
               <Input type="time" step={900} {...form.register('time')} />
             </Field>
             <Field label="Durée (min)" error={e.duration_minutes?.message}>
-              <Input type="number" min={15} max={480} step={15} {...form.register('duration_minutes')} />
+              <Input
+                type="number"
+                min={15}
+                max={480}
+                step={15}
+                {...form.register('duration_minutes')}
+              />
             </Field>
           </div>
           <Field label="Lieu" optional>

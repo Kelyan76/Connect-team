@@ -8,7 +8,13 @@ import { Input, Textarea } from '@/shared/ui/input';
 import { useCreateRequest } from '../queries';
 
 /** Demande de 1 à 1 par le collaborateur. */
-export function RequestDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+export function RequestDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
   const { profile, team } = useCurrentUser();
   const create = useCreateRequest();
   const [message, setMessage] = useState('');
@@ -27,7 +33,12 @@ export function RequestDialog({ open, onOpenChange }: { open: boolean; onOpenCha
               disabled={create.isPending}
               onClick={() =>
                 create.mutate(
-                  { collaborator_id: profile.id, team_id: team.id, message: message.trim(), preferred_date: date || null },
+                  {
+                    collaborator_id: profile.id,
+                    team_id: team.id,
+                    message: message.trim(),
+                    preferred_date: date || null,
+                  },
                   {
                     onSuccess: () => {
                       setMessage('');
@@ -44,10 +55,20 @@ export function RequestDialog({ open, onOpenChange }: { open: boolean; onOpenCha
       >
         <div className="flex flex-col gap-4">
           <Field label="Sujet à aborder" optional hint="1 000 caractères maximum.">
-            <Textarea rows={4} maxLength={1000} value={message} onChange={(e) => setMessage(e.target.value)} />
+            <Textarea
+              rows={4}
+              maxLength={1000}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
           </Field>
           <Field label="Date souhaitée" optional>
-            <Input type="date" min={todayIso()} value={date} onChange={(e) => setDate(e.target.value)} />
+            <Input
+              type="date"
+              min={todayIso()}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
           </Field>
         </div>
       </DialogContent>

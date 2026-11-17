@@ -37,7 +37,11 @@ export function RequestsList({
       <div className="rounded-lg border border-line bg-surface shadow-sm">
         <EmptyState
           title="Aucune demande"
-          description={isManager ? 'Les demandes de 1 à 1 de l’équipe apparaîtront ici.' : 'Vous n’avez pas encore demandé de 1 à 1.'}
+          description={
+            isManager
+              ? 'Les demandes de 1 à 1 de l’équipe apparaîtront ici.'
+              : 'Vous n’avez pas encore demandé de 1 à 1.'
+          }
         />
       </div>
     );
@@ -49,11 +53,16 @@ export function RequestsList({
         const status = STATUS[r.status];
         const pending = r.status === 'en_attente';
         return (
-          <li key={r.id} className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-4 shadow-sm sm:p-5">
+          <li
+            key={r.id}
+            className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-4 shadow-sm sm:p-5"
+          >
             <div className="flex items-start gap-3">
               {isManager && person && <Avatar person={person} />}
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-base font-semibold">{isManager && person ? fullName(person) : 'Ma demande de 1 à 1'}</span>
+                <span className="truncate text-base font-semibold">
+                  {isManager && person ? fullName(person) : 'Ma demande de 1 à 1'}
+                </span>
                 <span className="flex items-center gap-1 text-sm text-fg-subtle">
                   <Clock className="size-3" aria-hidden />
                   Demandée {relativeDays(daysFromToday(r.created_at.slice(0, 10)))}
@@ -72,7 +81,8 @@ export function RequestsList({
             {r.preferred_date && (
               <span className="flex items-center gap-2 text-sm text-fg-muted">
                 <CalendarClock className="size-4 text-fg-subtle" aria-hidden />
-                Date souhaitée : <span className="font-medium text-fg">{formatDate(r.preferred_date)}</span>
+                Date souhaitée :{' '}
+                <span className="font-medium text-fg">{formatDate(r.preferred_date)}</span>
               </span>
             )}
 
@@ -83,14 +93,21 @@ export function RequestsList({
                   onClick={() =>
                     decide.mutate(
                       { id: r.id, status: 'refusee', reviewId: null },
-                      { onSuccess: () => toast.success(`Demande de ${person ? fullName(person) : ''} refusée`) },
+                      {
+                        onSuccess: () =>
+                          toast.success(`Demande de ${person ? fullName(person) : ''} refusée`),
+                      },
                     )
                   }
                 >
                   <X aria-hidden />
                   Refuser
                 </Button>
-                <Button className="flex-1 sm:flex-none" variant="primary" onClick={() => onAccept(r)}>
+                <Button
+                  className="flex-1 sm:flex-none"
+                  variant="primary"
+                  onClick={() => onAccept(r)}
+                >
                   <CalendarPlus aria-hidden />
                   Planifier
                 </Button>

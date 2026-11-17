@@ -6,7 +6,17 @@ import { canSeeOtherSide, hasGap, type AnswerValue } from '../lib/review-rules';
 import { formatAnswer } from '../lib/format-answer';
 
 /** Réponses du collaborateur et du manager en regard, écarts d'appréciation mis en évidence. */
-export function SideBySide({ review, questions, answers, viewer }: { review: Review; questions: Question[]; answers: Answer[]; viewer: 'manager' | 'collaborateur' }) {
+export function SideBySide({
+  review,
+  questions,
+  answers,
+  viewer,
+}: {
+  review: Review;
+  questions: Question[];
+  answers: Answer[];
+  viewer: 'manager' | 'collaborateur';
+}) {
   if (!canSeeOtherSide(viewer, review)) {
     return (
       <div className="rounded-lg border border-line bg-surface">
@@ -23,8 +33,11 @@ export function SideBySide({ review, questions, answers, viewer }: { review: Rev
     );
   }
   const get = (key: string, author: 'manager' | 'collaborateur') =>
-    answers.find((a) => a.question_key === key && a.author === author)?.value as AnswerValue | undefined;
-  const gaps = questions.filter((q) => hasGap(q.type, get(q.key, 'collaborateur'), get(q.key, 'manager'))).length;
+    answers.find((a) => a.question_key === key && a.author === author)?.value as
+      AnswerValue | undefined;
+  const gaps = questions.filter((q) =>
+    hasGap(q.type, get(q.key, 'collaborateur'), get(q.key, 'manager')),
+  ).length;
 
   return (
     <div className="flex flex-col gap-3">
@@ -45,7 +58,13 @@ export function SideBySide({ review, questions, answers, viewer }: { review: Rev
             const manager = get(q.key, 'manager');
             const gap = hasGap(q.type, collab, manager);
             return (
-              <li key={q.key} className={cn('flex flex-col gap-3 px-4 py-4', gap && 'border-l-2 border-warning pl-3')}>
+              <li
+                key={q.key}
+                className={cn(
+                  'flex flex-col gap-3 px-4 py-4',
+                  gap && 'border-l-2 border-warning pl-3',
+                )}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <span className="text-sm font-medium text-fg-muted">{q.label}</span>
                   {gap && <span className="shrink-0 text-xs font-medium text-warning">Écart</span>}

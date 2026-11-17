@@ -21,10 +21,29 @@ export interface ActionDraft {
 }
 
 const DAYS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
-const MONTHS = ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre'];
+const MONTHS = [
+  'janvier',
+  'fevrier',
+  'mars',
+  'avril',
+  'mai',
+  'juin',
+  'juillet',
+  'aout',
+  'septembre',
+  'octobre',
+  'novembre',
+  'decembre',
+];
 
 export const normalize = (s: string) =>
-  s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[’']/g, ' ').replace(/\s+/g, ' ').trim();
+  s
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[’']/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 const iso = (d: Date) => format(d, 'yyyy-MM-dd');
 
@@ -47,7 +66,9 @@ export function parseDue(text: string | null | undefined, today: Date = new Date
   }
   const numeric = t.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/);
   if (numeric) {
-    const year = numeric[3] ? Number(numeric[3].length === 2 ? `20${numeric[3]}` : numeric[3]) : base.getFullYear();
+    const year = numeric[3]
+      ? Number(numeric[3].length === 2 ? `20${numeric[3]}` : numeric[3])
+      : base.getFullYear();
     let d = new Date(year, Number(numeric[2]) - 1, Number(numeric[1]));
     if (!numeric[3] && d < base) d = new Date(year + 1, d.getMonth(), d.getDate());
     return isValid(d) ? iso(d) : '';
@@ -73,7 +94,8 @@ export function parseDue(text: string | null | undefined, today: Date = new Date
   if (/\bfin du mois\b|\bfin de mois\b/.test(t)) return iso(endOfMonth(base));
   if (/\bmois prochain\b/.test(t)) return iso(endOfMonth(addMonths(base, 1)));
   if (/\bsemaine prochaine\b/.test(t)) return iso(addDays(nextWeekday(base, 1), 4));
-  if (/\bfin de (la )?semaine\b/.test(t)) return iso(base.getDay() === 5 ? base : nextWeekday(base, 5));
+  if (/\bfin de (la )?semaine\b/.test(t))
+    return iso(base.getDay() === 5 ? base : nextWeekday(base, 5));
 
   const day = DAYS.findIndex((d) => new RegExp(`\\b${d}\\b`).test(t));
   if (day >= 0) return iso(nextWeekday(base, day));
@@ -81,7 +103,11 @@ export function parseDue(text: string | null | undefined, today: Date = new Date
 }
 
 /** Responsable déduit du nom prononcé : le manager s'il est nommé (« moi », son prénom), sinon le collaborateur. */
-export function guessOwner(owner: string | null | undefined, managerFirstName: string, collaboratorFirstName: string): ActionDraft['owner'] {
+export function guessOwner(
+  owner: string | null | undefined,
+  managerFirstName: string,
+  collaboratorFirstName: string,
+): ActionDraft['owner'] {
   const o = normalize(owner ?? '');
   if (!o) return 'collaborateur';
   if (o.includes(normalize(collaboratorFirstName))) return 'collaborateur';
@@ -90,7 +116,11 @@ export function guessOwner(owner: string | null | undefined, managerFirstName: s
 }
 
 /** Transforme la réponse d'Echo en brouillons d'actions éditables. */
-export function toDrafts(result: EchoResult, people: { manager: string; collaborator: string }, today: Date = new Date()): ActionDraft[] {
+export function toDrafts(
+  result: EchoResult,
+  people: { manager: string; collaborator: string },
+  today: Date = new Date(),
+): ActionDraft[] {
   return result.tasks
     .filter((t) => typeof t.title === 'string' && t.title.trim().length >= 3)
     .slice(0, 12)
@@ -112,7 +142,13 @@ export function readEchoResult(data: unknown): EchoResult | null {
         if (!t || typeof t !== 'object') return [];
         const x = t as Record<string, unknown>;
         if (typeof x.title !== 'string') return [];
-        return [{ title: x.title, owner: typeof x.owner === 'string' ? x.owner : null, due: typeof x.due === 'string' ? x.due : null }];
+        return [
+          {
+            title: x.title,
+            owner: typeof x.owner === 'string' ? x.owner : null,
+            due: typeof x.due === 'string' ? x.due : null,
+          },
+        ];
       })
     : [];
   return { summary: typeof d.summary === 'string' ? d.summary : '', tasks };
@@ -122,5 +158,10 @@ export function readEchoResult(data: unknown): EchoResult | null {
 export const summaryLines = (summary: string) =>
   summary
     .split('\n')
-    .map((l) => l.replace(/^\s*(#+|[-*•])\s*/, '').replace(/\*\*/g, '').trim())
+    .map((l) =>
+      l
+        .replace(/^\s*(#+|[-*•])\s*/, '')
+        .replace(/\*\*/g, '')
+        .trim(),
+    )
     .filter(Boolean);

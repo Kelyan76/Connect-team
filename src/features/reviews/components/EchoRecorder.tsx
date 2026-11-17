@@ -40,16 +40,22 @@ export function EchoRecorder({ review }: { review: Review }) {
   const chunks = useRef<Blob[]>([]);
   const timer = useRef<number | undefined>(undefined);
 
-  const supported = typeof window !== 'undefined' && 'MediaRecorder' in window && !!navigator.mediaDevices?.getUserMedia;
+  const supported =
+    typeof window !== 'undefined' &&
+    'MediaRecorder' in window &&
+    !!navigator.mediaDevices?.getUserMedia;
 
   const release = () => {
     window.clearInterval(timer.current);
     recorder.current?.stream.getTracks().forEach((t) => t.stop());
   };
-  useEffect(() => () => {
-    if (recorder.current?.state === 'recording') recorder.current.onstop = null;
-    release();
-  }, []);
+  useEffect(
+    () => () => {
+      if (recorder.current?.state === 'recording') recorder.current.onstop = null;
+      release();
+    },
+    [],
+  );
 
   const analyse = async (audio: Blob) => {
     setStage('processing');
@@ -69,7 +75,10 @@ export function EchoRecorder({ review }: { review: Review }) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = pickMime();
-      const rec = new MediaRecorder(stream, { ...(mimeType ? { mimeType } : {}), audioBitsPerSecond: 24000 });
+      const rec = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 24000,
+      });
       chunks.current = [];
       rec.ondataavailable = (e) => {
         if (e.data.size > 0) chunks.current.push(e.data);
@@ -123,14 +132,19 @@ export function EchoRecorder({ review }: { review: Review }) {
       description={`En fin d’entretien, dites à voix haute qui fait quoi et pour quand : Echo en tire les engagements.`}
     >
       {!supported ? (
-        <p className="text-sm text-fg-muted">L’enregistrement n’est pas disponible sur ce navigateur. Ajoutez les actions à la main ci-dessous.</p>
+        <p className="text-sm text-fg-muted">
+          L’enregistrement n’est pas disponible sur ce navigateur. Ajoutez les actions à la main
+          ci-dessous.
+        </p>
       ) : stage === 'results' ? (
         <EchoDrafts
           summary={summary}
           drafts={drafts}
           names={names}
           pending={addActions.isPending}
-          onChange={(key, patch) => setDrafts((list) => list.map((d) => (d.key === key ? { ...d, ...patch } : d)))}
+          onChange={(key, patch) =>
+            setDrafts((list) => list.map((d) => (d.key === key ? { ...d, ...patch } : d)))
+          }
           onAdd={add}
           onRestart={restart}
         />
@@ -152,18 +166,32 @@ export function EchoRecorder({ review }: { review: Review }) {
             <Square aria-hidden />
             Terminer
           </Button>
-          <span className="w-full text-xs text-fg-subtle">Arrêt automatique à {ECHO_MAX_SECONDS / 60} minutes.</span>
+          <span className="w-full text-xs text-fg-subtle">
+            Arrêt automatique à {ECHO_MAX_SECONDS / 60} minutes.
+          </span>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
           <label className="flex items-start gap-3 text-base">
-            <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-1" />
+            <Checkbox
+              checked={consent}
+              onCheckedChange={(v) => setConsent(v === true)}
+              className="mt-1"
+            />
             <span>
               {collaborator} est d’accord pour être enregistré(e).
-              <span className="block text-sm text-fg-muted">Ni l’audio ni la transcription ne sont conservés : seules les actions que vous validez sont enregistrées.</span>
+              <span className="block text-sm text-fg-muted">
+                Ni l’audio ni la transcription ne sont conservés : seules les actions que vous
+                validez sont enregistrées.
+              </span>
             </span>
           </label>
-          <Button variant="primary" className="self-start" disabled={!consent} onClick={() => void start()}>
+          <Button
+            variant="primary"
+            className="self-start"
+            disabled={!consent}
+            onClick={() => void start()}
+          >
             <Mic aria-hidden />
             Enregistrer avec Echo
           </Button>

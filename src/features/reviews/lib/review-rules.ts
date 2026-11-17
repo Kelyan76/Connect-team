@@ -29,7 +29,9 @@ export interface ReviewLike {
   manager_signed_at: string | null;
 }
 
-export function prepStatus(r: Pick<ReviewLike, 'collaborator_prepared_at' | 'manager_prepared_at'>): PrepStatus {
+export function prepStatus(
+  r: Pick<ReviewLike, 'collaborator_prepared_at' | 'manager_prepared_at'>,
+): PrepStatus {
   if (r.collaborator_prepared_at && r.manager_prepared_at) return 'pret';
   if (r.collaborator_prepared_at) return 'prepare_collaborateur';
   if (r.manager_prepared_at) return 'prepare_manager';
@@ -45,17 +47,27 @@ export function reviewStage(r: ReviewLike): Stage {
 }
 
 /** Prochain entretien planifié (aujourd'hui compris), le plus proche d'abord. */
-export function nextPlannedReview<T extends Pick<ReviewLike, 'status' | 'scheduled_at'>>(reviews: T[], todayIso: string): T | undefined {
+export function nextPlannedReview<T extends Pick<ReviewLike, 'status' | 'scheduled_at'>>(
+  reviews: T[],
+  todayIso: string,
+): T | undefined {
   return reviews
     .filter((r) => r.status === 'planifie' && r.scheduled_at.slice(0, 10) >= todayIso)
     .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at))[0];
 }
 
 /** Périodicité réglementaire : annuel tous les 12 mois, professionnel tous les 24 mois (art. L6315-1). */
-export const REGULATORY_MONTHS: Partial<Record<ReviewKind, number>> = { annuel: 12, professionnel: 24 };
+export const REGULATORY_MONTHS: Partial<Record<ReviewKind, number>> = {
+  annuel: 12,
+  professionnel: 24,
+};
 
 /** Prochaine échéance réglementaire d'un type d'entretien, à partir du dernier tenu (ou de l'embauche). */
-export function nextRegulatoryDue(kind: ReviewKind, lastHeld: string | null, hiredOn: string | null): string | null {
+export function nextRegulatoryDue(
+  kind: ReviewKind,
+  lastHeld: string | null,
+  hiredOn: string | null,
+): string | null {
   const months = REGULATORY_MONTHS[kind];
   const base = lastHeld ?? hiredOn;
   if (!months || !base) return null;
@@ -67,21 +79,29 @@ export function nextRegulatoryDue(kind: ReviewKind, lastHeld: string | null, hir
  * le manager ne voit la préparation du collaborateur qu'une fois celle-ci validée ;
  * le collaborateur voit celle du manager quand les deux sont validées.
  */
-export function canSeeOtherSide(viewer: 'manager' | 'collaborateur', r: Pick<ReviewLike, 'collaborator_prepared_at' | 'manager_prepared_at'>): boolean {
+export function canSeeOtherSide(
+  viewer: 'manager' | 'collaborateur',
+  r: Pick<ReviewLike, 'collaborator_prepared_at' | 'manager_prepared_at'>,
+): boolean {
   if (viewer === 'manager') return r.collaborator_prepared_at !== null;
   return r.collaborator_prepared_at !== null && r.manager_prepared_at !== null;
 }
 
 export function canEditOwnAnswers(viewer: 'manager' | 'collaborateur', r: ReviewLike): boolean {
   if (r.status === 'annule') return false;
-  if (viewer === 'collaborateur') return r.status === 'planifie' && r.collaborator_prepared_at === null;
+  if (viewer === 'collaborateur')
+    return r.status === 'planifie' && r.collaborator_prepared_at === null;
   return r.manager_signed_at === null;
 }
 
 export type AnswerValue = string | number | boolean | null;
 
 /** Écart d'appréciation : échelles distantes d'au moins 2 points, ou choix/oui-non différents. */
-export function hasGap(type: string, a: AnswerValue | undefined, b: AnswerValue | undefined): boolean {
+export function hasGap(
+  type: string,
+  a: AnswerValue | undefined,
+  b: AnswerValue | undefined,
+): boolean {
   if (a === undefined || b === undefined || a === null || b === null) return false;
   if (type === 'echelle') return Math.abs(Number(a) - Number(b)) >= 2;
   if (type === 'choix' || type === 'oui_non') return a !== b;

@@ -14,7 +14,9 @@ interface Props {
 const choiceClass = (selected: boolean) =>
   cn(
     'h-8 rounded border px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed',
-    selected ? 'border-accent bg-accent text-accent-fg' : 'border-line-strong bg-surface text-fg hover:bg-surface-muted',
+    selected
+      ? 'border-accent bg-accent text-accent-fg'
+      : 'border-line-strong bg-surface text-fg hover:bg-surface-muted',
   );
 
 /** Saisie d'une réponse selon le type de question : texte libre, échelle 1–5, choix, oui/non. */
@@ -66,7 +68,15 @@ export function QuestionInput({ question, value, disabled, onSave }: Props) {
       {question.type === 'choix' && (
         <div role="radiogroup" aria-labelledby={`${id}-label`} className="flex flex-wrap gap-2">
           {question.options.map((option) => (
-            <button key={option} type="button" role="radio" aria-checked={value === option} disabled={disabled} onClick={() => onSave(option)} className={choiceClass(value === option)}>
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={value === option}
+              disabled={disabled}
+              onClick={() => onSave(option)}
+              className={choiceClass(value === option)}
+            >
               {option}
             </button>
           ))}
@@ -79,7 +89,15 @@ export function QuestionInput({ question, value, disabled, onSave }: Props) {
             { v: true, label: 'Oui' },
             { v: false, label: 'Non' },
           ].map((o) => (
-            <button key={o.label} type="button" role="radio" aria-checked={value === o.v} disabled={disabled} onClick={() => onSave(o.v)} className={choiceClass(value === o.v)}>
+            <button
+              key={o.label}
+              type="button"
+              role="radio"
+              aria-checked={value === o.v}
+              disabled={disabled}
+              onClick={() => onSave(o.v)}
+              className={choiceClass(value === o.v)}
+            >
               {o.label}
             </button>
           ))}

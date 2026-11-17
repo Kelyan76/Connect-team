@@ -8,7 +8,13 @@ import type { Review } from '../api';
 import { useSignReview } from '../queries';
 
 /** Signature électronique simple : horodatage serveur de l'accord de chaque partie. */
-export function Signatures({ review, viewer }: { review: Review; viewer: 'manager' | 'collaborateur' }) {
+export function Signatures({
+  review,
+  viewer,
+}: {
+  review: Review;
+  viewer: 'manager' | 'collaborateur';
+}) {
   const sign = useSignReview(review.id);
   const [confirm, setConfirm] = useState(false);
   const mine = viewer === 'manager' ? review.manager_signed_at : review.collaborator_signed_at;
@@ -32,7 +38,13 @@ export function Signatures({ review, viewer }: { review: Review; viewer: 'manage
   return (
     <Panel
       title="Validation du compte-rendu"
-      description={both ? 'Compte-rendu signé par les deux parties : il n’est plus modifiable.' : closed ? 'Chaque partie confirme le compte-rendu.' : 'Disponible après la clôture de l’entretien.'}
+      description={
+        both
+          ? 'Compte-rendu signé par les deux parties : il n’est plus modifiable.'
+          : closed
+            ? 'Chaque partie confirme le compte-rendu.'
+            : 'Disponible après la clôture de l’entretien.'
+      }
       actions={
         closed && !mine ? (
           <Button size="sm" variant="primary" onClick={() => setConfirm(true)}>

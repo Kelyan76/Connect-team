@@ -24,14 +24,20 @@ export default function ReviewsPage() {
   const team = useTeamMembers();
   const [scheduling, setScheduling] = useState(params.get('planifier') === '1');
   const [requesting, setRequesting] = useState(params.get('demande') === '1');
-  const [fromRequest, setFromRequest] = useState<{ id: string; collaboratorId: string; date: string | null } | null>(null);
+  const [fromRequest, setFromRequest] = useState<{
+    id: string;
+    collaboratorId: string;
+    date: string | null;
+  } | null>(null);
   useHotkey('n', () => (isManager ? setScheduling(true) : setRequesting(true)));
 
   const all = reviews.data ?? [];
   const upcoming = all
     .filter((r) => r.status === 'planifie')
     .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
-  const toSign = all.filter((r) => r.status === 'termine' && (!r.collaborator_signed_at || !r.manager_signed_at));
+  const toSign = all.filter(
+    (r) => r.status === 'termine' && (!r.collaborator_signed_at || !r.manager_signed_at),
+  );
   const history = all.filter((r) => r.status !== 'planifie');
   const pending = (requests.data ?? []).filter((r) => r.status === 'en_attente');
 
@@ -46,7 +52,10 @@ export default function ReviewsPage() {
   return (
     <Page>
       <PageHeader
-        breadcrumbs={[{ label: isManager ? 'Équipe' : 'Mon espace' }, { label: isManager ? 'Entretiens' : 'Mes entretiens' }]}
+        breadcrumbs={[
+          { label: isManager ? 'Équipe' : 'Mon espace' },
+          { label: isManager ? 'Entretiens' : 'Mes entretiens' },
+        ]}
         title={isManager ? 'Entretiens' : 'Mes entretiens'}
         description={
           isManager
@@ -97,15 +106,29 @@ export default function ReviewsPage() {
                     reviews={upcoming}
                     byId={team.byId}
                     showPerson={isManager}
-                    empty={isManager ? 'Aucun entretien planifié. Commencez par les 1 à 1 de l’équipe.' : 'Aucun entretien planifié pour le moment.'}
+                    empty={
+                      isManager
+                        ? 'Aucun entretien planifié. Commencez par les 1 à 1 de l’équipe.'
+                        : 'Aucun entretien planifié pour le moment.'
+                    }
                     when={(r) => daysFromToday(r.scheduled_at.slice(0, 10))}
                   />
                 </TabsContent>
                 <TabsContent value="a-signer">
-                  <ReviewTable reviews={toSign} byId={team.byId} showPerson={isManager} empty="Aucun compte-rendu en attente de signature." />
+                  <ReviewTable
+                    reviews={toSign}
+                    byId={team.byId}
+                    showPerson={isManager}
+                    empty="Aucun compte-rendu en attente de signature."
+                  />
                 </TabsContent>
                 <TabsContent value="historique">
-                  <ReviewTable reviews={history} byId={team.byId} showPerson={isManager} empty="Aucun entretien passé." />
+                  <ReviewTable
+                    reviews={history}
+                    byId={team.byId}
+                    showPerson={isManager}
+                    empty="Aucun entretien passé."
+                  />
                 </TabsContent>
                 <TabsContent value="demandes">
                   <RequestsList
@@ -113,7 +136,11 @@ export default function ReviewsPage() {
                     byId={team.byId}
                     isManager={isManager}
                     onAccept={(r) => {
-                      setFromRequest({ id: r.id, collaboratorId: r.collaborator_id, date: r.preferred_date });
+                      setFromRequest({
+                        id: r.id,
+                        collaboratorId: r.collaborator_id,
+                        date: r.preferred_date,
+                      });
                       setScheduling(true);
                     }}
                   />
@@ -128,7 +155,9 @@ export default function ReviewsPage() {
         <ScheduleDialog
           open={scheduling}
           onOpenChange={closeSchedule}
-          defaultCollaborator={fromRequest?.collaboratorId ?? params.get('collaborateur') ?? undefined}
+          defaultCollaborator={
+            fromRequest?.collaboratorId ?? params.get('collaborateur') ?? undefined
+          }
           defaultDate={fromRequest?.date ?? undefined}
           requestId={fromRequest?.id}
         />

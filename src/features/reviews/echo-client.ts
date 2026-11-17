@@ -25,14 +25,20 @@ export async function transcribeWithEcho(audio: Blob): Promise<EchoResult> {
     res = await fetch('/api/echo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ audio: await toBase64(audio), mimeType: audio.type.split(';')[0] || 'audio/webm' }),
+      body: JSON.stringify({
+        audio: await toBase64(audio),
+        mimeType: audio.type.split(';')[0] || 'audio/webm',
+      }),
     });
   } catch {
     throw new Error('Echo est injoignable. Vérifiez la connexion et réessayez.');
   }
   const data: unknown = await res.json().catch(() => null);
   if (!res.ok) {
-    const message = data && typeof data === 'object' && 'error' in data && typeof data.error === 'string' ? data.error : null;
+    const message =
+      data && typeof data === 'object' && 'error' in data && typeof data.error === 'string'
+        ? data.error
+        : null;
     throw new Error(message ?? 'Echo n’a pas pu analyser l’enregistrement. Réessayez.');
   }
   const result = readEchoResult(data);

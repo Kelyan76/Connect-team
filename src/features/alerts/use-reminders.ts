@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useAbsenceNotices } from '@/features/absences/use-absence-notices';
+import { useReviewNotices } from '@/features/reviews/use-review-notices';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { pulseSignals } from '@/features/pulse/lib/pulse';
 import { usePulses } from '@/features/pulse/queries';
@@ -113,5 +114,7 @@ export function useReminders(): Reminder[] {
   const own = useCollaboratorReminders(!isManager);
   // Congés : demandes à valider (manager) ou décisions reçues (collaborateur), en tête.
   const leave = useAbsenceNotices().items;
-  return [...leave, ...(isManager ? manager : own)];
+  // Parcours 1 à 1 : planifié, accepté, à signer (collaborateur) ; préparé, signé (manager).
+  const oneToOne = useReviewNotices().bell;
+  return [...oneToOne, ...leave, ...(isManager ? manager : own)];
 }

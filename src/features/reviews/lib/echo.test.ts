@@ -57,12 +57,19 @@ describe('réponse Echo', () => {
     expect(readEchoResult(raw)?.tasks).toHaveLength(3);
   });
   it('produit des brouillons prêts à ajouter', () => {
-    const drafts = toDrafts(readEchoResult(raw) ?? { summary: '', tasks: [] }, { manager: 'Kelyan', collaborator: 'Hugo' }, today);
+    const drafts = toDrafts(
+      readEchoResult(raw) ?? { summary: '', tasks: [] },
+      { manager: 'Kelyan', collaborator: 'Hugo' },
+      today,
+    );
     expect(drafts).toHaveLength(2);
     expect(drafts[0]).toMatchObject({ owner: 'collaborateur', due: '2026-11-20', keep: true });
     expect(drafts[1]).toMatchObject({ owner: 'manager', due: '2026-11-17' });
   });
   it('résumé en lignes simples', () => {
-    expect(summaryLines(raw.summary)).toEqual(['Documentation : finalisation vendredi.', 'Support : point avec Inès.']);
+    expect(summaryLines(raw.summary)).toEqual([
+      'Documentation : finalisation vendredi.',
+      'Support : point avec Inès.',
+    ]);
   });
 });
