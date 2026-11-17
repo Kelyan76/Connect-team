@@ -1,6 +1,6 @@
-import { FileDown, Mic, Trash2 } from 'lucide-react';
-import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { FileDown, Mic, Trash2, Video } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { downloadReviewReport } from '@/features/reports/download';
 import { useTeamMembers } from '@/features/team/queries';
@@ -16,6 +16,7 @@ import { ActionPlan } from '../components/ActionPlan';
 import { AnswerForm } from '../components/AnswerForm';
 import { CollaboratorTopics } from '../components/CollaboratorTopics';
 import { ManagerPrep } from '../components/ManagerPrep';
+import { VideoCall } from '../components/VideoCall';
 import { QuickPrep } from '../components/QuickPrep';
 import { OneToOneGuide } from '../components/OneToOneGuide';
 import { EchoRecorder } from '../components/EchoRecorder';
@@ -43,6 +44,10 @@ export default function ReviewPage() {
   const [exporting, setExporting] = useState(false);
   const [tab, setTab] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  // Visio : ouverte depuis le bouton, ou directement depuis la notification « … vous attend en visio ».
+  const [params] = useSearchParams();
+  const [inCall, setInCall] = useState(params.get('visio') === '1');
+  const leaveCall = useCallback(() => setInCall(false), []);
   const remove = useDeleteReview();
   const navigate = useNavigate();
 
@@ -80,6 +85,7 @@ export default function ReviewPage() {
         ? 'cote-a-cote'
         : 'compte-rendu';
   const canRecord = isManager && r.kind === 'one_to_one' && !r.manager_signed_at;
+  const canCall = r.status === 'planifie';
   const currentTab = tab ?? defaultTab;
   // Manager en préparation : tout est dans les 3 étapes, pas de colonne à droite.
   const showAside = !(isManager && stage === 'preparation' && currentTab === 'preparation');
@@ -130,10 +136,16 @@ export default function ReviewPage() {
           </div>
         }
         actions={
-          isManager || stage !== 'preparation' ? (
+          isManager || canCall || stage !== 'preparation' ? (
             <div className="flex flex-wrap gap-2">
+              {canCall && !inCall && (
+                <Button variant="primary" onClick={() => setInCall(true)}>
+                  <Video aria-hidden />
+                  Visio
+                </Button>
+              )}
               {canRecord && (
-                <Button variant="primary" onClick={openEcho}>
+                <Button onClick={openEcho}>
                   <Mic aria-hidden />
                   Enregistrer avec Echo
                 </Button>
@@ -158,6 +170,7 @@ export default function ReviewPage() {
           ) : undefined
         }
       />
+      {inCall && canCall && <VideoCall reviewId={r.id} onClose={leaveCall} />}
       <div
         className={
           showAside ? 'grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]' : 'flex flex-col gap-6'
