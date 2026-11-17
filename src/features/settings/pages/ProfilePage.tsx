@@ -6,6 +6,7 @@ import { updatePassword } from '@/features/auth/api';
 import { useAuth, useCurrentUser } from '@/features/auth/AuthProvider';
 import { newPasswordSchema, type NewPasswordValues } from '@/features/auth/lib/password';
 import { NotificationSettings } from '@/features/notifications/components/NotificationSettings';
+import { AppearancePanel } from '@/features/settings/components/AppearancePanel';
 import { BackupPanel } from '@/features/settings/components/BackupPanel';
 import { DiscCard } from '@/features/team/components/DiscCard';
 import { toUserMessage } from '@/shared/lib/errors';
@@ -77,6 +78,9 @@ export default function ProfilePage() {
             </Button>
           </form>
         </Panel>
+      </div>
+      <div className="mt-6">
+        <AppearancePanel />
       </div>
       {!isManager && (
         <div className="mt-6">

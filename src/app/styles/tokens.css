@@ -3,7 +3,8 @@
  * Neutres : gris légèrement bleutés, fond très clair. Accent : un indigo doux.
  * Statuts : vert, orange, rouge adoucis. Contrastes vérifiés WCAG AA sur canvas et surface.
  */
-:root {
+:root,
+[data-ui-preview='classique'] {
   --slate-50: 225 33% 98%;
   --slate-100: 224 28% 96%;
   --slate-200: 223 22% 92%;
@@ -77,4 +78,204 @@
 
   --focus: 234 70% 55%;
   --shadow: 230 35% 20%;
+
+  /* Forme, police, densité : redéfinies par les ambiances et les réglages d'apparence. */
+  --font-sans: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-heading: var(--font-sans);
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --space-unit: 0.25rem;
+}
+
+/* ─── Réglages d'apparence (indépendants de l'ambiance) ────────────────── */
+:root[data-text='grand'] {
+  font-size: 112.5%;
+}
+:root[data-density='compacte'] {
+  --space-unit: 0.21rem;
+}
+
+/* ─── Ambiance « Nuit » : fond sombre, accent cyan ─────────────────────── */
+:root[data-ui='nuit'],
+[data-ui-preview='nuit'] {
+  color-scheme: dark;
+  --canvas: 228 24% 9%;
+  --surface: 228 20% 13%;
+  --surface-muted: 228 18% 17%;
+  --surface-sunken: 228 24% 8%;
+  --line: 228 16% 22%;
+  --line-strong: 228 14% 31%;
+  --fg: 225 35% 94%;
+  --fg-muted: 225 15% 74%;
+  --fg-subtle: 225 11% 60%;
+  --fg-inverse: 0 0% 100%;
+  --accent: 190 78% 52%;
+  --accent-hover: 190 80% 62%;
+  --accent-subtle: 192 45% 17%;
+  --accent-fg: 228 40% 9%;
+  --success: 150 55% 56%;
+  --success-subtle: 152 38% 15%;
+  --warning: 38 92% 62%;
+  --warning-subtle: 38 48% 15%;
+  --danger: 355 82% 66%;
+  --danger-hover: 355 82% 72%;
+  --danger-subtle: 355 42% 17%;
+  --level-0: 228 18% 17%;
+  --level-1: 192 40% 22%;
+  --level-2: 192 52% 32%;
+  --level-3: 191 64% 42%;
+  --level-4: 190 78% 52%;
+  --sidebar: 228 28% 6%;
+  --sidebar-hover: 228 20% 13%;
+  --sidebar-muted: 225 12% 66%;
+  --hero-from: 205 68% 32%;
+  --hero-to: 252 50% 38%;
+  --sec-home: 226 82% 68%;
+  --sec-team: 172 60% 48%;
+  --sec-reviews: 262 72% 72%;
+  --sec-goals: 150 52% 50%;
+  --sec-planning: 28 92% 60%;
+  --sec-meetings: 330 72% 68%;
+  --sec-settings: 215 16% 62%;
+  --focus: 190 85% 60%;
+  --shadow: 0 0% 0%;
+}
+
+/* ─── Ambiance « Zen » : sable et vert sauge, formes très douces ───────── */
+:root[data-ui='zen'],
+[data-ui-preview='zen'] {
+  --canvas: 40 36% 95%;
+  --surface: 40 60% 99%;
+  --surface-muted: 40 32% 93%;
+  --surface-sunken: 40 28% 91%;
+  --line: 38 24% 86%;
+  --line-strong: 36 18% 77%;
+  --fg: 120 14% 18%;
+  --fg-muted: 110 9% 34%;
+  --fg-subtle: 100 7% 44%;
+  --accent: 125 20% 38%;
+  --accent-hover: 125 22% 31%;
+  --accent-subtle: 110 28% 92%;
+  --success: 140 36% 30%;
+  --success-subtle: 130 30% 92%;
+  --warning: 28 58% 36%;
+  --warning-subtle: 38 60% 92%;
+  --danger: 8 52% 44%;
+  --danger-hover: 8 52% 38%;
+  --danger-subtle: 10 60% 95%;
+  --level-0: 40 30% 92%;
+  --level-1: 115 22% 86%;
+  --level-2: 118 20% 70%;
+  --level-3: 122 20% 52%;
+  --level-4: 125 20% 38%;
+  --sidebar: 125 16% 24%;
+  --sidebar-hover: 125 14% 30%;
+  --sidebar-muted: 90 16% 78%;
+  --hero-from: 118 22% 46%;
+  --hero-to: 32 40% 56%;
+  --sec-home: 125 20% 38%;
+  --sec-team: 172 28% 34%;
+  --sec-reviews: 280 20% 46%;
+  --sec-goals: 95 32% 34%;
+  --sec-planning: 22 48% 46%;
+  --sec-meetings: 340 32% 46%;
+  --sec-settings: 40 10% 42%;
+  --focus: 125 25% 42%;
+  --shadow: 40 30% 30%;
+  --font-sans: 'Nunito Variable', Nunito, system-ui, sans-serif;
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+}
+
+/* ─── Ambiance « Épuré » : noir et blanc éditorial, angles nets ────────── */
+:root[data-ui='epure'],
+[data-ui-preview='epure'] {
+  --canvas: 0 0% 100%;
+  --surface: 0 0% 100%;
+  --surface-muted: 0 0% 96.5%;
+  --surface-sunken: 0 0% 95%;
+  --line: 0 0% 87%;
+  --line-strong: 0 0% 68%;
+  --fg: 0 0% 7%;
+  --fg-muted: 0 0% 30%;
+  --fg-subtle: 0 0% 42%;
+  --accent: 0 0% 8%;
+  --accent-hover: 0 0% 24%;
+  --accent-subtle: 0 0% 94%;
+  --level-0: 0 0% 95%;
+  --level-1: 0 0% 85%;
+  --level-2: 0 0% 65%;
+  --level-3: 0 0% 40%;
+  --level-4: 0 0% 8%;
+  --sidebar: 0 0% 6%;
+  --sidebar-hover: 0 0% 15%;
+  --sidebar-muted: 0 0% 70%;
+  --hero-from: 0 0% 8%;
+  --hero-to: 0 0% 24%;
+  --sec-home: 0 0% 8%;
+  --sec-team: 0 0% 22%;
+  --sec-reviews: 0 0% 14%;
+  --sec-goals: 0 0% 28%;
+  --sec-planning: 0 0% 18%;
+  --sec-meetings: 0 0% 34%;
+  --sec-settings: 0 0% 42%;
+  --focus: 0 0% 8%;
+  --shadow: 0 0% 0%;
+  --font-heading: Fraunces, Georgia, 'Times New Roman', serif;
+  --radius-sm: 2px;
+  --radius: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+}
+
+/* ─── Ambiance « Énergie » : corail, jaune et violet, très arrondi ─────── */
+:root[data-ui='energie'],
+[data-ui-preview='energie'] {
+  --canvas: 32 100% 97%;
+  --surface: 0 0% 100%;
+  --surface-muted: 30 85% 95%;
+  --surface-sunken: 30 75% 93%;
+  --line: 28 65% 88%;
+  --line-strong: 26 45% 77%;
+  --fg: 20 45% 11%;
+  --fg-muted: 20 22% 30%;
+  --fg-subtle: 20 15% 42%;
+  --accent: 9 85% 50%;
+  --accent-hover: 9 85% 43%;
+  --accent-subtle: 12 100% 95%;
+  --success: 165 72% 28%;
+  --success-subtle: 165 60% 92%;
+  --warning: 36 95% 34%;
+  --warning-subtle: 45 100% 90%;
+  --danger: 350 80% 46%;
+  --danger-hover: 350 80% 40%;
+  --danger-subtle: 350 90% 96%;
+  --level-0: 30 80% 94%;
+  --level-1: 12 100% 90%;
+  --level-2: 11 95% 78%;
+  --level-3: 10 90% 64%;
+  --level-4: 9 85% 50%;
+  --sidebar: 255 58% 24%;
+  --sidebar-hover: 255 48% 31%;
+  --sidebar-muted: 255 32% 82%;
+  --hero-from: 9 92% 56%;
+  --hero-to: 38 98% 52%;
+  --sec-home: 9 85% 50%;
+  --sec-team: 168 78% 32%;
+  --sec-reviews: 255 78% 60%;
+  --sec-goals: 145 68% 33%;
+  --sec-planning: 32 95% 46%;
+  --sec-meetings: 330 85% 52%;
+  --sec-settings: 250 15% 44%;
+  --focus: 9 90% 55%;
+  --shadow: 15 60% 25%;
+  --font-sans: Poppins, system-ui, sans-serif;
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
 }

@@ -1,4 +1,5 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { applyAppearance, toAppearance } from '@/app/appearance';
 import { Outlet, useLocation } from 'react-router-dom';
 import { NotificationsMenu } from '@/features/alerts/components/NotificationsMenu';
 import { useAuth, useCurrentUser } from '@/features/auth/AuthProvider';
@@ -19,6 +20,13 @@ export function AuthenticatedLayout() {
   const { profile, team, isManager } = useCurrentUser();
   const entries = useSearchEntries(isManager);
   const { pathname } = useLocation();
+
+  // Apparence enregistrée dans le profil (la même sur téléphone et ordinateur).
+  const { ui_theme, ui_text_size, ui_density } = profile;
+  useEffect(
+    () => applyAppearance(toAppearance({ ui_theme, ui_text_size, ui_density })),
+    [ui_theme, ui_text_size, ui_density],
+  );
 
   // Déconnexion automatique après 30 minutes d'inactivité.
   useIdle(

@@ -1,4 +1,11 @@
 @import '@fontsource-variable/inter';
+/* Polices des ambiances (téléchargées seulement si l'ambiance est choisie). */
+@import '@fontsource-variable/nunito';
+@import '@fontsource/poppins/400.css';
+@import '@fontsource/poppins/500.css';
+@import '@fontsource/poppins/600.css';
+@import '@fontsource/fraunces/500.css';
+@import '@fontsource/fraunces/600.css';
 @import './tokens.css';
 
 @tailwind base;
@@ -16,6 +23,12 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
+  }
+  /* Titres : police de titre de l'ambiance (serif en « Épuré »). */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
   }
   body {
     @apply bg-canvas font-sans text-base text-fg;

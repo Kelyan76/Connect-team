@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, type ReactNode } from 'react';
+import { applyAppearance, cachedAppearance } from '../appearance';
 
 /**
- * Thème : l'application est volontairement en clair uniquement (fond clair, lisible partout).
- * Le contexte reste en place pour les composants qui lisent `resolved`.
+ * Thème de base clair. L'ambiance choisie par chacun (Mon profil › Apparence) est appliquée
+ * dès le démarrage depuis l'appareil, puis synchronisée avec le profil une fois connecté.
  */
 type Resolved = 'clair';
 
@@ -16,6 +17,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.classList.remove('dark');
+    applyAppearance(cachedAppearance());
     try {
       localStorage.removeItem('cadence.theme');
     } catch {
