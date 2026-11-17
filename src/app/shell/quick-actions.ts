@@ -1,5 +1,6 @@
 import {
   CalendarPlus,
+  CalendarRange,
   HeartPulse,
   KanbanSquare,
   MessageSquarePlus,
@@ -144,6 +145,16 @@ export function useQuickActions(): QuickAction[] {
       icon: KanbanSquare,
       tone: 'goals',
       to: '/taches',
+      notOnHome: true,
+    },
+    {
+      id: 'leave',
+      short: 'Congés',
+      label: 'Poser un congé',
+      hint: 'Sur le calendrier',
+      icon: CalendarRange,
+      tone: 'goals',
+      to: '/calendrier?nouveau=1',
     },
     {
       id: 'objectives',

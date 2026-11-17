@@ -25,19 +25,39 @@ export const useAbsences = () => useTable(qk.absences, 'absences', 'start_date')
 
 export const useRequestAbsence = () =>
   useWrite(
-    async (a: { collaborator_id: string; kind: AbsenceKind; start_date: string; end_date: string; comment: string }) =>
-      check(await supabase.from('absences').insert(a), 'Demande de congés'),
+    async (a: {
+      collaborator_id: string;
+      kind: AbsenceKind;
+      start_date: string;
+      end_date: string;
+      comment: string;
+    }) => check(await supabase.from('absences').insert(a), 'Demande de congés'),
     [qk.absences],
     'Demande envoyée à votre manager',
   );
 
 export const useDecideAbsence = () =>
   useWrite(
-    async ({ id, status, comment, by }: { id: string; status: 'validee' | 'refusee'; comment: string; by: string }) =>
+    async ({
+      id,
+      status,
+      comment,
+      by,
+    }: {
+      id: string;
+      status: 'validee' | 'refusee';
+      comment: string;
+      by: string;
+    }) =>
       check(
         await supabase
           .from('absences')
-          .update({ status, decision_comment: comment, decided_by: by, decided_at: new Date().toISOString() })
+          .update({
+            status,
+            decision_comment: comment,
+            decided_by: by,
+            decided_at: new Date().toISOString(),
+          })
           .eq('id', id),
         'Décision',
       ),
@@ -46,4 +66,9 @@ export const useDecideAbsence = () =>
   );
 
 export const useCancelAbsence = () =>
-  useWrite(async (id: string) => check(await supabase.from('absences').delete().eq('id', id), 'Annulation'), [qk.absences], 'Demande annulée');
+  useWrite(
+    async (id: string) =>
+      check(await supabase.from('absences').delete().eq('id', id), 'Annulation'),
+    [qk.absences],
+    'Demande annulée',
+  );

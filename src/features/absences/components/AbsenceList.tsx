@@ -11,22 +11,47 @@ import { Input } from '@/shared/ui/input';
 import { Panel } from '@/shared/ui/layout';
 import { Table, TBody, Td, Th, THead, Tr } from '@/shared/ui/table';
 import { workingDaysCount } from '../lib/overlap';
-import { ABSENCE_KIND, REQUEST_STATUS, useCancelAbsence, useDecideAbsence, type Absence } from '../queries';
+import {
+  ABSENCE_KIND,
+  REQUEST_STATUS,
+  useCancelAbsence,
+  useDecideAbsence,
+  type Absence,
+} from '../queries';
 
 /** Demandes d'absence : décision du manager, annulation par le collaborateur tant qu'elle est en attente. */
-export function AbsenceList({ absences, byId, isManager }: { absences: Absence[]; byId: Map<string, Person>; isManager: boolean }) {
+export function AbsenceList({
+  absences,
+  byId,
+  isManager,
+}: {
+  absences: Absence[];
+  byId: Map<string, Person>;
+  isManager: boolean;
+}) {
   const { profile } = useCurrentUser();
   const decide = useDecideAbsence();
   const cancel = useCancelAbsence();
   const [refusing, setRefusing] = useState<Absence | null>(null);
   const [reason, setReason] = useState('');
   const [cancelling, setCancelling] = useState<Absence | null>(null);
-  const sorted = [...absences].sort((a, b) => (a.status === 'en_attente' ? -1 : 0) - (b.status === 'en_attente' ? -1 : 0) || b.start_date.localeCompare(a.start_date));
+  const sorted = [...absences].sort(
+    (a, b) =>
+      (a.status === 'en_attente' ? -1 : 0) - (b.status === 'en_attente' ? -1 : 0) ||
+      b.start_date.localeCompare(a.start_date),
+  );
 
   return (
     <Panel title={isManager ? 'Demandes et absences' : 'Mes demandes'} flush>
       {sorted.length === 0 ? (
-        <EmptyState title="Aucune absence" description={isManager ? 'Les demandes de l’équipe apparaîtront ici.' : 'Vous n’avez pas encore fait de demande.'} />
+        <EmptyState
+          title="Aucune absence"
+          description={
+            isManager
+              ? 'Les demandes de l’équipe apparaîtront ici.'
+              : 'Vous n’avez pas encore fait de demande.'
+          }
+        />
       ) : (
         <Table>
           <THead>
@@ -49,22 +74,45 @@ export function AbsenceList({ absences, byId, isManager }: { absences: Absence[]
                   <Td>
                     <span className="flex flex-col">
                       {ABSENCE_KIND[a.kind]}
-                      {(a.comment || a.decision_comment) && <span className="text-xs text-fg-subtle">{a.decision_comment || a.comment}</span>}
+                      {(a.comment || a.decision_comment) && (
+                        <span className="text-xs text-fg-subtle">
+                          {a.decision_comment || a.comment}
+                        </span>
+                      )}
                     </span>
                   </Td>
                   <Td numeric>{formatDate(a.start_date)}</Td>
                   <Td numeric>{formatDate(a.end_date)}</Td>
                   <Td numeric>{workingDaysCount(a.start_date, a.end_date)}</Td>
                   <Td>
-                    <Badge tone={REQUEST_STATUS[a.status].tone}>{REQUEST_STATUS[a.status].label}</Badge>
+                    <Badge tone={REQUEST_STATUS[a.status].tone}>
+                      {REQUEST_STATUS[a.status].label}
+                    </Badge>
                   </Td>
                   <Td align="right" className="whitespace-nowrap">
                     {isManager && a.status === 'en_attente' && (
                       <span className="inline-flex gap-2">
-                        <Button size="sm" onClick={() => { setRefusing(a); setReason(''); }}>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setRefusing(a);
+                            setReason('');
+                          }}
+                        >
                           Refuser
                         </Button>
-                        <Button size="sm" variant="primary" onClick={() => decide.mutate({ id: a.id, status: 'validee', comment: '', by: profile.id })}>
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={() =>
+                            decide.mutate({
+                              id: a.id,
+                              status: 'validee',
+                              comment: '',
+                              by: profile.id,
+                            })
+                          }
+                        >
                           Valider
                         </Button>
                       </span>
@@ -88,11 +136,23 @@ export function AbsenceList({ absences, byId, isManager }: { absences: Absence[]
         description={
           <span className="flex flex-col gap-3">
             Le collaborateur verra le motif indiqué.
-            <Input aria-label="Motif du refus" placeholder="Motif (facultatif)" value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} />
+            <Input
+              aria-label="Motif du refus"
+              placeholder="Motif (facultatif)"
+              value={reason}
+              maxLength={500}
+              onChange={(e) => setReason(e.target.value)}
+            />
           </span>
         }
         confirmLabel="Refuser"
-        onConfirm={() => refusing && decide.mutate({ id: refusing.id, status: 'refusee', comment: reason, by: profile.id }, { onSettled: () => setRefusing(null) })}
+        onConfirm={() =>
+          refusing &&
+          decide.mutate(
+            { id: refusing.id, status: 'refusee', comment: reason, by: profile.id },
+            { onSettled: () => setRefusing(null) },
+          )
+        }
       />
       <ConfirmDialog
         open={cancelling !== null}
@@ -100,7 +160,9 @@ export function AbsenceList({ absences, byId, isManager }: { absences: Absence[]
         title="Annuler cette demande ?"
         description="La demande sera supprimée. Vous pourrez en refaire une."
         confirmLabel="Annuler la demande"
-        onConfirm={() => cancelling && cancel.mutate(cancelling.id, { onSettled: () => setCancelling(null) })}
+        onConfirm={() =>
+          cancelling && cancel.mutate(cancelling.id, { onSettled: () => setCancelling(null) })
+        }
       />
     </Panel>
   );

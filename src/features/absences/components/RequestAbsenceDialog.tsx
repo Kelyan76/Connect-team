@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
@@ -18,15 +19,47 @@ const schema = z
     end_date: z.string().min(1, 'Date requise.'),
     comment: z.string().max(500),
   })
-  .refine((v) => v.end_date >= v.start_date, { path: ['end_date'], message: 'La fin doit suivre le début.' })
-  .refine((v) => daysBetween(v.start_date, v.end_date) <= 90, { path: ['end_date'], message: '90 jours maximum par demande.' });
+  .refine((v) => v.end_date >= v.start_date, {
+    path: ['end_date'],
+    message: 'La fin doit suivre le début.',
+  })
+  .refine((v) => daysBetween(v.start_date, v.end_date) <= 90, {
+    path: ['end_date'],
+    message: '90 jours maximum par demande.',
+  });
 type Values = z.infer<typeof schema>;
 
-export function RequestAbsenceDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+export function RequestAbsenceDialog({
+  open,
+  onOpenChange,
+  range,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  range?: { start: string; end: string };
+}) {
   const { profile } = useCurrentUser();
   const request = useRequestAbsence();
   const start = isoAddDays(todayIso(), 14);
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { kind: 'conges_payes', start_date: start, end_date: isoAddDays(start, 4), comment: '' } });
+  const form = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      kind: 'conges_payes',
+      start_date: start,
+      end_date: isoAddDays(start, 4),
+      comment: '',
+    },
+  });
+  // Période choisie dans le calendrier : préremplie à l'ouverture.
+  useEffect(() => {
+    if (open && range)
+      form.reset({
+        kind: 'conges_payes',
+        start_date: range.start,
+        end_date: range.end,
+        comment: '',
+      });
+  }, [open, range, form]);
   const [s, e] = form.watch(['start_date', 'end_date']);
   const errors = form.formState.errors;
 
@@ -42,7 +75,12 @@ export function RequestAbsenceDialog({ open, onOpenChange }: { open: boolean; on
         footer={
           <>
             <Button onClick={() => onOpenChange(false)}>Annuler</Button>
-            <Button type="submit" form="absence-form" variant="primary" disabled={request.isPending}>
+            <Button
+              type="submit"
+              form="absence-form"
+              variant="primary"
+              disabled={request.isPending}
+            >
               Envoyer la demande
             </Button>
           </>
@@ -62,7 +100,11 @@ export function RequestAbsenceDialog({ open, onOpenChange }: { open: boolean; on
             <Field label="Du" error={errors.start_date?.message}>
               <Input type="date" {...form.register('start_date')} />
             </Field>
-            <Field label="Au" error={errors.end_date?.message} hint={s && e && e >= s ? `${workingDaysCount(s, e)} jours ouvrés` : undefined}>
+            <Field
+              label="Au"
+              error={errors.end_date?.message}
+              hint={s && e && e >= s ? `${workingDaysCount(s, e)} jours ouvrés` : undefined}
+            >
               <Input type="date" {...form.register('end_date')} />
             </Field>
           </div>

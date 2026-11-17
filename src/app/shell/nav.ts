@@ -1,5 +1,6 @@
 import {
   Bell,
+  CalendarDays,
   Compass,
   HeartPulse,
   KanbanSquare,
@@ -39,7 +40,7 @@ const both: Role[] = ['manager', 'collaborateur'];
 const manager: Role[] = ['manager'];
 
 // Menu recentré sur les questions du manager et les outils du cours.
-// Plan de charge, absences, réunions et rapports restent accessibles par leur adresse, hors menu.
+// Plan de charge, réunions et rapports restent accessibles par leur adresse, hors menu.
 export const NAV: NavGroup[] = [
   {
     label: 'Pilotage',
@@ -55,8 +56,20 @@ export const NAV: NavGroup[] = [
       { to: '/parcours', label: 'Parcours', icon: Trophy, selfLabel: 'Mon parcours', roles: both },
       { to: '/pouls', label: 'Pouls', icon: HeartPulse, selfLabel: 'Mon pouls', roles: both },
       { to: '/leviers', label: 'Leviers DREAM', icon: Sparkles, roles: manager },
-      { to: '/competences', label: 'Compétences', icon: Grid3x3, selfLabel: 'Mes compétences', roles: both },
-      { to: '/entretiens', label: '1 à 1', icon: MessageSquareText, selfLabel: 'Mes 1 à 1', roles: both },
+      {
+        to: '/competences',
+        label: 'Compétences',
+        icon: Grid3x3,
+        selfLabel: 'Mes compétences',
+        roles: both,
+      },
+      {
+        to: '/entretiens',
+        label: '1 à 1',
+        icon: MessageSquareText,
+        selfLabel: 'Mes 1 à 1',
+        roles: both,
+      },
       { to: '/feedbacks', label: 'Feedbacks', icon: NotebookPen, roles: both },
       { to: '/posture', label: 'Décider', icon: Compass, roles: manager },
     ],
@@ -64,9 +77,22 @@ export const NAV: NavGroup[] = [
   {
     label: 'Organisation',
     items: [
-      { to: '/objectifs', label: 'Objectifs', icon: Target, selfLabel: 'Mes objectifs', roles: both },
+      {
+        to: '/objectifs',
+        label: 'Objectifs',
+        icon: Target,
+        selfLabel: 'Mes objectifs',
+        roles: both,
+      },
       { to: '/delegation', label: 'Délégation', icon: GitFork, roles: both },
       { to: '/taches', label: 'Tâches', icon: KanbanSquare, selfLabel: 'Mes tâches', roles: both },
+      {
+        to: '/calendrier',
+        label: 'Calendrier',
+        icon: CalendarDays,
+        selfLabel: 'Mes congés',
+        roles: both,
+      },
     ],
   },
 ];
@@ -92,9 +118,7 @@ export function navForRole(role: Role): NavGroup[] {
   return NAV.map((g) => ({
     label: role === 'collaborateur' ? (SELF_GROUP_LABEL[g.label] ?? g.label) : g.label,
     items: g.items.filter((i) => i.roles.includes(role)),
-  })).filter(
-    (g) => g.items.length > 0,
-  );
+  })).filter((g) => g.items.length > 0);
 }
 
 export const itemLabel = (item: NavItem, role: Role) =>
@@ -117,10 +141,45 @@ export interface NavSection {
 }
 
 export const SECTIONS: NavSection[] = [
-  { label: 'Tableau de bord', selfLabel: 'Accueil', shortLabel: 'Accueil', tone: 'home', icon: LayoutDashboard, tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }] },
-  { label: 'Équipe', selfLabel: 'Mon suivi', shortLabel: 'Équipe', selfShortLabel: 'Suivi', tone: 'team', icon: Users, tabs: [{ to: '/equipe' }, { to: '/parcours' }, { to: '/pouls' }, { to: '/leviers' }, { to: '/competences' }] },
-  { label: '1 à 1 et feedback', selfLabel: 'Mes 1 à 1', shortLabel: '1 à 1', tone: 'reviews', icon: MessageSquareText, tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }, { to: '/posture' }] },
-  { label: 'Objectifs', selfLabel: 'Mes objectifs', shortLabel: 'Objectifs', tone: 'goals', icon: Target, tabs: [{ to: '/objectifs' }, { to: '/delegation' }, { to: '/taches' }] },
+  {
+    label: 'Tableau de bord',
+    selfLabel: 'Accueil',
+    shortLabel: 'Accueil',
+    tone: 'home',
+    icon: LayoutDashboard,
+    tabs: [{ to: '/', tabLabel: 'Vue d’ensemble' }, { to: '/alertes' }],
+  },
+  {
+    label: 'Équipe',
+    selfLabel: 'Mon suivi',
+    shortLabel: 'Équipe',
+    selfShortLabel: 'Suivi',
+    tone: 'team',
+    icon: Users,
+    tabs: [
+      { to: '/equipe' },
+      { to: '/parcours' },
+      { to: '/pouls' },
+      { to: '/leviers' },
+      { to: '/competences' },
+    ],
+  },
+  {
+    label: '1 à 1 et feedback',
+    selfLabel: 'Mes 1 à 1',
+    shortLabel: '1 à 1',
+    tone: 'reviews',
+    icon: MessageSquareText,
+    tabs: [{ to: '/entretiens' }, { to: '/feedbacks' }, { to: '/posture' }],
+  },
+  {
+    label: 'Objectifs',
+    selfLabel: 'Mes objectifs',
+    shortLabel: 'Objectifs',
+    tone: 'goals',
+    icon: Target,
+    tabs: [{ to: '/objectifs' }, { to: '/delegation' }, { to: '/taches' }, { to: '/calendrier' }],
+  },
 ];
 
 export interface ResolvedSection {

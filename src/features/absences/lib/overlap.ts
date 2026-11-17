@@ -14,11 +14,19 @@ export const isWorkingDay = (iso: string) => {
 };
 
 /** Collaborateurs absents (ou en demande) par jour ouvré, demandes refusées exclues. */
-export function absentByDay(absences: AbsenceLike[], from: string, to: string): Map<string, Set<string>> {
+export function absentByDay(
+  absences: AbsenceLike[],
+  from: string,
+  to: string,
+): Map<string, Set<string>> {
   const out = new Map<string, Set<string>>();
   for (const a of absences) {
     if (a.status === 'refusee') continue;
-    for (let d = a.start_date < from ? from : a.start_date; d <= a.end_date && d <= to; d = isoAddDays(d, 1)) {
+    for (
+      let d = a.start_date < from ? from : a.start_date;
+      d <= a.end_date && d <= to;
+      d = isoAddDays(d, 1)
+    ) {
       if (!isWorkingDay(d)) continue;
       const set = out.get(d) ?? new Set<string>();
       set.add(a.collaborator_id);
@@ -29,7 +37,12 @@ export function absentByDay(absences: AbsenceLike[], from: string, to: string): 
 }
 
 /** Jours ouvrés où le nombre d'absents dépasse le seuil de l'équipe. */
-export function crowdedDays(absences: AbsenceLike[], from: string, to: string, maxAbsent: number): string[] {
+export function crowdedDays(
+  absences: AbsenceLike[],
+  from: string,
+  to: string,
+  maxAbsent: number,
+): string[] {
   return [...absentByDay(absences, from, to)]
     .filter(([, people]) => people.size > maxAbsent)
     .map(([day]) => day)
