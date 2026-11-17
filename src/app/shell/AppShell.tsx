@@ -27,6 +27,7 @@ interface AppShellProps {
   onSignOut: () => void;
   searchEntries?: PaletteEntry[];
   notifications?: ReactNode;
+  assistant?: ReactNode;
   badges?: Partial<Record<string, number>>;
   /** Bandeau au-dessus de l'en-tête (ex. mode test collaborateur). */
   banner?: ReactNode;
@@ -40,6 +41,7 @@ export function AppShell({
   onSignOut,
   searchEntries = [],
   notifications,
+  assistant,
   badges,
   banner,
   children,
@@ -83,6 +85,7 @@ export function AppShell({
           onOpenPalette={() => setPaletteOpen(true)}
           onSignOut={onSignOut}
           notifications={notifications}
+          assistant={assistant}
           showSettings={role === 'manager'}
         />
         <SectionTabs role={role} />

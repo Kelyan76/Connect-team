@@ -10,12 +10,16 @@ export const DialogClose = DialogPrimitive.Close;
 const overlay =
   'fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out';
 
-interface ContentProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, 'title'> {
+interface ContentProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
+  'title'
+> {
   title: ReactNode;
   description?: ReactNode;
   footer?: ReactNode;
   size?: 'sm' | 'md' | 'lg';
+  /** Classes du corps (ex. corps sans marge ni défilement, géré par le contenu). */
+  bodyClassName?: string;
 }
 
 const widths = { sm: 'sm:max-w-100', md: 'sm:max-w-130', lg: 'sm:max-w-180' } as const;
@@ -25,7 +29,10 @@ const widths = { sm: 'sm:max-w-100', md: 'sm:max-w-130', lg: 'sm:max-w-180' } as
  * Sur téléphone, elle s'affiche en panneau qui monte du bas de l'écran (atteignable au pouce).
  */
 export const DialogContent = forwardRef<HTMLDivElement, ContentProps>(
-  ({ className, title, description, footer, size = 'md', children, ...props }, ref) => (
+  (
+    { className, title, description, footer, size = 'md', children, bodyClassName, ...props },
+    ref,
+  ) => (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className={overlay} />
       <DialogPrimitive.Content
@@ -39,7 +46,10 @@ export const DialogContent = forwardRef<HTMLDivElement, ContentProps>(
         )}
         {...props}
       >
-        <span aria-hidden className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-line-strong sm:hidden" />
+        <span
+          aria-hidden
+          className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-line-strong sm:hidden"
+        />
         <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div className="flex flex-col gap-1">
             <DialogPrimitive.Title className="text-md font-semibold">{title}</DialogPrimitive.Title>
@@ -58,7 +68,7 @@ export const DialogContent = forwardRef<HTMLDivElement, ContentProps>(
             <X className="size-4" aria-hidden />
           </DialogPrimitive.Close>
         </div>
-        <div className="overflow-y-auto px-5 py-4">{children}</div>
+        <div className={cn('overflow-y-auto px-5 py-4', bodyClassName)}>{children}</div>
         {footer && (
           <div className="flex flex-wrap justify-end gap-2 border-t border-line bg-surface-muted/40 px-5 py-3">
             {footer}
@@ -72,7 +82,7 @@ DialogContent.displayName = 'DialogContent';
 
 /** Panneau latéral droit pour consulter ou éditer un élément sans quitter la liste. */
 export const SheetContent = forwardRef<HTMLDivElement, ContentProps>(
-  ({ className, title, description, footer, children, ...props }, ref) => (
+  ({ className, title, description, footer, children, bodyClassName, ...props }, ref) => (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className={overlay} />
       <DialogPrimitive.Content
@@ -85,8 +95,12 @@ export const SheetContent = forwardRef<HTMLDivElement, ContentProps>(
       >
         <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div className="flex min-w-0 flex-col gap-1">
-            <DialogPrimitive.Title className="truncate text-md font-semibold">{title}</DialogPrimitive.Title>
-            <DialogPrimitive.Description className={description ? 'text-sm text-fg-muted' : 'sr-only'}>
+            <DialogPrimitive.Title className="truncate text-md font-semibold">
+              {title}
+            </DialogPrimitive.Title>
+            <DialogPrimitive.Description
+              className={description ? 'text-sm text-fg-muted' : 'sr-only'}
+            >
               {description ?? title}
             </DialogPrimitive.Description>
           </div>
@@ -97,8 +111,10 @@ export const SheetContent = forwardRef<HTMLDivElement, ContentProps>(
             <X className="size-4" aria-hidden />
           </DialogPrimitive.Close>
         </div>
-        <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="flex justify-end gap-2 border-t border-line px-5 py-3">{footer}</div>}
+        <div className={cn('flex-1 overflow-y-auto px-5 py-4', bodyClassName)}>{children}</div>
+        {footer && (
+          <div className="flex justify-end gap-2 border-t border-line px-5 py-3">{footer}</div>
+        )}
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>
   ),

@@ -112,7 +112,7 @@ const RULES = [
   },
   {
     title: 'Une IA qui propose, un humain qui décide',
-    body: 'L’assistant IA (servi par l’application Echo) reçoit seulement le prénom et le texte du formulaire, jamais de nom de famille ni d’e-mail. Il propose un feedback DESC, un objectif SMART, des questions ou une décision : rien n’est enregistré sans la relecture du manager.',
+    body: 'L’assistant IA (servi par l’application Echo, en discussion ou via les boutons violets) reçoit seulement le prénom et le texte du formulaire, jamais de nom de famille ni d’e-mail. Il propose un feedback DESC, un objectif SMART, des questions ou une décision : rien n’est enregistré sans la relecture du manager.',
   },
   {
     title: 'Enregistrement avec accord',

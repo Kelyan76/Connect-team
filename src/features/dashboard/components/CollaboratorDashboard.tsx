@@ -12,6 +12,7 @@ import { Page, Panel } from '@/shared/ui/layout';
 import { Segmented, SegmentedItem } from '@/shared/ui/toggle';
 import { EnableNotificationsCard } from '@/features/notifications/components/EnableNotificationsCard';
 import { PulseCheckin } from '@/features/pulse/components/PulseCheckin';
+import { AskAssistant } from './AskAssistant';
 import { HeroBanner } from './HeroBanner';
 import { MyActions } from './MyActions';
 import { MyWeekTasks } from './MyWeekTasks';
@@ -29,7 +30,12 @@ export function CollaboratorDashboard() {
 
   return (
     <Page>
-      <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`${profile.job_title} · bonne journée !`} />
+      <HeroBanner
+        title={`Bonjour ${profile.first_name}`}
+        subtitle={`${profile.job_title} · bonne journée !`}
+      >
+        <AskAssistant />
+      </HeroBanner>
       <PulseCheckin />
       <QuickActions />
       <PrepNudge />
@@ -57,7 +63,10 @@ export function CollaboratorDashboard() {
             {!objectives.data ? (
               <TableSkeleton rows={3} columns={3} />
             ) : objectives.data.length === 0 ? (
-              <EmptyState title="Aucun objectif" description="Vos objectifs apparaîtront ici dès que votre manager les aura définis." />
+              <EmptyState
+                title="Aucun objectif"
+                description="Vos objectifs apparaîtront ici dès que votre manager les aura définis."
+              />
             ) : (
               <ul className="stagger divide-y divide-line">
                 {objectives.data.map((o) => {
@@ -68,14 +77,21 @@ export function CollaboratorDashboard() {
                         <div className="flex min-w-0 flex-col">
                           <span className="text-base font-medium">{o.title}</span>
                           <span className="text-sm text-fg-subtle">
-                            {o.scope === 'equipe' ? 'Objectif d’équipe' : 'Objectif individuel'} · {formatDate(o.due_date)}
+                            {o.scope === 'equipe' ? 'Objectif d’équipe' : 'Objectif individuel'} ·{' '}
+                            {formatDate(o.due_date)}
                           </span>
                         </div>
                         <Badge tone={meta.tone}>{meta.label}</Badge>
                       </div>
                       <div className="flex items-center gap-3">
-                        <ProgressBar value={o.progress} tone={meta.tone} label={`Avancement de ${o.title}`} />
-                        <span className="tabular w-10 text-right text-sm font-medium">{formatPercent(o.progress)}</span>
+                        <ProgressBar
+                          value={o.progress}
+                          tone={meta.tone}
+                          label={`Avancement de ${o.title}`}
+                        />
+                        <span className="tabular w-10 text-right text-sm font-medium">
+                          {formatPercent(o.progress)}
+                        </span>
                       </div>
                     </li>
                   );

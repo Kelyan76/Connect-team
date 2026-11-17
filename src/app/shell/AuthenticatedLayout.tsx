@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { NotificationsMenu } from '@/features/alerts/components/NotificationsMenu';
 import { useAuth, useCurrentUser } from '@/features/auth/AuthProvider';
+import { AssistantButton } from '@/features/ai/components/AssistantButton';
 import { DemoBanner } from '@/features/auth/components/DemoBanner';
 import { DailyPulseDialog } from '@/features/pulse/components/DailyPulseDialog';
 import { useIdle } from '@/shared/hooks/use-idle';
@@ -32,6 +33,7 @@ export function AuthenticatedLayout() {
       onSignOut={() => void signOut()}
       searchEntries={entries}
       notifications={<NotificationsMenu />}
+      assistant={<AssistantButton />}
       banner={<DemoBanner viewerName={`${profile.first_name} ${profile.last_name}`} />}
     >
       <Suspense fallback={<PageSkeleton />}>

@@ -11,11 +11,20 @@ import { EmptyState } from '@/shared/ui/feedback';
 import { Panel } from '@/shared/ui/layout';
 
 /** Prochains entretiens avec leur statut de préparation, en liste lisible sur téléphone. */
-export function UpcomingReviews({ reviews, byId }: { reviews: Review[]; byId: Map<string, Person> }) {
+export function UpcomingReviews({
+  reviews,
+  byId,
+}: {
+  reviews: Review[];
+  byId: Map<string, Person>;
+}) {
   return (
     <Panel title="Prochains entretiens" flush>
       {reviews.length === 0 ? (
-        <EmptyState title="Aucun entretien planifié" description="Planifiez les 1 à 1 de l’équipe depuis la page Entretiens." />
+        <EmptyState
+          title="Aucun entretien planifié"
+          description="Planifiez les 1 à 1 de l’équipe depuis la page Entretiens."
+        />
       ) : (
         <ul className="stagger divide-y divide-line">
           {reviews.map((r) => {
@@ -24,12 +33,18 @@ export function UpcomingReviews({ reviews, byId }: { reviews: Review[]; byId: Ma
             const days = daysFromToday(r.scheduled_at.slice(0, 10));
             return (
               <li key={r.id}>
-                <Link to={`/entretiens/${r.id}`} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-surface-muted/60">
+                <Link
+                  to={`/entretiens/${r.id}`}
+                  className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-surface-muted/60"
+                >
                   {person && <Avatar person={person} />}
                   <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-base font-medium">{person ? fullName(person) : '—'}</span>
+                    <span className="truncate text-base font-medium">
+                      {person ? fullName(person) : '—'}
+                    </span>
                     <span className="truncate text-sm text-fg-subtle">
-                      {KIND_LABEL[r.kind]} · {formatDate(r.scheduled_at)} à {formatTime(r.scheduled_at)}
+                      {KIND_LABEL[r.kind]} · {formatDate(r.scheduled_at)} à{' '}
+                      {formatTime(r.scheduled_at)}
                     </span>
                   </span>
                   <span className="hidden shrink-0 flex-col items-end gap-1 sm:flex">

@@ -16,12 +16,15 @@ import { useManagerDashboard } from '../use-manager-dashboard';
 import { EnableNotificationsCard } from '@/features/notifications/components/EnableNotificationsCard';
 import { TeamPulse } from '@/features/pulse/components/TeamPulse';
 import { useTeamMembers } from '@/features/team/queries';
+import { AskAssistant } from './AskAssistant';
 import { HeroBanner } from './HeroBanner';
 import { KpiDetailDialog, type KpiKind } from './KpiDetailDialog';
 import { UpcomingReviews } from './UpcomingReviews';
 
-const pts = (delta: number) => `${formatDecimal(Math.abs(delta * 100)).replace(',0', '')} pt${Math.abs(delta * 100) >= 2 ? 's' : ''}`;
-const trend = (d: number, eps = 0.005) => (d > eps ? 'up' : d < -eps ? 'down' : 'flat') as 'up' | 'down' | 'flat';
+const pts = (delta: number) =>
+  `${formatDecimal(Math.abs(delta * 100)).replace(',0', '')} pt${Math.abs(delta * 100) >= 2 ? 's' : ''}`;
+const trend = (d: number, eps = 0.005) =>
+  (d > eps ? 'up' : d < -eps ? 'down' : 'flat') as 'up' | 'down' | 'flat';
 
 type View = 'pouls' | 'alertes' | 'entretiens' | 'evolution';
 const VIEWS: View[] = ['pouls', 'alertes', 'entretiens', 'evolution'];
@@ -35,7 +38,9 @@ export function ManagerDashboard() {
   const { period } = usePeriod();
   const { data, byId, isLoading, error } = useManagerDashboard(period);
   const alerts = useAlerts();
-  const weak = (alerts.data ?? []).filter((a) => a.kind === 'decrochage' || a.kind === 'pouls' || a.kind === 'echeances').length;
+  const weak = (alerts.data ?? []).filter(
+    (a) => a.kind === 'decrochage' || a.kind === 'pouls' || a.kind === 'echeances',
+  ).length;
   const [params] = useSearchParams();
   const [view, setView] = useState<View>(() => {
     const v = params.get('vue') as View | null;
@@ -51,7 +56,12 @@ export function ManagerDashboard() {
 
   return (
     <Page>
-      <HeroBanner title={`Bonjour ${profile.first_name}`} subtitle={`Voici l’essentiel de votre équipe · ${period.label}`} />
+      <HeroBanner
+        title={`Bonjour ${profile.first_name}`}
+        subtitle={`Voici l’essentiel de votre équipe · ${period.label}`}
+      >
+        <AskAssistant />
+      </HeroBanner>
       <QuickActions />
       <EnableNotificationsCard />
       {error ? (
@@ -106,10 +116,17 @@ export function ManagerDashboard() {
 
           <div className="flex flex-col gap-4">
             <div className="no-scrollbar -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-              <Segmented value={view} onValueChange={(v) => setView(v as View)} aria-label="Afficher">
+              <Segmented
+                value={view}
+                onValueChange={(v) => setView(v as View)}
+                aria-label="Afficher"
+              >
                 <SegmentedItem value="pouls">Pouls</SegmentedItem>
                 <SegmentedItem value="alertes">
-                  Signaux{alerts.data?.length ? <span className="tabular text-xs text-fg-subtle">{alerts.data.length}</span> : null}
+                  Signaux
+                  {alerts.data?.length ? (
+                    <span className="tabular text-xs text-fg-subtle">{alerts.data.length}</span>
+                  ) : null}
                 </SegmentedItem>
                 <SegmentedItem value="entretiens">Entretiens</SegmentedItem>
                 <SegmentedItem value="evolution">Évolution</SegmentedItem>
@@ -132,10 +149,15 @@ export function ManagerDashboard() {
               </Panel>
             )}
 
-            {view === 'entretiens' && <UpcomingReviews reviews={data.upcoming.slice(0, 6)} byId={byId} />}
+            {view === 'entretiens' && (
+              <UpcomingReviews reviews={data.upcoming.slice(0, 6)} byId={byId} />
+            )}
 
             {view === 'evolution' && (
-              <Panel title="Évolution sur 6 mois" description="Fin de mois · humeur (pouls) ramenée sur 100">
+              <Panel
+                title="Évolution sur 6 mois"
+                description="Fin de mois · humeur (pouls) ramenée sur 100"
+              >
                 <TrendChart
                   data={data.trend}
                   xKey="mois"

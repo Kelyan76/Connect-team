@@ -35,3 +35,28 @@ export async function askAiFor<T>(prompt: string, parse: (reply: string) => T | 
   if (value === null) throw new Error('Réponse de l’IA inexploitable. Réessayez.');
   return value;
 }
+
+/** Discussion avec l'assistant : contexte (consignes + données résumées) et historique récent. */
+export async function askAiChat(
+  context: string,
+  messages: { role: 'user' | 'assistant'; content: string }[],
+): Promise<string> {
+  let res: Response;
+  try {
+    res = await fetch('/api/echo-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript: context, summary: '', messages }),
+    });
+  } catch {
+    throw new Error('L’assistant IA est injoignable. Vérifiez la connexion et réessayez.');
+  }
+  const data: unknown = await res.json().catch(() => null);
+  const reply =
+    data && typeof data === 'object' && 'reply' in data && typeof data.reply === 'string'
+      ? data.reply
+      : null;
+  if (!res.ok || !reply)
+    throw new Error('L’assistant IA n’a pas pu répondre. Réessayez dans un instant.');
+  return reply;
+}

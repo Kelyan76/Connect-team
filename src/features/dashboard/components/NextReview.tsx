@@ -35,13 +35,25 @@ export function NextReview() {
           <div className="flex flex-col">
             <span className="text-md font-semibold">{KIND_LABEL[next.kind]}</span>
             <span className="text-sm text-fg-muted">
-              {formatDate(next.scheduled_at)} à {formatTime(next.scheduled_at)} · {relativeDays(daysFromToday(next.scheduled_at.slice(0, 10)))}
+              {formatDate(next.scheduled_at)} à {formatTime(next.scheduled_at)} ·{' '}
+              {relativeDays(daysFromToday(next.scheduled_at.slice(0, 10)))}
               {next.location ? ` · ${next.location}` : ''}
             </span>
           </div>
-          <StatusDot tone={PREP_META[prepStatus(next)].tone}>{PREP_META[prepStatus(next)].label}</StatusDot>
-          <Button asChild variant={next.collaborator_prepared_at ? 'secondary' : 'primary'} size="sm" className="self-start">
-            <Link to={`/entretiens/${next.id}`}>{next.collaborator_prepared_at ? 'Consulter ma préparation' : 'Préparer mon entretien'}</Link>
+          <StatusDot tone={PREP_META[prepStatus(next)].tone}>
+            {PREP_META[prepStatus(next)].label}
+          </StatusDot>
+          <Button
+            asChild
+            variant={next.collaborator_prepared_at ? 'secondary' : 'primary'}
+            size="sm"
+            className="self-start"
+          >
+            <Link to={`/entretiens/${next.id}`}>
+              {next.collaborator_prepared_at
+                ? 'Consulter ma préparation'
+                : 'Préparer mon entretien'}
+            </Link>
           </Button>
         </div>
       )}

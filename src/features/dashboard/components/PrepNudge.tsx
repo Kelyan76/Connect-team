@@ -11,7 +11,9 @@ export function PrepNudge() {
   const reviews = useReviews();
   const team = useTeamMembers();
   const next = reviews.data
-    ?.filter((r) => r.kind === 'one_to_one' && r.status === 'planifie' && !r.collaborator_prepared_at)
+    ?.filter(
+      (r) => r.kind === 'one_to_one' && r.status === 'planifie' && !r.collaborator_prepared_at,
+    )
     .map((r) => ({ r, days: daysFromToday(r.scheduled_at.slice(0, 10)) }))
     .filter((x) => x.days >= 0 && x.days <= 7)
     .sort((a, b) => a.days - b.days)[0];
@@ -27,7 +29,9 @@ export function PrepNudge() {
         <span className="text-base font-medium">
           Votre 1 à 1 avec {manager} : {relativeDays(next.days)} à {formatTime(next.r.scheduled_at)}
         </span>
-        <span className="text-sm text-fg-muted">Choisissez vos sujets en 2 minutes : c’est votre moment.</span>
+        <span className="text-sm text-fg-muted">
+          Choisissez vos sujets en 2 minutes : c’est votre moment.
+        </span>
       </span>
       <Button asChild variant="primary" className="w-full sm:w-auto">
         <Link to={`/entretiens/${next.r.id}`}>

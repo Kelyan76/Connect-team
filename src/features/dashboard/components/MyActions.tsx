@@ -1,5 +1,10 @@
 import { useCurrentUser } from '@/features/auth/AuthProvider';
-import { ACTION_STATUS, useMeetingActions, useSetMeetingActionStatus, type ActionStatus } from '@/features/meetings/queries';
+import {
+  ACTION_STATUS,
+  useMeetingActions,
+  useSetMeetingActionStatus,
+  type ActionStatus,
+} from '@/features/meetings/queries';
 import { useReviewActions, useSetActionStatus } from '@/features/reviews/queries';
 import { todayIso } from '@/shared/lib/dates';
 import { formatDate } from '@/shared/lib/format';
@@ -28,14 +33,23 @@ export function MyActions() {
       {!reviewActions.data || !meetingActions.data ? (
         <Skeleton className="m-4 h-16" />
       ) : items.length === 0 ? (
-        <EmptyState title="Aucune action en cours" description="Les actions décidées avec votre manager apparaîtront ici." />
+        <EmptyState
+          title="Aucune action en cours"
+          description="Les actions décidées avec votre manager apparaîtront ici."
+        />
       ) : (
         <ul className="divide-y divide-line">
           {items.map((a) => (
             <li key={a.id} className="flex items-center gap-3 px-4 py-2">
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="text-base">{a.title}</span>
-                <span className={a.due_date && a.due_date < today ? 'text-xs text-danger' : 'text-xs text-fg-subtle'}>
+                <span
+                  className={
+                    a.due_date && a.due_date < today
+                      ? 'text-xs text-danger'
+                      : 'text-xs text-fg-subtle'
+                  }
+                >
                   {a.origin}
                   {a.due_date ? ` · échéance ${formatDate(a.due_date)}` : ''}
                 </span>

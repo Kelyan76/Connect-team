@@ -29,6 +29,8 @@ interface HeaderProps {
   onSignOut: () => void;
   /** Emplacement des notifications (rappels), fourni par la feature alertes. */
   notifications?: ReactNode;
+  /** Bouton de l'assistant IA. */
+  assistant?: ReactNode;
   /** Lien vers les paramètres dans le menu du profil (manager). */
   showSettings?: boolean;
 }
@@ -41,6 +43,7 @@ export function Header({
   onOpenPalette,
   onSignOut,
   notifications,
+  assistant,
   showSettings,
 }: HeaderProps) {
   const { period, setPreset } = usePeriod();
@@ -95,6 +98,7 @@ export function Header({
           </SelectContent>
         </Select>
 
+        {assistant}
         {notifications}
 
         <DropdownMenu>

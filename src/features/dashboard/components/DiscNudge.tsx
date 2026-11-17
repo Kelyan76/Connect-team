@@ -17,7 +17,9 @@ export function DiscNudge() {
       </span>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="text-base font-medium">Découvrez votre style de communication</span>
-        <span className="text-sm text-fg-muted">Test DISC en 2 minutes : votre manager saura comment échanger au mieux avec vous.</span>
+        <span className="text-sm text-fg-muted">
+          Test DISC en 2 minutes : votre manager saura comment échanger au mieux avec vous.
+        </span>
       </span>
       <Button asChild variant="primary" className="w-full sm:w-auto">
         <Link to="/mon-style">

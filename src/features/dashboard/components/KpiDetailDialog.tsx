@@ -28,10 +28,30 @@ interface Props {
 }
 
 const META: Record<KpiKind, { title: string; description: string; to: string; cta: string }> = {
-  objectifs: { title: 'Objectifs', description: 'Du moins avancé au plus avancé.', to: '/objectifs', cta: 'Ouvrir les objectifs' },
-  charge: { title: 'Charge cette semaine', description: 'Par collaborateur, en % de sa capacité.', to: '/plan-de-charge', cta: 'Ouvrir le plan de charge' },
-  retard: { title: 'Tâches en retard', description: 'Échéance dépassée, non terminées.', to: '/taches', cta: 'Ouvrir le planning' },
-  entretiens: { title: 'Entretiens à préparer', description: 'Dans les 15 prochains jours.', to: '/entretiens', cta: 'Ouvrir les entretiens' },
+  objectifs: {
+    title: 'Objectifs',
+    description: 'Du moins avancé au plus avancé.',
+    to: '/objectifs',
+    cta: 'Ouvrir les objectifs',
+  },
+  charge: {
+    title: 'Charge cette semaine',
+    description: 'Par collaborateur, en % de sa capacité.',
+    to: '/plan-de-charge',
+    cta: 'Ouvrir le plan de charge',
+  },
+  retard: {
+    title: 'Tâches en retard',
+    description: 'Échéance dépassée, non terminées.',
+    to: '/taches',
+    cta: 'Ouvrir le planning',
+  },
+  entretiens: {
+    title: 'Entretiens à préparer',
+    description: 'Dans les 15 prochains jours.',
+    to: '/entretiens',
+    cta: 'Ouvrir les entretiens',
+  },
 };
 
 function Row({ to, children }: { to?: string; children: ReactNode }) {
@@ -39,7 +59,10 @@ function Row({ to, children }: { to?: string; children: ReactNode }) {
   return (
     <li>
       {to ? (
-        <Link to={to} className="-mx-2 flex items-center gap-2 rounded px-2 py-3 hover:bg-surface-muted">
+        <Link
+          to={to}
+          className="-mx-2 flex items-center gap-2 rounded px-2 py-3 hover:bg-surface-muted"
+        >
           {body}
           <ChevronRight className="size-4 shrink-0 text-fg-subtle" aria-hidden />
         </Link>
@@ -51,7 +74,15 @@ function Row({ to, children }: { to?: string; children: ReactNode }) {
 }
 
 /** Détail d'une carte chiffre de l'accueil : la liste qui explique le chiffre, puis un lien vers la page complète. */
-export function KpiDetailDialog({ kind, onClose, byId, objectives, loadByPerson, late, toPrepare }: Props) {
+export function KpiDetailDialog({
+  kind,
+  onClose,
+  byId,
+  objectives,
+  loadByPerson,
+  late,
+  toPrepare,
+}: Props) {
   const meta = kind ? META[kind] : null;
   return (
     <Dialog open={kind !== null} onOpenChange={(o) => !o && onClose()}>
@@ -78,10 +109,18 @@ export function KpiDetailDialog({ kind, onClose, byId, objectives, loadByPerson,
                         <Badge tone={status.tone}>{status.label}</Badge>
                       </span>
                       <span className="flex items-center gap-3">
-                        <ProgressBar value={o.progress} tone={status.tone} label={`Avancement de ${o.title}`} />
-                        <span className="tabular w-10 shrink-0 text-right text-sm font-medium">{formatPercent(o.progress)}</span>
+                        <ProgressBar
+                          value={o.progress}
+                          tone={status.tone}
+                          label={`Avancement de ${o.title}`}
+                        />
+                        <span className="tabular w-10 shrink-0 text-right text-sm font-medium">
+                          {formatPercent(o.progress)}
+                        </span>
                       </span>
-                      <span className="text-xs text-fg-subtle">{owner ? fullName(owner) : 'Objectif d’équipe'}</span>
+                      <span className="text-xs text-fg-subtle">
+                        {owner ? fullName(owner) : 'Objectif d’équipe'}
+                      </span>
                     </span>
                   </Row>
                 );
@@ -96,11 +135,21 @@ export function KpiDetailDialog({ kind, onClose, byId, objectives, loadByPerson,
                     <span className="flex min-w-0 flex-1 flex-col gap-1">
                       <span className="flex items-center justify-between gap-2">
                         <span className="truncate text-base font-medium">{fullName(person)}</span>
-                        <span className={over ? 'tabular text-sm font-semibold text-danger' : 'tabular text-sm font-medium'}>
+                        <span
+                          className={
+                            over
+                              ? 'tabular text-sm font-semibold text-danger'
+                              : 'tabular text-sm font-medium'
+                          }
+                        >
                           {load === null ? '—' : formatPercent(load, false)}
                         </span>
                       </span>
-                      <ProgressBar value={(load ?? 0) / 100} tone={over ? 'danger' : load !== null && load < 60 ? 'warning' : 'success'} label={`Charge de ${fullName(person)}`} />
+                      <ProgressBar
+                        value={(load ?? 0) / 100}
+                        tone={over ? 'danger' : load !== null && load < 60 ? 'warning' : 'success'}
+                        label={`Charge de ${fullName(person)}`}
+                      />
                     </span>
                   </Row>
                 );
@@ -123,7 +172,9 @@ export function KpiDetailDialog({ kind, onClose, byId, objectives, loadByPerson,
                         </span>
                       </span>
                       {(t.priority === 'urgente' || t.priority === 'haute') && (
-                        <Badge tone={t.priority === 'urgente' ? 'danger' : 'warning'}>{PRIORITY[t.priority].label}</Badge>
+                        <Badge tone={t.priority === 'urgente' ? 'danger' : 'warning'}>
+                          {PRIORITY[t.priority].label}
+                        </Badge>
                       )}
                     </Row>
                   );
@@ -132,7 +183,9 @@ export function KpiDetailDialog({ kind, onClose, byId, objectives, loadByPerson,
 
             {kind === 'entretiens' &&
               (toPrepare.length === 0 ? (
-                <p className="py-6 text-center text-sm text-fg-subtle">Tous les entretiens sont prêts.</p>
+                <p className="py-6 text-center text-sm text-fg-subtle">
+                  Tous les entretiens sont prêts.
+                </p>
               ) : (
                 toPrepare.map((r) => {
                   const who = byId.get(r.collaborator_id);
@@ -141,9 +194,12 @@ export function KpiDetailDialog({ kind, onClose, byId, objectives, loadByPerson,
                     <Row key={r.id} to={`/entretiens/${r.id}`}>
                       {who && <Avatar person={who} />}
                       <span className="flex min-w-0 flex-1 flex-col gap-1">
-                        <span className="truncate text-base font-medium">{who ? fullName(who) : '—'}</span>
+                        <span className="truncate text-base font-medium">
+                          {who ? fullName(who) : '—'}
+                        </span>
                         <span className="text-sm text-fg-subtle">
-                          {KIND_LABEL[r.kind]} · {relativeDays(daysFromToday(r.scheduled_at.slice(0, 10)))}
+                          {KIND_LABEL[r.kind]} ·{' '}
+                          {relativeDays(daysFromToday(r.scheduled_at.slice(0, 10)))}
                         </span>
                         <StatusDot tone={prep.tone}>{prep.label}</StatusDot>
                       </span>
