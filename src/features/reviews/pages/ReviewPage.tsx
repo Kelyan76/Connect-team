@@ -1,4 +1,4 @@
-import { FileDown } from 'lucide-react';
+import { FileDown, Mic } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
@@ -32,6 +32,7 @@ export default function ReviewPage() {
   const answers = useAnswers(id);
   const team = useTeamMembers();
   const [exporting, setExporting] = useState(false);
+  const [tab, setTab] = useState<string | null>(null);
 
   if (review.error) {
     return (
@@ -60,6 +61,11 @@ export default function ReviewPage() {
   const prep = PREP_META[prepStatus(r)];
   const sideBySide = canSeeOtherSide(viewer, r);
   const defaultTab = stage === 'preparation' && !sideBySide ? 'preparation' : stage === 'preparation' ? 'cote-a-cote' : 'compte-rendu';
+  const canRecord = isManager && r.kind === 'one_to_one' && !r.manager_signed_at;
+  const openEcho = () => {
+    setTab('compte-rendu');
+    window.setTimeout(() => document.getElementById('echo')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  };
 
   const exportPdf = async () => {
     setExporting(true);
@@ -97,16 +103,26 @@ export default function ReviewPage() {
           </div>
         }
         actions={
-          stage !== 'preparation' ? (
-            <Button onClick={() => void exportPdf()} disabled={exporting}>
-              <FileDown aria-hidden />
-              {exporting ? 'Génération…' : 'Export PDF'}
-            </Button>
+          canRecord || stage !== 'preparation' ? (
+            <div className="flex flex-wrap gap-2">
+              {canRecord && (
+                <Button variant="primary" onClick={openEcho}>
+                  <Mic aria-hidden />
+                  Enregistrer avec Echo
+                </Button>
+              )}
+              {stage !== 'preparation' && (
+                <Button onClick={() => void exportPdf()} disabled={exporting}>
+                  <FileDown aria-hidden />
+                  {exporting ? 'Génération…' : 'Export PDF'}
+                </Button>
+              )}
+            </div>
           ) : undefined
         }
       />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <Tabs defaultValue={defaultTab} className="min-w-0">
+        <Tabs value={tab ?? defaultTab} onValueChange={setTab} className="min-w-0">
           <TabsList>
             {stage === 'preparation' && <TabsTrigger value="preparation">Ma préparation</TabsTrigger>}
             <TabsTrigger value="cote-a-cote">Vue côte à côte</TabsTrigger>
@@ -132,7 +148,11 @@ export default function ReviewPage() {
               </div>
             )}
             <MinutesPanel review={r} isManager={isManager} />
-            {isManager && r.kind === 'one_to_one' && !r.manager_signed_at && <EchoRecorder review={r} />}
+            {canRecord && (
+              <div id="echo" className="scroll-mt-24">
+                <EchoRecorder review={r} />
+              </div>
+            )}
             <ActionPlan review={r} isManager={isManager} />
             <Signatures review={r} viewer={viewer} />
           </TabsContent>
