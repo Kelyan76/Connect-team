@@ -31,12 +31,37 @@ export function VideoCall({ reviewId, onClose }: { reviewId: string; onClose: ()
           lang: 'fr',
         });
         call.current = frame;
-        frame.on('left-meeting', () => onClose());
+        // On ne referme le bloc qu'après une vraie participation : un échec de connexion reste affiché.
+        let joined = false;
+        frame.on('joined-meeting', () => {
+          joined = true;
+          setState('ready');
+        });
+        frame.on('left-meeting', () => {
+          if (joined) onClose();
+        });
+        frame.on('error', (ev) => {
+          console.error('Visio Daily', ev);
+          if (cancelled) return;
+          setError(`La visio s’est interrompue : ${ev?.errorMsg ?? 'erreur inconnue'}. Réessayez.`);
+          setState('error');
+        });
         await frame.join({ url, token });
-        if (!cancelled) setState('ready');
       } catch (e) {
         if (cancelled) return;
-        setError(toUserMessage(e, 'La visio n’a pas pu démarrer.'));
+        console.error('Visio', e);
+        // Daily rejette avec un objet { errorMsg } plutôt qu'une Error.
+        const detail =
+          e && typeof e === 'object' && 'errorMsg' in e && typeof e.errorMsg === 'string'
+            ? e.errorMsg
+            : e instanceof Error
+              ? e.message
+              : '';
+        setError(
+          detail
+            ? `La visio n’a pas pu démarrer : ${detail}`
+            : toUserMessage(e, 'La visio n’a pas pu démarrer.'),
+        );
         setState('error');
       }
     })();
